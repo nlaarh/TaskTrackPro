@@ -30,20 +30,20 @@ export default function HeroSection() {
     <section 
       className="relative min-h-screen flex items-center justify-center parallax-bg"
       style={{
-        backgroundImage: `linear-gradient(135deg, rgba(233, 30, 99, 0.8) 0%, rgba(233, 30, 99, 0.6) 100%), url('https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&h=1080')`
+        backgroundImage: `linear-gradient(135deg, rgba(76, 144, 116, 0.85) 0%, rgba(52, 120, 92, 0.75) 100%), url('https://images.unsplash.com/photo-1519225421980-715cb0215aed?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&h=1080')`
       }}
     >
-      <div className="absolute inset-0 bg-black bg-opacity-20"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/10 to-green-800/5"></div>
       
       <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div className="animate-fade-in">
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
-            Discover Beautiful
-            <span className="block text-yellow-300">Local Florists</span>
+          <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight tracking-tight">
+            Celebrate Life's
+            <span className="block text-amber-200 text-gradient">Beautiful Moments</span>
           </h1>
-          <p className="text-xl text-white mb-12 max-w-2xl mx-auto leading-relaxed">
-            Find the perfect florist for your special moments. Browse local flower shops, 
-            compare services, and create unforgettable floral arrangements.
+          <p className="text-xl text-white/90 mb-12 max-w-3xl mx-auto leading-relaxed font-light">
+            Connect with exceptional local florists who create stunning arrangements for weddings, 
+            celebrations, and every special occasion that deserves extraordinary flowers.
           </p>
         </div>
         
@@ -59,10 +59,10 @@ export default function HeroSection() {
                   <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                   <Input
                     type="text"
-                    placeholder="Wedding flowers, birthday bouquet..."
+                    placeholder="Wedding flowers, anniversary bouquet..."
                     value={searchKeyword}
                     onChange={(e) => setSearchKeyword(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 bg-white rounded-lg border-0 focus:ring-2 focus:ring-primary/50 transition-all duration-200"
+                    className="w-full pl-12 pr-4 py-4 bg-white/95 rounded-xl border-0 focus:ring-2 focus:ring-emerald-500/50 transition-all duration-200 text-green-900 placeholder-green-600/60"
                   />
                 </div>
               </div>
@@ -78,13 +78,13 @@ export default function HeroSection() {
                     placeholder="ZIP code or city name"
                     value={searchLocationInput}
                     onChange={(e) => setSearchLocationInput(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 bg-white rounded-lg border-0 focus:ring-2 focus:ring-primary/50 transition-all duration-200"
+                    className="w-full pl-12 pr-4 py-4 bg-white/95 rounded-xl border-0 focus:ring-2 focus:ring-emerald-500/50 transition-all duration-200 text-green-900 placeholder-green-600/60"
                   />
                 </div>
               </div>
             </div>
             
-            <Button type="submit" className="btn-primary w-full py-4 text-white font-semibold rounded-lg text-lg">
+            <Button type="submit" className="bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-700 hover:to-green-800 w-full py-4 text-white font-semibold rounded-xl text-lg transition-all duration-300 hover:shadow-xl hover:scale-105">
               <Search className="h-5 w-5 mr-2" />
               Find Florists Near Me
             </Button>
