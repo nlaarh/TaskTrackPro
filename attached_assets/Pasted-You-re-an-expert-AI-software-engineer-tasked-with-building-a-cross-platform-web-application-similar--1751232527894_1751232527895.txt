@@ -1,0 +1,156 @@
+You're an expert AI software engineer tasked with building a cross-platform web application similar to https://www.floristusadirectory.com, which allows users to search for local florists, view their listings, and allows florists to register and create listings.
+
+🎯 GOAL
+Build a mobile-friendly, search-driven, florist directory platform that mirrors the structure and user journey of the Florist USA Directory. All development should use modern, scalable, cross-platform libraries only (React Native Web, Next.js, TailwindCSS, etc.) with responsive design baked in from the start.
+
+Use PostgreSQL as the primary database. Connect to the following PostgreSQL instance:
+
+bash
+Copy
+Edit
+postgresql://flouristm:RwDPqwPPtxhBNDzKDGiJlrHDtdTBZBYx@yamanote.proxy.rlwy.net:18615/flouristdb
+✅ FUNCTIONAL REQUIREMENTS
+1. Homepage
+Hero banner with a search bar for:
+
+"What do you need?" (Keyword or business name)
+
+"Search by location" (ZIP code or city)
+
+Search button routes to results page.
+
+Navigation bar includes:
+
+Home
+
+Search Members
+
+Search by Category
+
+Local Events (Dropdown)
+
+Local Deals
+
+Blog
+
+“Contact”, “Login”, and “Get Listed Today” CTA buttons
+
+2. Search Results Page
+Display florists matching the search location and keyword
+
+Each florist tile must include:
+
+Name
+
+Image (or placeholder avatar)
+
+Address
+
+Short description
+
+“Save” button
+
+“View Listing” and “Send Message” buttons
+
+Distance from location in miles
+
+Include sort options: “Closest to Me”
+
+Toggle view (grid/list), optional map toggle
+
+3. Florist Listing Page
+Full details:
+
+Business name
+
+Description
+
+Address
+
+Hours
+
+Gallery (images optional)
+
+Contact form or link
+
+Lead capture form (Send Message)
+
+4. Florist Registration
+Form to:
+
+Create account
+
+Submit business profile
+
+Upload images
+
+Backend to store listings tied to accounts
+
+5. Community & Newsletter
+Newsletter email capture
+
+“Join Our Community” CTA with 3-step guide:
+
+Register
+
+Create listing
+
+Connect with clients
+
+🚫 NON-FUNCTIONAL REQUIREMENTS
+The website must be responsive and work beautifully on all screen sizes.
+
+Only use cross-platform frameworks/libraries to ensure consistent mobile and web experience.
+
+Must be accessible (WCAG-friendly).
+
+SEO-friendly URLs and metadata.
+
+Use secure auth, hashed passwords, and validation on all forms.
+
+Fast page loads and image optimization.
+
+🧠 AI TASK PLAN REQUEST
+Please generate a clear technical document that includes:
+
+🧱 Architecture Outline (frontend, backend, database)
+
+🛠 Feature Breakdown by modules/components
+
+🧩 Step-by-Step Task Plan including:
+
+Database schema design
+
+Backend API setup
+
+Frontend UI scaffolding
+
+Responsive design integrations
+
+Testing and deployment instructions
+
+🧪 Test coverage strategy
+
+📜 Deployment checklist
+
+📦 Tools/Tech Stack Suggestions (Use but not limited to)
+Frontend: Next.js or React Native Web + TailwindCSS
+
+Backend: Node.js (Express or Next API routes)
+
+Database: PostgreSQL (postgresql://... provided)
+
+ORM: Prisma or Drizzle (if schema-first preferred)
+
+Auth: NextAuth.js, Auth.js, or custom token-based auth
+
+Deployment: Vercel, Railway, or Render
+
+📣 Deliverables
+Full codebase (GitHub-ready)
+
+Database schema SQL or Prisma schema
+
+API documentation (Postman collection or Swagger)
+
+Task plan in Markdown format (or Notion-style layout)
