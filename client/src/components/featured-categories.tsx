@@ -6,47 +6,47 @@ const categories = [
   {
     id: 1,
     title: "Wedding Flowers",
-    description: "Beautiful bridal bouquets and ceremony decorations",
+    description: "Elegant bridal bouquets and ceremony arrangements",
     image: "https://images.unsplash.com/photo-1519225421980-715cb0215aed?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
     href: "/search?services=Wedding%20Flowers",
-    gradient: "from-pink-100 to-pink-200"
+    gradient: "from-emerald-50 to-green-100"
   },
   {
     id: 2,
-    title: "Funeral Arrangements",
-    description: "Respectful tributes and sympathy flowers",
-    image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
-    href: "/search?services=Funeral%20Arrangements",
-    gradient: "from-gray-100 to-gray-200"
+    title: "Anniversary Flowers",
+    description: "Romantic arrangements for celebrating love",
+    image: "https://images.unsplash.com/photo-1563241527-3004b7be0ffd?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
+    href: "/search?services=Anniversary%20Flowers",
+    gradient: "from-amber-50 to-yellow-100"
   },
   {
     id: 3,
     title: "Birthday & Celebrations",
-    description: "Vibrant bouquets for special occasions",
+    description: "Vibrant bouquets for joyful occasions",
     image: "https://images.unsplash.com/photo-1587334205817-c3df6abc544c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
     href: "/search?services=Birthday%20Bouquets",
-    gradient: "from-yellow-100 to-orange-200"
+    gradient: "from-green-50 to-emerald-100"
   },
   {
     id: 4,
     title: "Corporate Events",
-    description: "Professional arrangements for business events",
+    description: "Professional arrangements for business occasions",
     image: "https://images.unsplash.com/photo-1586611292717-f828b167408c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
     href: "/search?services=Corporate%20Events",
-    gradient: "from-green-100 to-blue-200"
+    gradient: "from-teal-50 to-green-100"
   }
 ];
 
 export default function FeaturedCategories() {
   return (
-    <section className="py-20 bg-white">
+    <section className="py-24 bg-gradient-to-br from-green-50 to-emerald-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Find Florists by Occasion
+        <div className="text-center mb-20">
+          <h2 className="text-4xl md:text-5xl font-bold text-green-900 mb-6">
+            Discover by Occasion
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Whether it's a wedding, funeral, or special celebration, find the perfect florist for your needs.
+          <p className="text-xl text-green-800/80 max-w-3xl mx-auto font-light">
+            From intimate weddings to grand celebrations, find expert florists who specialize in creating memorable moments through beautiful flowers.
           </p>
         </div>
         

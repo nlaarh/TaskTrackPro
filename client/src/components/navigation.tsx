@@ -36,18 +36,18 @@ export default function Navigation() {
   ];
 
   return (
-    <nav className="bg-white shadow-lg sticky top-0 z-50">
+    <nav className="bg-white/95 backdrop-blur-lg shadow-lg sticky top-0 z-50 border-b border-green-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary-dark rounded-lg flex items-center justify-center">
-              <Heart className="h-6 w-6 text-white" />
+          <Link href="/" className="flex items-center space-x-3">
+            <div className="w-12 h-12 bg-gradient-to-br from-emerald-600 to-green-700 rounded-xl flex items-center justify-center shadow-lg">
+              <Heart className="h-7 w-7 text-white" />
             </div>
             <div className="flex flex-col">
-              <span className="text-xl font-bold text-foreground">FloriHub</span>
-              <span className="text-xs text-muted-foreground hidden sm:block">
-                Find Local Florists
+              <span className="text-2xl font-bold text-green-900">FloriHub</span>
+              <span className="text-xs text-green-700/70 hidden sm:block font-medium">
+                Celebrate with Flowers
               </span>
             </div>
           </Link>
