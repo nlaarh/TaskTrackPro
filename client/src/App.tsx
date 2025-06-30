@@ -29,6 +29,8 @@ function Router() {
           <Route path="/search" component={SearchResults} />
           <Route path="/florist/:id" component={FloristDetail} />
           <Route path="/register" component={FloristRegistration} />
+          <Route path="/florist-login" component={() => import("@/pages/florist-login")} />
+          <Route path="/florist-register" component={() => import("@/pages/florist-register")} />
         </>
       )}
       <Route component={NotFound} />

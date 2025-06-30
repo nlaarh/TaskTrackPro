@@ -37,6 +37,31 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Florist authentication table for business owners
+export const floristAuth = pgTable("florist_auth", {
+  id: serial("id").primaryKey(),
+  email: varchar("email").unique().notNull(),
+  password: varchar("password").notNull(), // hashed password
+  firstName: varchar("first_name").notNull(),
+  lastName: varchar("last_name").notNull(),
+  businessName: varchar("business_name").notNull(),
+  address: text("address").notNull(),
+  city: varchar("city").notNull(),
+  state: varchar("state").notNull(),
+  zipCode: varchar("zip_code").notNull(),
+  phone: varchar("phone").notNull(),
+  profileImageUrl: varchar("profile_image_url"),
+  profileSummary: text("profile_summary"),
+  yearsOfExperience: integer("years_of_experience"),
+  specialties: text("specialties").array(),
+  businessHours: jsonb("business_hours"),
+  website: varchar("website"),
+  socialMedia: jsonb("social_media"),
+  isVerified: boolean("is_verified").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Florist business listings
 export const florists = pgTable("florists", {
   id: serial("id").primaryKey(),
@@ -215,11 +240,19 @@ export const insertSavedFloristSchema = createInsertSchema(savedFlorists).omit({
   createdAt: true,
 });
 
+export const insertFloristAuthSchema = createInsertSchema(floristAuth).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type UpsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertFlorist = z.infer<typeof insertFloristSchema>;
 export type Florist = typeof florists.$inferSelect;
+export type InsertFloristAuth = z.infer<typeof insertFloristAuthSchema>;
+export type FloristAuth = typeof floristAuth.$inferSelect;
 export type InsertFloristImage = z.infer<typeof insertFloristImageSchema>;
 export type FloristImage = typeof floristImages.$inferSelect;
 export type InsertReview = z.infer<typeof insertReviewSchema>;
