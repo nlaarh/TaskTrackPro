@@ -39,13 +39,13 @@ const categories = [
 
 export default function FeaturedCategories() {
   return (
-    <section className="py-24 bg-gradient-to-br from-green-50 to-emerald-50">
+    <section className="py-24 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-20">
-          <h2 className="text-4xl md:text-5xl font-bold text-green-900 mb-6">
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
             Discover by Occasion
           </h2>
-          <p className="text-xl text-green-800/80 max-w-3xl mx-auto font-light">
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto font-light">
             From intimate weddings to grand celebrations, find expert florists who specialize in creating memorable moments through beautiful flowers.
           </p>
         </div>

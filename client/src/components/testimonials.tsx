@@ -33,10 +33,10 @@ export default function Testimonials() {
     <section className="py-24 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-20">
-          <h2 className="text-4xl md:text-5xl font-bold text-green-900 mb-6">
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
             Celebrating Love Stories
           </h2>
-          <p className="text-xl text-green-800/80 max-w-3xl mx-auto font-light">
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto font-light">
             Discover how FloriHub connects couples with talented florists to create unforgettable moments through exceptional floral artistry.
           </p>
         </div>

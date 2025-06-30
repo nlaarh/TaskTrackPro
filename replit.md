@@ -128,9 +128,9 @@ FloriHub is a modern, mobile-friendly florist directory platform that connects c
 
 ## Changelog
 - June 29, 2025. Initial setup with PostgreSQL database integration
-- June 29, 2025. Complete design transformation: Elegant sage green and cream color scheme, wedding-focused imagery, professional sophisticated look replacing previous pink theme
+- June 30, 2025. Complete design transformation: Clean Apple-like white aesthetic with minimal color scheme, wedding-focused imagery, easy-on-the-eyes professional look
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
-Design preferences: Professional, stunning look with elegant colors (no pink or dark backgrounds), wedding/celebration focused imagery, sophisticated aesthetic.
+Design preferences: Clean Apple-like white aesthetic, easy on the eyes, professional look with minimal colors (no pink, no dark backgrounds, no strong green), wedding/celebration focused imagery, sophisticated aesthetic.
