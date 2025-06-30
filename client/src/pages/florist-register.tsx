@@ -672,8 +672,14 @@ export default function FloristRegister() {
                 ) : (
                   <Button 
                     type="submit" 
-                    className="ml-auto bg-gray-900 hover:bg-gray-800 text-white"
-                    disabled={registerMutation.isPending || Object.keys(form.formState.errors).length > 0}
+                    className="ml-auto bg-gray-900 hover:bg-gray-800 text-white disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    disabled={registerMutation.isPending || hasPasswordError}
+                    onClick={() => {
+                      console.log("Submit button clicked");
+                      console.log("Form errors:", form.formState.errors);
+                      console.log("Has password error:", hasPasswordError);
+                      console.log("Form values:", form.getValues());
+                    }}
                   >
                     {registerMutation.isPending ? "Creating Account..." : "Complete Registration"}
                   </Button>
