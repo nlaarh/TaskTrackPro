@@ -34,21 +34,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Florist authentication endpoints
   app.post('/api/auth/florist/register', async (req, res) => {
     try {
-      const validatedData = insertFloristAuthSchema.parse(req.body);
-      
+      // Extract and validate the required fields from the frontend form
+      const {
+        firstName,
+        lastName,
+        email,
+        password,
+        phone,
+        businessName,
+        address,
+        city,
+        state,
+        zipCode,
+        website,
+        profileSummary,
+        yearsOfExperience,
+        specialties,
+        profileImageUrl
+      } = req.body;
+
+      // Validate required fields
+      if (!firstName || !lastName || !email || !password || !phone || !businessName || !address || !city || !state || !zipCode) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
       // Check if email already exists
-      const existingFlorist = await storage.getFloristAuthByEmail(validatedData.email);
+      const existingFlorist = await storage.getFloristAuthByEmail(email);
       if (existingFlorist) {
         return res.status(400).json({ message: "Email already registered" });
       }
 
       // Hash password
-      const hashedPassword = await bcrypt.hash(validatedData.password, 12);
+      const hashedPassword = await bcrypt.hash(password, 12);
 
-      // Create florist account
+      // Create florist account with all the form data
       const florist = await storage.createFloristAuth({
-        ...validatedData,
-        password: hashedPassword,
+        email,
+        passwordHash: hashedPassword,
+        firstName,
+        lastName,
+        businessName,
+        address,
+        city,
+        state,
+        zipCode,
+        phone,
+        website: website || null,
+        profileSummary: profileSummary || null,
+        yearsOfExperience: yearsOfExperience || 0,
+        specialties: specialties || [],
+        profileImageUrl: profileImageUrl || null,
       });
 
       // Generate JWT token
@@ -92,7 +127,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Verify password
-      const isValidPassword = await bcrypt.compare(password, florist.password);
+      const isValidPassword = await bcrypt.compare(password, florist.passwordHash);
       if (!isValidPassword) {
         return res.status(401).json({ message: "Invalid email or password" });
       }

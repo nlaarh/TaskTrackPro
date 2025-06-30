@@ -41,7 +41,7 @@ export const users = pgTable("users", {
 export const floristAuth = pgTable("florist_auth", {
   id: serial("id").primaryKey(),
   email: varchar("email").unique().notNull(),
-  password: varchar("password").notNull(), // hashed password
+  passwordHash: varchar("password_hash").notNull(), // hashed password
   firstName: varchar("first_name").notNull(),
   lastName: varchar("last_name").notNull(),
   businessName: varchar("business_name").notNull(),
