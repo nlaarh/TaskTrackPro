@@ -1,13 +1,9 @@
-import { Pool, neonConfig } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-serverless';
-import ws from "ws";
+import { Pool } from 'pg';
+import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from "@shared/schema";
 
-neonConfig.webSocketConstructor = ws;
-
 // Use external PostgreSQL database as specified by user
-// Modified to use the correct Railway hostname for SSL certificate match
-const DATABASE_URL = "postgresql://flouristm:RwDPqwPPtxhBNDzKDGiJlrHDtdTBZBYx@yamanote-production.up.railway.app:18615/flouristdb";
+const DATABASE_URL = "postgresql://flouristm:RwDPqwPPtxhBNDzKDGiJlrHDtdTBZBYx@yamanote.proxy.rlwy.net:18615/flouristdb";
 
 if (!DATABASE_URL) {
   throw new Error(
@@ -18,8 +14,7 @@ if (!DATABASE_URL) {
 export const pool = new Pool({ 
   connectionString: DATABASE_URL,
   ssl: {
-    rejectUnauthorized: false,
-    checkServerIdentity: () => undefined // Skip hostname verification
+    rejectUnauthorized: false
   }
 });
-export const db = drizzle({ client: pool, schema });
+export const db = drizzle(pool, { schema });
