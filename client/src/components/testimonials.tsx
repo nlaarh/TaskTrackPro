@@ -6,7 +6,7 @@ const testimonials = [
     id: 1,
     name: "Emily & James",
     business: "Wedding Couple",
-    image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150",
+    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150",
     rating: 5,
     content: "FloriHub helped us find the most talented florist for our dream wedding. The arrangements were breathtaking and exceeded all our expectations. Truly magical!"
   },
@@ -14,7 +14,7 @@ const testimonials = [
     id: 2,
     name: "Isabella Martinez",
     business: "Garden of Grace Florals",
-    image: "https://images.unsplash.com/photo-1521119989659-a83eee488004?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150",
+    image: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150",
     rating: 5,
     content: "As a wedding florist, FloriHub connects me with couples who truly appreciate artistry in floral design. The platform showcases my work beautifully and brings quality clients."
   },
@@ -22,7 +22,7 @@ const testimonials = [
     id: 3,
     name: "Robert & Catherine",
     business: "Anniversary Celebration",
-    image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150",
+    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150",
     rating: 5,
     content: "For our 25th anniversary, we wanted something special. FloriHub led us to a florist who created the most elegant arrangements that made our celebration unforgettable."
   }

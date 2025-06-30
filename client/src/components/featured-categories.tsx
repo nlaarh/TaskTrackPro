@@ -7,7 +7,7 @@ const categories = [
     id: 1,
     title: "Wedding Flowers",
     description: "Elegant bridal bouquets and ceremony arrangements",
-    image: "https://images.unsplash.com/photo-1519225421980-715cb0215aed?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
+    image: "https://images.unsplash.com/photo-1606216794074-735e91aa2c92?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
     href: "/search?services=Wedding%20Flowers",
     gradient: "from-gray-50 to-gray-100"
   },
@@ -15,7 +15,7 @@ const categories = [
     id: 2,
     title: "Anniversary Flowers",
     description: "Romantic arrangements for celebrating love",
-    image: "https://images.unsplash.com/photo-1563241527-3004b7be0ffd?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
+    image: "https://images.unsplash.com/photo-1465495976277-4387d4b0e4a6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
     href: "/search?services=Anniversary%20Flowers",
     gradient: "from-gray-50 to-gray-100"
   },
@@ -31,7 +31,7 @@ const categories = [
     id: 4,
     title: "Corporate Events",
     description: "Professional arrangements for business occasions",
-    image: "https://images.unsplash.com/photo-1586611292717-f828b167408c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
+    image: "https://images.unsplash.com/photo-1511578314322-379afb476865?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
     href: "/search?services=Corporate%20Events",
     gradient: "from-gray-50 to-gray-100"
   }
