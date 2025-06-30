@@ -4,6 +4,7 @@ import FeaturedCategories from "@/components/featured-categories";
 import CommunitySection from "@/components/community-section";
 import Testimonials from "@/components/testimonials";
 import Footer from "@/components/footer";
+import FloatingActionButton from "@/components/floating-action-button";
 
 export default function Landing() {
   return (
@@ -14,6 +15,7 @@ export default function Landing() {
       <CommunitySection />
       <Testimonials />
       <Footer />
+      <FloatingActionButton />
     </div>
   );
 }
