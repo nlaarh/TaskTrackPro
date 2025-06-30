@@ -7,7 +7,8 @@ const DATABASE_URL = "postgresql://postgres:postgres@yamanote.proxy.rlwy.net:186
 
 export const pool = new Pool({ 
   connectionString: DATABASE_URL,
-  ssl: false // Railway typically doesn't require SSL for proxy connections
+  ssl: false, // Railway typically doesn't require SSL for proxy connections
+  schema: 'floristdb' // Use floristdb schema
 });
 
 export const db = drizzle(pool, { schema });

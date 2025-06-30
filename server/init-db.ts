@@ -41,10 +41,10 @@ CREATE TABLE IF NOT EXISTS floristdb.sessions (
   expire TIMESTAMP NOT NULL
 );
 
-CREATE INDEX IF NOT EXISTS "IDX_session_expire" ON sessions (expire);
+CREATE INDEX IF NOT EXISTS "IDX_session_expire" ON floristdb.sessions (expire);
 
 -- Users table for customer authentication (Replit Auth)
-CREATE TABLE IF NOT EXISTS users (
+CREATE TABLE IF NOT EXISTS floristdb.users (
   id VARCHAR PRIMARY KEY NOT NULL,
   email VARCHAR UNIQUE,
   first_name VARCHAR,
@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 -- Florist authentication table (separate from users)
-CREATE TABLE IF NOT EXISTS florist_auth (
+CREATE TABLE IF NOT EXISTS floristdb.florist_auth (
   id SERIAL PRIMARY KEY,
   email VARCHAR UNIQUE NOT NULL,
   password_hash VARCHAR NOT NULL,
@@ -71,9 +71,9 @@ CREATE TABLE IF NOT EXISTS florist_auth (
 );
 
 -- Florists table for business profiles
-CREATE TABLE IF NOT EXISTS florists (
+CREATE TABLE IF NOT EXISTS floristdb.florists (
   id SERIAL PRIMARY KEY,
-  user_id VARCHAR REFERENCES florist_auth(id),
+  user_id VARCHAR REFERENCES floristdb.florist_auth(id),
   email VARCHAR,
   phone VARCHAR,
   business_name VARCHAR NOT NULL,
@@ -99,9 +99,9 @@ CREATE TABLE IF NOT EXISTS florists (
 );
 
 -- Florist images table
-CREATE TABLE IF NOT EXISTS florist_images (
+CREATE TABLE IF NOT EXISTS floristdb.florist_images (
   id SERIAL PRIMARY KEY,
-  florist_id INTEGER REFERENCES florists(id) ON DELETE CASCADE,
+  florist_id INTEGER REFERENCES floristdb.florists(id) ON DELETE CASCADE,
   image_url VARCHAR NOT NULL,
   alt_text VARCHAR,
   is_primary BOOLEAN DEFAULT false,
@@ -110,10 +110,10 @@ CREATE TABLE IF NOT EXISTS florist_images (
 );
 
 -- Reviews table
-CREATE TABLE IF NOT EXISTS reviews (
+CREATE TABLE IF NOT EXISTS floristdb.reviews (
   id SERIAL PRIMARY KEY,
-  florist_id INTEGER REFERENCES florists(id) ON DELETE CASCADE,
-  user_id VARCHAR REFERENCES users(id),
+  florist_id INTEGER REFERENCES floristdb.florists(id) ON DELETE CASCADE,
+  user_id VARCHAR REFERENCES floristdb.users(id),
   rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
   title VARCHAR,
   comment TEXT,
@@ -126,10 +126,10 @@ CREATE TABLE IF NOT EXISTS reviews (
 );
 
 -- Inquiries table
-CREATE TABLE IF NOT EXISTS inquiries (
+CREATE TABLE IF NOT EXISTS floristdb.inquiries (
   id SERIAL PRIMARY KEY,
-  florist_id INTEGER REFERENCES florists(id) ON DELETE CASCADE,
-  user_id VARCHAR REFERENCES users(id),
+  florist_id INTEGER REFERENCES floristdb.florists(id) ON DELETE CASCADE,
+  user_id VARCHAR REFERENCES floristdb.users(id),
   name VARCHAR NOT NULL,
   email VARCHAR NOT NULL,
   phone VARCHAR,
@@ -143,7 +143,7 @@ CREATE TABLE IF NOT EXISTS inquiries (
 );
 
 -- Newsletter subscriptions table
-CREATE TABLE IF NOT EXISTS newsletter_subscriptions (
+CREATE TABLE IF NOT EXISTS floristdb.newsletter_subscriptions (
   id SERIAL PRIMARY KEY,
   email VARCHAR UNIQUE NOT NULL,
   name VARCHAR,
@@ -154,23 +154,23 @@ CREATE TABLE IF NOT EXISTS newsletter_subscriptions (
 );
 
 -- Saved florists table
-CREATE TABLE IF NOT EXISTS saved_florists (
+CREATE TABLE IF NOT EXISTS floristdb.saved_florists (
   id SERIAL PRIMARY KEY,
-  user_id VARCHAR REFERENCES users(id) ON DELETE CASCADE,
-  florist_id INTEGER REFERENCES florists(id) ON DELETE CASCADE,
+  user_id VARCHAR REFERENCES floristdb.users(id) ON DELETE CASCADE,
+  florist_id INTEGER REFERENCES floristdb.florists(id) ON DELETE CASCADE,
   created_at TIMESTAMP DEFAULT NOW(),
   UNIQUE(user_id, florist_id)
 );
 
 -- Create indexes for better performance
-CREATE INDEX IF NOT EXISTS idx_florists_location ON florists (latitude, longitude);
-CREATE INDEX IF NOT EXISTS idx_florists_city_state ON florists (city, state);
-CREATE INDEX IF NOT EXISTS idx_florists_featured ON florists (is_featured);
-CREATE INDEX IF NOT EXISTS idx_florists_active ON florists (is_active);
-CREATE INDEX IF NOT EXISTS idx_reviews_florist ON reviews (florist_id);
-CREATE INDEX IF NOT EXISTS idx_reviews_rating ON reviews (rating);
-CREATE INDEX IF NOT EXISTS idx_inquiries_florist ON inquiries (florist_id);
-CREATE INDEX IF NOT EXISTS idx_inquiries_status ON inquiries (status);
+CREATE INDEX IF NOT EXISTS idx_florists_location ON floristdb.florists (latitude, longitude);
+CREATE INDEX IF NOT EXISTS idx_florists_city_state ON floristdb.florists (city, state);
+CREATE INDEX IF NOT EXISTS idx_florists_featured ON floristdb.florists (is_featured);
+CREATE INDEX IF NOT EXISTS idx_florists_active ON floristdb.florists (is_active);
+CREATE INDEX IF NOT EXISTS idx_reviews_florist ON floristdb.reviews (florist_id);
+CREATE INDEX IF NOT EXISTS idx_reviews_rating ON floristdb.reviews (rating);
+CREATE INDEX IF NOT EXISTS idx_inquiries_florist ON floristdb.inquiries (florist_id);
+CREATE INDEX IF NOT EXISTS idx_inquiries_status ON floristdb.inquiries (status);
 `;
 
 async function initializeDatabase() {
@@ -203,7 +203,7 @@ async function initializeDatabase() {
     const result = await client.query(`
       SELECT table_name 
       FROM information_schema.tables 
-      WHERE table_schema = 'public'
+      WHERE table_schema = 'floristdb'
       ORDER BY table_name;
     `);
     
