@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Mail, Lock, Eye, EyeOff, User, Store, MapPin, Phone, Globe, Star, Upload, X, Flower2 } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, User, Store, MapPin, Phone, Globe, Star, Upload, X, Flower2, Check, AlertCircle } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -104,6 +104,12 @@ export default function FloristRegister() {
       profileImageUrl: "",
     },
   });
+
+  // Password matching state
+  const password = form.watch("password");
+  const confirmPassword = form.watch("confirmPassword");
+  const passwordsMatch = password && confirmPassword && password === confirmPassword;
+  const hasPasswordError = password && confirmPassword && password !== confirmPassword;
 
   const registerMutation = useMutation({
     mutationFn: async (data: RegistrationForm) => {
@@ -207,6 +213,18 @@ export default function FloristRegister() {
   };
 
   const nextStep = () => {
+    // Prevent moving from step 1 if passwords don't match
+    if (currentStep === 1) {
+      const formValues = form.getValues();
+      if (formValues.password && formValues.confirmPassword && formValues.password !== formValues.confirmPassword) {
+        toast({
+          title: "Passwords Don't Match",
+          description: "Please make sure both password fields match before continuing.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
     if (currentStep < 3) setCurrentStep(currentStep + 1);
   };
 
@@ -350,9 +368,23 @@ export default function FloristRegister() {
                           id="confirmPassword"
                           type={showConfirmPassword ? "text" : "password"}
                           placeholder="••••••••"
-                          className="pl-10 pr-10"
+                          className={`pl-10 pr-20 ${
+                            hasPasswordError ? 'border-red-500 focus:border-red-500' : 
+                            passwordsMatch ? 'border-green-500 focus:border-green-500' : ''
+                          }`}
                           {...form.register("confirmPassword")}
                         />
+                        <div className="absolute right-10 top-3 flex items-center">
+                          {confirmPassword && (
+                            <>
+                              {passwordsMatch ? (
+                                <Check className="h-4 w-4 text-green-500" />
+                              ) : (
+                                <AlertCircle className="h-4 w-4 text-red-500" />
+                              )}
+                            </>
+                          )}
+                        </div>
                         <button
                           type="button"
                           onClick={() => setShowConfirmPassword(!showConfirmPassword)}
@@ -361,9 +393,14 @@ export default function FloristRegister() {
                           {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </button>
                       </div>
-                      {form.formState.errors.confirmPassword && (
+                      {hasPasswordError && (
                         <p className="text-sm text-red-600 font-medium bg-red-50 p-2 rounded border border-red-200">
-                          ⚠️ {form.formState.errors.confirmPassword.message}
+                          ⚠️ Passwords don't match
+                        </p>
+                      )}
+                      {passwordsMatch && (
+                        <p className="text-sm text-green-600 font-medium bg-green-50 p-2 rounded border border-green-200">
+                          ✓ Passwords match
                         </p>
                       )}
                     </div>
