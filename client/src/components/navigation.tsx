@@ -140,20 +140,34 @@ export default function Navigation() {
                 </Button>
               </div>
             ) : (
-              <Button 
-                onClick={() => window.location.href = "/api/login"}
-                variant="ghost"
-                className="text-primary hover:text-primary-dark transition-colors duration-200 font-medium"
-              >
-                <User className="h-4 w-4 mr-2" />
-                Login
-              </Button>
+              <div className="flex items-center space-x-3">
+                <Link href="/florist-login">
+                  <Button 
+                    variant="outline"
+                    size="sm"
+                    className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                  >
+                    <Store className="h-4 w-4 mr-2" />
+                    Florist Login
+                  </Button>
+                </Link>
+                
+                <Button 
+                  onClick={() => window.location.href = "/api/login"}
+                  variant="ghost"
+                  size="sm"
+                  className="text-gray-700 hover:text-gray-900"
+                >
+                  <User className="h-4 w-4 mr-2" />
+                  Customer Login
+                </Button>
+              </div>
             )}
             
-            <Button asChild className="btn-primary">
-              <Link href="/register">
+            <Button asChild className="bg-gray-900 hover:bg-gray-800 text-white">
+              <Link href="/florist-register">
                 <Store className="h-4 w-4 mr-2" />
-                Get Listed Today
+                Join as Florist
               </Link>
             </Button>
             
