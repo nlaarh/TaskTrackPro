@@ -23,7 +23,7 @@ const categories = [
     id: 3,
     title: "Birthday & Celebrations",
     description: "Vibrant bouquets for joyful occasions",
-    image: "https://images.unsplash.com/photo-1587334205817-c3df6abc544c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
+    image: "https://images.unsplash.com/photo-1464349153735-7db50ed83c84?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
     href: "/search?services=Birthday%20Bouquets",
     gradient: "from-gray-50 to-gray-100"
   },

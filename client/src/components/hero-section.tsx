@@ -30,7 +30,7 @@ export default function HeroSection() {
     <section 
       className="relative min-h-screen flex items-center justify-center parallax-bg"
       style={{
-        backgroundImage: `linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(249, 250, 251, 0.90) 100%), url('https://images.unsplash.com/photo-1519225421980-715cb0215aed?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&h=1080')`
+        backgroundImage: `linear-gradient(135deg, rgba(255, 255, 255, 0.92) 0%, rgba(249, 250, 251, 0.88) 100%), url('https://images.unsplash.com/photo-1606800052052-a08af7148866?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&h=1080')`
       }}
     >
       <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-gray-50/10"></div>
