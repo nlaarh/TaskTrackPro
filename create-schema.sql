@@ -147,4 +147,4 @@ CREATE INDEX IF NOT EXISTS idx_inquiries_status ON floristdb.inquiries (status);
 
 -- Verify tables were created
 SELECT 'Schema created successfully!' as message;
-SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name;
+SELECT table_name FROM information_schema.tables WHERE table_schema = 'floristdb' ORDER BY table_name;

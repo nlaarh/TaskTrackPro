@@ -132,6 +132,7 @@ FloriHub is a modern, mobile-friendly florist directory platform that connects c
 - June 30, 2025. Completed florist authentication system: Working registration and login with JWT tokens, bcrypt password hashing, drag-and-drop profile image upload, and comprehensive form validation
 - June 30, 2025. Enhanced registration UX: Added visual password matching indicators with green/red feedback, prevented form progression when passwords mismatch, fixed form submission issues, and successfully tested complete registration flow
 - June 30, 2025. Database migration to external PostgreSQL: Updated connection to use yamanote.proxy.rlwy.net:18615/flouristdb with postgres password, created complete schema SQL file for manual execution
+- June 30, 2025. Updated database schema structure: All tables now use floristdb schema (floristdb.sessions, floristdb.users, floristdb.florists, etc.), updated connection string and created finalized create-schema.sql file for manual database setup
 
 ## User Preferences
 
