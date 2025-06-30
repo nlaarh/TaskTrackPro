@@ -10,6 +10,8 @@ import Home from "@/pages/home";
 import SearchResults from "@/pages/search-results";
 import FloristDetail from "@/pages/florist-detail";
 import FloristRegistration from "@/pages/florist-registration";
+import FloristLogin from "@/pages/florist-login";
+import FloristRegister from "@/pages/florist-register";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -29,8 +31,8 @@ function Router() {
           <Route path="/search" component={SearchResults} />
           <Route path="/florist/:id" component={FloristDetail} />
           <Route path="/register" component={FloristRegistration} />
-          <Route path="/florist-login" component={() => import("@/pages/florist-login")} />
-          <Route path="/florist-register" component={() => import("@/pages/florist-register")} />
+          <Route path="/florist-login" component={FloristLogin} />
+          <Route path="/florist-register" component={FloristRegister} />
         </>
       )}
       <Route component={NotFound} />

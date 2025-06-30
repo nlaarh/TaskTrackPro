@@ -2,6 +2,9 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import { insertFloristAuthSchema } from "@shared/schema";
 import { 
   insertFloristSchema, 
   insertReviewSchema, 
@@ -25,6 +28,98 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
+  // Florist authentication endpoints
+  app.post('/api/auth/florist/register', async (req, res) => {
+    try {
+      const validatedData = insertFloristAuthSchema.parse(req.body);
+      
+      // Check if email already exists
+      const existingFlorist = await storage.getFloristAuthByEmail(validatedData.email);
+      if (existingFlorist) {
+        return res.status(400).json({ message: "Email already registered" });
+      }
+
+      // Hash password
+      const hashedPassword = await bcrypt.hash(validatedData.password, 12);
+
+      // Create florist account
+      const florist = await storage.createFloristAuth({
+        ...validatedData,
+        password: hashedPassword,
+      });
+
+      // Generate JWT token
+      const token = jwt.sign(
+        { floristId: florist.id, email: florist.email },
+        process.env.JWT_SECRET || 'default-secret',
+        { expiresIn: '7d' }
+      );
+
+      res.status(201).json({
+        message: "Registration successful",
+        token,
+        florist: {
+          id: florist.id,
+          email: florist.email,
+          firstName: florist.firstName,
+          lastName: florist.lastName,
+          businessName: florist.businessName,
+        },
+      });
+    } catch (error: any) {
+      console.error("Florist registration error:", error);
+      res.status(400).json({ 
+        message: error.message || "Registration failed" 
+      });
+    }
+  });
+
+  app.post('/api/auth/florist/login', async (req, res) => {
+    try {
+      const { email, password } = req.body;
+
+      if (!email || !password) {
+        return res.status(400).json({ message: "Email and password are required" });
+      }
+
+      // Find florist by email
+      const florist = await storage.getFloristAuthByEmail(email);
+      if (!florist) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+
+      // Verify password
+      const isValidPassword = await bcrypt.compare(password, florist.password);
+      if (!isValidPassword) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+
+      // Generate JWT token
+      const token = jwt.sign(
+        { floristId: florist.id, email: florist.email },
+        process.env.JWT_SECRET || 'default-secret',
+        { expiresIn: '7d' }
+      );
+
+      res.json({
+        message: "Login successful",
+        token,
+        florist: {
+          id: florist.id,
+          email: florist.email,
+          firstName: florist.firstName,
+          lastName: florist.lastName,
+          businessName: florist.businessName,
+        },
+      });
+    } catch (error: any) {
+      console.error("Florist login error:", error);
+      res.status(500).json({ 
+        message: "Login failed" 
+      });
     }
   });
 

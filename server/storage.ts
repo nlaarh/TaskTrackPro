@@ -6,6 +6,7 @@ import {
   inquiries,
   newsletterSubscriptions,
   savedFlorists,
+  floristAuth,
   type User,
   type UpsertUser,
   type InsertFlorist,
@@ -22,6 +23,8 @@ import {
   type SavedFlorist,
   type FloristWithDetails,
   type FloristWithReviews,
+  type InsertFloristAuth,
+  type FloristAuth,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, ilike, or, sql, count } from "drizzle-orm";
@@ -30,6 +33,12 @@ export interface IStorage {
   // User operations (required for Replit Auth)
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
+  
+  // Florist authentication
+  createFloristAuth(florist: InsertFloristAuth): Promise<FloristAuth>;
+  getFloristAuthByEmail(email: string): Promise<FloristAuth | undefined>;
+  getFloristAuthById(id: number): Promise<FloristAuth | undefined>;
+  updateFloristAuth(id: number, updates: Partial<InsertFloristAuth>): Promise<FloristAuth | undefined>;
   
   // Florist operations
   createFlorist(florist: InsertFlorist): Promise<Florist>;
@@ -491,6 +500,42 @@ export class DatabaseStorage implements IStorage {
       .where(and(eq(savedFlorists.userId, userId), eq(savedFlorists.floristId, floristId)))
       .limit(1);
     return !!result;
+  }
+
+  // Florist authentication methods
+  async createFloristAuth(florist: InsertFloristAuth): Promise<FloristAuth> {
+    const [result] = await db
+      .insert(floristAuth)
+      .values(florist)
+      .returning();
+    return result;
+  }
+
+  async getFloristAuthByEmail(email: string): Promise<FloristAuth | undefined> {
+    const [result] = await db
+      .select()
+      .from(floristAuth)
+      .where(eq(floristAuth.email, email))
+      .limit(1);
+    return result;
+  }
+
+  async getFloristAuthById(id: number): Promise<FloristAuth | undefined> {
+    const [result] = await db
+      .select()
+      .from(floristAuth)
+      .where(eq(floristAuth.id, id))
+      .limit(1);
+    return result;
+  }
+
+  async updateFloristAuth(id: number, updates: Partial<InsertFloristAuth>): Promise<FloristAuth | undefined> {
+    const [result] = await db
+      .update(floristAuth)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(floristAuth.id, id))
+      .returning();
+    return result;
   }
 }
 
