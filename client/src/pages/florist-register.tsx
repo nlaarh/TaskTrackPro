@@ -79,6 +79,8 @@ export default function FloristRegister() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [selectedSpecialties, setSelectedSpecialties] = useState<string[]>([]);
   const [currentStep, setCurrentStep] = useState(1);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [uploadedFileName, setUploadedFileName] = useState<string>("");
   const { toast } = useToast();
 
   const form = useForm<RegistrationForm>({
@@ -143,6 +145,57 @@ export default function FloristRegister() {
     
     setSelectedSpecialties(updated);
     form.setValue('specialties', updated);
+  };
+
+  const handleFileUpload = (file: File) => {
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      toast({
+        title: "File too large",
+        description: "Please select a file smaller than 5MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid file type",
+        description: "Please select an image file (PNG, JPG, etc.)",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setUploadedFileName(file.name);
+    // For demo purposes, create a placeholder URL
+    // In production, you would upload to a service like Cloudinary or AWS S3
+    const placeholder = `https://via.placeholder.com/300x300.png?text=${encodeURIComponent(file.name.split('.')[0])}`;
+    form.setValue("profileImageUrl", placeholder);
+    
+    toast({
+      title: "Image uploaded successfully",
+      description: `${file.name} has been uploaded`,
+    });
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) {
+      handleFileUpload(files[0]);
+    }
   };
 
   const onSubmit = (data: RegistrationForm) => {
@@ -489,19 +542,75 @@ export default function FloristRegister() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="profileImageUrl">Profile Picture URL (Optional)</Label>
-                    <div className="relative">
-                      <Upload className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Label htmlFor="profileImageUrl">Profile Picture</Label>
+                    <div 
+                      className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors cursor-pointer ${
+                        isDragOver 
+                          ? 'border-gray-900 bg-gray-50' 
+                          : 'border-gray-300 hover:border-gray-400'
+                      }`}
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
+                      onClick={() => document.getElementById('fileInput')?.click()}
+                    >
+                      <div className="flex flex-col items-center space-y-4">
+                        <div className={`w-16 h-16 rounded-full flex items-center justify-center ${
+                          uploadedFileName ? 'bg-green-100' : 'bg-gray-100'
+                        }`}>
+                          {uploadedFileName ? (
+                            <Star className="h-8 w-8 text-green-600" />
+                          ) : (
+                            <Upload className="h-8 w-8 text-gray-400" />
+                          )}
+                        </div>
+                        <div>
+                          {uploadedFileName ? (
+                            <div>
+                              <p className="text-sm font-medium text-green-700">
+                                {uploadedFileName}
+                              </p>
+                              <p className="text-xs text-gray-500 mt-1">
+                                Click to change or drag another file
+                              </p>
+                            </div>
+                          ) : (
+                            <div>
+                              <p className="text-sm font-medium text-gray-900">
+                                Drag and drop your photo here, or{" "}
+                                <span className="text-gray-900 underline hover:text-gray-700">
+                                  browse files
+                                </span>
+                              </p>
+                              <p className="text-xs text-gray-500 mt-1">
+                                PNG, JPG up to 5MB
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <input
+                        id="fileInput"
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            handleFileUpload(file);
+                          }
+                        }}
+                      />
+                    </div>
+                    <div className="mt-2">
+                      <Label htmlFor="profileImageUrlText" className="text-sm">Or enter image URL</Label>
                       <Input
-                        id="profileImageUrl"
+                        id="profileImageUrlText"
                         placeholder="https://example.com/your-photo.jpg"
-                        className="pl-10"
+                        className="mt-1"
                         {...form.register("profileImageUrl")}
                       />
                     </div>
-                    <p className="text-sm text-gray-500">
-                      Upload your photo to a service like Imgur or use an existing URL
-                    </p>
                   </div>
                 </div>
               )}
@@ -515,13 +624,13 @@ export default function FloristRegister() {
                 )}
                 
                 {currentStep < 3 ? (
-                  <Button type="button" onClick={nextStep} className="ml-auto">
+                  <Button type="button" onClick={nextStep} className="ml-auto bg-gray-900 hover:bg-gray-800 text-white">
                     Next
                   </Button>
                 ) : (
                   <Button 
                     type="submit" 
-                    className="ml-auto bg-gray-900 hover:bg-gray-800"
+                    className="ml-auto bg-gray-900 hover:bg-gray-800 text-white"
                     disabled={registerMutation.isPending}
                   >
                     {registerMutation.isPending ? "Creating Account..." : "Complete Registration"}
