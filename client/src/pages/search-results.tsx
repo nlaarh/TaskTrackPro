@@ -89,13 +89,13 @@ export default function SearchResults() {
         <div className="mb-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
                 Florist Results
                 {searchParams.location && (
-                  <span className="text-primary"> - {searchParams.location}</span>
+                  <span className="text-gray-600"> - {searchParams.location}</span>
                 )}
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-gray-600">
                 {searchResults ? (
                   `Showing ${searchResults.florists.length} of ${searchResults.total} results`
                 ) : (

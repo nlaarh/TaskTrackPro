@@ -89,7 +89,7 @@ export default function FloristCard({ florist, viewMode }: FloristCardProps) {
 
   if (viewMode === 'list') {
     return (
-      <Card className="card-hover bg-white rounded-2xl shadow-lg overflow-hidden">
+      <Card className="card-hover bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300">
         <div className="md:flex">
           {/* Image */}
           <div className="md:w-80 h-64 md:h-auto relative">
@@ -101,17 +101,17 @@ export default function FloristCard({ florist, viewMode }: FloristCardProps) {
             <button
               onClick={handleSaveClick}
               disabled={saveFloristMutation.isPending}
-              className="absolute top-4 right-4 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center hover:bg-white transition-all duration-200"
+              className="absolute top-4 right-4 w-10 h-10 bg-white/95 rounded-full flex items-center justify-center hover:bg-white transition-all duration-200 shadow-sm"
             >
               <Heart 
                 className={cn(
                   "h-4 w-4 transition-colors duration-200",
-                  isSaved ? "text-primary fill-primary" : "text-muted-foreground hover:text-primary"
+                  isSaved ? "text-red-500 fill-red-500" : "text-gray-400 hover:text-red-500"
                 )} 
               />
             </button>
             <div className="absolute bottom-4 left-4">
-              <Badge className="bg-green-600 text-white">
+              <Badge className="bg-gray-900 text-white">
                 <Star className="h-3 w-3 mr-1" />
                 {formatRating(parseFloat(florist.rating))}
               </Badge>

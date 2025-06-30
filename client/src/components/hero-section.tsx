@@ -119,23 +119,23 @@ export default function HeroSection() {
         {/* Quick Stats */}
         <div className="mt-16 grid grid-cols-3 gap-8 max-w-2xl mx-auto">
           <div className="text-center">
-            <div className="text-3xl font-bold text-white">2,500+</div>
-            <div className="text-white text-sm">Verified Florists</div>
+            <div className="text-3xl font-bold text-gray-900">2,500+</div>
+            <div className="text-gray-600 text-sm">Verified Florists</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-white">150+</div>
-            <div className="text-white text-sm">Cities Covered</div>
+            <div className="text-3xl font-bold text-gray-900">150+</div>
+            <div className="text-gray-600 text-sm">Cities Covered</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-white">50K+</div>
-            <div className="text-white text-sm">Happy Customers</div>
+            <div className="text-3xl font-bold text-gray-900">50K+</div>
+            <div className="text-gray-600 text-sm">Happy Customers</div>
           </div>
         </div>
       </div>
       
       {/* Scroll Indicator */}
       <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-        <ChevronDown className="h-6 w-6 text-white" />
+        <ChevronDown className="h-6 w-6 text-gray-400" />
       </div>
     </section>
   );
