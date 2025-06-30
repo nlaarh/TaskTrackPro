@@ -362,7 +362,9 @@ export default function FloristRegister() {
                         </button>
                       </div>
                       {form.formState.errors.confirmPassword && (
-                        <p className="text-sm text-red-600">{form.formState.errors.confirmPassword.message}</p>
+                        <p className="text-sm text-red-600 font-medium bg-red-50 p-2 rounded border border-red-200">
+                          ⚠️ {form.formState.errors.confirmPassword.message}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -634,13 +636,7 @@ export default function FloristRegister() {
                   <Button 
                     type="submit" 
                     className="ml-auto bg-gray-900 hover:bg-gray-800 text-white"
-                    disabled={registerMutation.isPending}
-                    onClick={() => {
-                      console.log("Submit button clicked");
-                      console.log("Form errors:", form.formState.errors);
-                      console.log("Form values:", form.getValues());
-                      console.log("Selected specialties:", selectedSpecialties);
-                    }}
+                    disabled={registerMutation.isPending || Object.keys(form.formState.errors).length > 0}
                   >
                     {registerMutation.isPending ? "Creating Account..." : "Complete Registration"}
                   </Button>
