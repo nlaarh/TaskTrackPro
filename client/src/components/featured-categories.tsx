@@ -9,7 +9,7 @@ const categories = [
     description: "Elegant bridal bouquets and ceremony arrangements",
     image: "https://images.unsplash.com/photo-1519225421980-715cb0215aed?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
     href: "/search?services=Wedding%20Flowers",
-    gradient: "from-emerald-50 to-green-100"
+    gradient: "from-gray-50 to-gray-100"
   },
   {
     id: 2,
@@ -17,7 +17,7 @@ const categories = [
     description: "Romantic arrangements for celebrating love",
     image: "https://images.unsplash.com/photo-1563241527-3004b7be0ffd?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
     href: "/search?services=Anniversary%20Flowers",
-    gradient: "from-amber-50 to-yellow-100"
+    gradient: "from-gray-50 to-gray-100"
   },
   {
     id: 3,
@@ -25,7 +25,7 @@ const categories = [
     description: "Vibrant bouquets for joyful occasions",
     image: "https://images.unsplash.com/photo-1587334205817-c3df6abc544c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
     href: "/search?services=Birthday%20Bouquets",
-    gradient: "from-green-50 to-emerald-100"
+    gradient: "from-gray-50 to-gray-100"
   },
   {
     id: 4,
@@ -33,7 +33,7 @@ const categories = [
     description: "Professional arrangements for business occasions",
     image: "https://images.unsplash.com/photo-1586611292717-f828b167408c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
     href: "/search?services=Corporate%20Events",
-    gradient: "from-teal-50 to-green-100"
+    gradient: "from-gray-50 to-gray-100"
   }
 ];
 

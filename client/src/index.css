@@ -3,34 +3,34 @@
 @tailwind utilities;
 
 :root {
-  --background: hsl(50, 20%, 98%);
-  --foreground: hsl(25, 25%, 25%);
-  --muted: hsl(45, 30%, 95%);
-  --muted-foreground: hsl(25, 15%, 55%);
+  --background: hsl(0, 0%, 100%);
+  --foreground: hsl(0, 0%, 9%);
+  --muted: hsl(210, 40%, 98%);
+  --muted-foreground: hsl(0, 0%, 45%);
   --popover: hsl(0, 0%, 100%);
-  --popover-foreground: hsl(25, 25%, 25%);
+  --popover-foreground: hsl(0, 0%, 9%);
   --card: hsl(0, 0%, 100%);
-  --card-foreground: hsl(25, 25%, 25%);
-  --border: hsl(40, 20%, 88%);
-  --input: hsl(40, 20%, 92%);
-  --primary: hsl(160, 35%, 45%);
-  --primary-foreground: hsl(0, 0%, 100%);
-  --secondary: hsl(45, 25%, 92%);
-  --secondary-foreground: hsl(25, 25%, 25%);
-  --accent: hsl(35, 40%, 85%);
-  --accent-foreground: hsl(25, 25%, 25%);
-  --destructive: hsl(0, 65%, 55%);
-  --destructive-foreground: hsl(0, 0%, 100%);
-  --ring: hsl(160, 35%, 45%);
+  --card-foreground: hsl(0, 0%, 9%);
+  --border: hsl(220, 13%, 91%);
+  --input: hsl(220, 13%, 91%);
+  --primary: hsl(220, 14%, 96%);
+  --primary-foreground: hsl(0, 0%, 9%);
+  --secondary: hsl(210, 40%, 98%);
+  --secondary-foreground: hsl(0, 0%, 9%);
+  --accent: hsl(210, 40%, 96%);
+  --accent-foreground: hsl(0, 0%, 9%);
+  --destructive: hsl(0, 84%, 60%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --ring: hsl(0, 0%, 63%);
   --radius: 0.75rem;
   
-  /* FloriHub elegant colors */
-  --primary-light: hsl(160, 35%, 75%);
-  --primary-dark: hsl(160, 40%, 35%);
-  --accent-sage: hsl(140, 25%, 60%);
-  --accent-cream: hsl(45, 40%, 92%);
-  --accent-gold: hsl(40, 60%, 70%);
-  --text-soft: hsl(25, 20%, 45%);
+  /* FloriHub clean colors */
+  --primary-light: hsl(220, 14%, 98%);
+  --primary-dark: hsl(0, 0%, 20%);
+  --accent-light: hsl(210, 40%, 98%);
+  --accent-medium: hsl(220, 13%, 91%);
+  --text-soft: hsl(0, 0%, 45%);
+  --text-medium: hsl(0, 0%, 25%);
 }
 
 .dark {
