@@ -57,15 +57,15 @@ export default function CommunitySection() {
   };
 
   return (
-    <section id="community" className="py-20 bg-white">
+    <section id="community" className="py-24 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           {/* Community Info */}
           <div>
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
               Join Our Florist Community
             </h2>
-            <p className="text-lg text-muted-foreground mb-8">
+            <p className="text-xl text-gray-600 mb-8 font-light">
               Connect with flower lovers, share your expertise, and grow your business in our 
               thriving community of professional florists and flower enthusiasts.
             </p>

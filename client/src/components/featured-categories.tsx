@@ -53,14 +53,14 @@ export default function FeaturedCategories() {
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
           {categories.map((category) => (
             <Link key={category.id} href={category.href}>
-              <Card className="card-hover bg-white rounded-2xl shadow-lg overflow-hidden group cursor-pointer h-full">
-                <div className={`h-48 bg-gradient-to-br ${category.gradient} relative overflow-hidden`}>
+              <Card className="card-hover bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group cursor-pointer h-full hover:shadow-lg transition-all duration-300">
+                <div className={`h-56 bg-gradient-to-br ${category.gradient} relative overflow-hidden`}>
                   <img 
                     src={category.image} 
                     alt={category.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                   />
-                  <div className="absolute inset-0 bg-primary bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300"></div>
+                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300"></div>
                 </div>
                 <CardContent className="p-6">
                   <h3 className="text-xl font-semibold text-foreground mb-2">

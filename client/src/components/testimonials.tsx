@@ -43,9 +43,9 @@ export default function Testimonials() {
         
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {testimonials.map((testimonial) => (
-            <Card key={testimonial.id} className="bg-white rounded-2xl shadow-lg">
-              <CardContent className="p-6">
-                <div className="flex text-yellow-400 mb-4">
+            <Card key={testimonial.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300">
+              <CardContent className="p-8">
+                <div className="flex text-amber-400 mb-6">
                   {Array.from({ length: testimonial.rating }).map((_, i) => (
                     <Star key={i} className="h-5 w-5 fill-current" />
                   ))}

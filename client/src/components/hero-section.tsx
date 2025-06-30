@@ -62,7 +62,7 @@ export default function HeroSection() {
                     placeholder="Wedding flowers, anniversary bouquet..."
                     value={searchKeyword}
                     onChange={(e) => setSearchKeyword(e.target.value)}
-                    className="w-full pl-12 pr-4 py-4 bg-white/95 rounded-xl border-0 focus:ring-2 focus:ring-emerald-500/50 transition-all duration-200 text-green-900 placeholder-green-600/60"
+                    className="w-full pl-12 pr-4 py-4 bg-white/95 rounded-xl border-0 focus:ring-2 focus:ring-gray-300/50 transition-all duration-200 text-gray-900 placeholder-gray-500"
                   />
                 </div>
               </div>
@@ -78,40 +78,40 @@ export default function HeroSection() {
                     placeholder="ZIP code or city name"
                     value={searchLocationInput}
                     onChange={(e) => setSearchLocationInput(e.target.value)}
-                    className="w-full pl-12 pr-4 py-4 bg-white/95 rounded-xl border-0 focus:ring-2 focus:ring-emerald-500/50 transition-all duration-200 text-green-900 placeholder-green-600/60"
+                    className="w-full pl-12 pr-4 py-4 bg-white/95 rounded-xl border-0 focus:ring-2 focus:ring-gray-300/50 transition-all duration-200 text-gray-900 placeholder-gray-500"
                   />
                 </div>
               </div>
             </div>
             
-            <Button type="submit" className="bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-700 hover:to-green-800 w-full py-4 text-white font-semibold rounded-xl text-lg transition-all duration-300 hover:shadow-xl hover:scale-105">
+            <Button type="submit" className="bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-gray-700 w-full py-4 text-white font-semibold rounded-xl text-lg transition-all duration-300 hover:shadow-xl hover:scale-105">
               <Search className="h-5 w-5 mr-2" />
               Find Florists Near Me
             </Button>
           </form>
           
           <div className="mt-6 flex flex-wrap justify-center gap-2">
-            <span className="text-white text-sm">Popular searches:</span>
+            <span className="text-gray-700 text-sm">Popular searches:</span>
             <Badge 
               variant="secondary" 
-              className="bg-white/20 text-white hover:bg-white/30 transition-all duration-200 cursor-pointer"
+              className="bg-gray-100/80 text-gray-700 hover:bg-gray-200/80 transition-all duration-200 cursor-pointer"
               onClick={() => handlePopularSearch("Wedding Flowers")}
             >
               Wedding Flowers
             </Badge>
             <Badge 
               variant="secondary" 
-              className="bg-white/20 text-white hover:bg-white/30 transition-all duration-200 cursor-pointer"
-              onClick={() => handlePopularSearch("Funeral Arrangements")}
+              className="bg-gray-100/80 text-gray-700 hover:bg-gray-200/80 transition-all duration-200 cursor-pointer"
+              onClick={() => handlePopularSearch("Anniversary Flowers")}
             >
-              Funeral Arrangements
+              Anniversary Flowers
             </Badge>
             <Badge 
               variant="secondary" 
-              className="bg-white/20 text-white hover:bg-white/30 transition-all duration-200 cursor-pointer"
-              onClick={() => handlePopularSearch("Valentine's Day")}
+              className="bg-gray-100/80 text-gray-700 hover:bg-gray-200/80 transition-all duration-200 cursor-pointer"
+              onClick={() => handlePopularSearch("Birthday Bouquets")}
             >
-              Valentine's Day
+              Birthday Bouquets
             </Badge>
           </div>
         </div>
