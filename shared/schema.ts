@@ -65,7 +65,7 @@ export const floristAuth = pgTable("florist_auth", {
 // Florist business listings
 export const florists = pgTable("florists", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id").notNull().references(() => users.id),
+  userId: integer("user_id").references(() => floristAuth.id),
   businessName: varchar("business_name").notNull(),
   description: text("description"),
   address: text("address").notNull(),
