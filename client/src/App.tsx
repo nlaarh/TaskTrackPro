@@ -18,6 +18,11 @@ function Router() {
 
   return (
     <Switch>
+      {/* Florist authentication routes - always available */}
+      <Route path="/florist-login" component={FloristLogin} />
+      <Route path="/florist-register" component={FloristRegister} />
+      
+      {/* Regular app routes based on authentication */}
       {isLoading || !isAuthenticated ? (
         <>
           <Route path="/" component={Landing} />
@@ -31,8 +36,6 @@ function Router() {
           <Route path="/search" component={SearchResults} />
           <Route path="/florist/:id" component={FloristDetail} />
           <Route path="/register" component={FloristRegistration} />
-          <Route path="/florist-login" component={FloristLogin} />
-          <Route path="/florist-register" component={FloristRegister} />
         </>
       )}
       <Route component={NotFound} />
