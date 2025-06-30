@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS floristdb.florist_auth (
 -- Florists table for business profiles
 CREATE TABLE IF NOT EXISTS floristdb.florists (
   id SERIAL PRIMARY KEY,
-  user_id VARCHAR REFERENCES floristdb.florist_auth(id),
+  user_id INTEGER REFERENCES floristdb.florist_auth(id),
   email VARCHAR,
   phone VARCHAR,
   business_name VARCHAR NOT NULL,

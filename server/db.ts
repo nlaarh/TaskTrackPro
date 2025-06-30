@@ -3,7 +3,7 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from "@shared/schema";
 
 // Use the external PostgreSQL database as specified in replit.md
-const DATABASE_URL = "postgresql://postgres:postgres@yamanote.proxy.rlwy.net:18615/flouristdb";
+const DATABASE_URL = "postgresql://postgres:RwDPqwPPtxhBNDzKDGiJlrHDtdTBZBYx@yamanote.proxy.rlwy.net:18615/floristdb";
 
 export const pool = new Pool({ 
   connectionString: DATABASE_URL,
