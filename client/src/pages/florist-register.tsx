@@ -199,7 +199,10 @@ export default function FloristRegister() {
   };
 
   const onSubmit = (data: RegistrationForm) => {
+    console.log("Form submitted with data:", data);
+    console.log("Selected specialties:", selectedSpecialties);
     const formData = { ...data, specialties: selectedSpecialties };
+    console.log("Final form data:", formData);
     registerMutation.mutate(formData);
   };
 
@@ -632,6 +635,12 @@ export default function FloristRegister() {
                     type="submit" 
                     className="ml-auto bg-gray-900 hover:bg-gray-800 text-white"
                     disabled={registerMutation.isPending}
+                    onClick={() => {
+                      console.log("Submit button clicked");
+                      console.log("Form errors:", form.formState.errors);
+                      console.log("Form values:", form.getValues());
+                      console.log("Selected specialties:", selectedSpecialties);
+                    }}
                   >
                     {registerMutation.isPending ? "Creating Account..." : "Complete Registration"}
                   </Button>
