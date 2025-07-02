@@ -134,6 +134,7 @@ FloriHub is a modern, mobile-friendly florist directory platform that connects c
 - June 30, 2025. Database migration to external PostgreSQL: Updated connection to use yamanote.proxy.rlwy.net:18615/flouristdb with postgres password, created complete schema SQL file for manual execution
 - June 30, 2025. Updated database schema structure: All tables now use floristdb schema (floristdb.sessions, floristdb.users, floristdb.florists, etc.), updated connection string and created finalized create-schema.sql file for manual database setup
 - June 30, 2025. Successfully deployed database schema: Connected to external PostgreSQL server using correct password (RwDPqwPPtxhBNDzKDGiJlrHDtdTBZBYx), fixed foreign key constraints between florist_auth and florists tables, created all 9 tables with proper indexes and relationships
+- July 2, 2025. Fixed database schema mismatch: Updated shared/schema.ts to match actual database structure, resolved column "business_name" error, confirmed working florist registration and login endpoints with JWT authentication
 
 ## User Preferences
 
