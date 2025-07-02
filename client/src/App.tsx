@@ -12,6 +12,7 @@ import FloristDetail from "@/pages/florist-detail";
 import FloristRegistration from "@/pages/florist-registration";
 import FloristLogin from "@/pages/florist-login";
 import FloristRegister from "@/pages/florist-register";
+import FloristDashboard from "@/pages/florist-dashboard";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -21,6 +22,7 @@ function Router() {
       {/* Florist authentication routes - always available */}
       <Route path="/florist-login" component={FloristLogin} />
       <Route path="/florist-register" component={FloristRegister} />
+      <Route path="/florist-dashboard" component={FloristDashboard} />
       
       {/* Regular app routes based on authentication */}
       {isLoading || !isAuthenticated ? (

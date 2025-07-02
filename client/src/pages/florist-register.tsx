@@ -129,12 +129,15 @@ export default function FloristRegister() {
       return response.json();
     },
     onSuccess: (data) => {
+      // Store florist authentication data
+      localStorage.setItem('florist_token', data.token);
+      localStorage.setItem('florist_data', JSON.stringify(data.florist));
+      
       toast({
         title: "Registration Successful!",
         description: "Welcome to FloriHub! You can now start managing your business.",
       });
-      // Redirect to home page for now, dashboard will be added later
-      setLocation('/');
+      setLocation('/florist-dashboard');
     },
     onError: (error: any) => {
       toast({

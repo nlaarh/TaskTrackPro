@@ -51,11 +51,15 @@ export default function FloristLogin() {
       return response.json();
     },
     onSuccess: (data) => {
+      // Store florist authentication data
+      localStorage.setItem('florist_token', data.token);
+      localStorage.setItem('florist_data', JSON.stringify(data.florist));
+      
       toast({
         title: "Welcome back!",
         description: "You've been successfully logged in.",
       });
-      setLocation('/dashboard');
+      setLocation('/florist-dashboard');
     },
     onError: (error: any) => {
       toast({
