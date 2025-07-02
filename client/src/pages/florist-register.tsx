@@ -252,13 +252,13 @@ export default function FloristRegister() {
             {[1, 2, 3].map((step) => (
               <div key={step} className="flex items-center">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                  step <= currentStep ? 'bg-gray-900 text-white' : 'bg-gray-200 text-gray-600'
+                  step <= currentStep ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
                 }`}>
                   {step}
                 </div>
                 {step < 3 && (
                   <div className={`w-12 h-1 mx-2 ${
-                    step < currentStep ? 'bg-gray-900' : 'bg-gray-200'
+                    step < currentStep ? 'bg-blue-600' : 'bg-gray-200'
                   }`} />
                 )}
               </div>
@@ -667,13 +667,13 @@ export default function FloristRegister() {
                 )}
                 
                 {currentStep < 3 ? (
-                  <Button type="button" onClick={nextStep} className="ml-auto bg-gray-900 hover:bg-gray-800 text-white">
+                  <Button type="button" onClick={nextStep} className="ml-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 shadow-sm">
                     Next
                   </Button>
                 ) : (
                   <Button 
                     type="submit" 
-                    className="ml-auto bg-gray-900 hover:bg-gray-800 text-white disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    className="ml-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 shadow-sm disabled:bg-gray-400 disabled:cursor-not-allowed"
                     disabled={registerMutation.isPending || hasPasswordError}
 
                   >
