@@ -147,6 +147,8 @@ export class DatabaseStorage implements IStorage {
     return florist;
   }
 
+
+
   async updateFlorist(id: number, updates: Partial<InsertFlorist>): Promise<Florist | undefined> {
     const [updatedFlorist] = await db
       .update(florists)

@@ -9,23 +9,36 @@ import { BarChart3, Users, MessageSquare, Settings, LogOut, Plus, Edit3, Star, M
 export default function FloristDashboard() {
   const [, setLocation] = useLocation();
   const [floristData, setFloristData] = useState<any>(null);
+  const [profileComplete, setProfileComplete] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if florist is logged in
-    const token = localStorage.getItem('florist_token');
-    const florist = localStorage.getItem('florist_data');
-    
-    if (!token || !florist) {
-      setLocation('/florist-login');
-      return;
-    }
+    const checkAuthAndProfile = async () => {
+      // Check if florist is logged in
+      const token = localStorage.getItem('florist_token');
+      const florist = localStorage.getItem('florist_data');
+      
+      if (!token || !florist) {
+        setLocation('/florist-login');
+        return;
+      }
 
-    try {
-      setFloristData(JSON.parse(florist));
-    } catch (error) {
-      console.error('Error parsing florist data:', error);
-      setLocation('/florist-login');
-    }
+      try {
+        const parsedFlorist = JSON.parse(florist);
+        setFloristData(parsedFlorist);
+
+        // Check if profile setup was completed by checking localStorage flag
+        const profileSetupComplete = localStorage.getItem('profile_setup_complete');
+        setProfileComplete(!!profileSetupComplete);
+      } catch (error) {
+        console.error('Error checking profile:', error);
+        setLocation('/florist-login');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuthAndProfile();
   }, [setLocation]);
 
   const handleLogout = () => {
@@ -34,7 +47,7 @@ export default function FloristDashboard() {
     setLocation('/');
   };
 
-  if (!floristData) {
+  if (loading || !floristData) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
@@ -191,19 +204,38 @@ export default function FloristDashboard() {
                   </div>
                 </div>
 
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <h4 className="font-medium text-blue-900 mb-2">Complete Your Profile</h4>
-                  <p className="text-blue-700 text-sm mb-3">
-                    Add your business information, photos, and services to start attracting customers.
-                  </p>
-                  <Button 
-                    className="bg-blue-600 hover:bg-blue-700"
-                    onClick={() => setLocation('/florist-profile-setup')}
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Complete Profile Setup
-                  </Button>
-                </div>
+                {!profileComplete && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h4 className="font-medium text-blue-900 mb-2">Complete Your Profile</h4>
+                    <p className="text-blue-700 text-sm mb-3">
+                      Add your business information, photos, and services to start attracting customers.
+                    </p>
+                    <Button 
+                      className="bg-blue-600 hover:bg-blue-700"
+                      onClick={() => setLocation('/florist-profile-setup')}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Complete Profile Setup
+                    </Button>
+                  </div>
+                )}
+                
+                {profileComplete && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <h4 className="font-medium text-green-900 mb-2">Profile Complete!</h4>
+                    <p className="text-green-700 text-sm mb-3">
+                      Your business profile is set up and ready to attract customers.
+                    </p>
+                    <Button 
+                      variant="outline"
+                      className="border-green-300 text-green-700 hover:bg-green-100"
+                      onClick={() => setLocation('/florist-profile-setup')}
+                    >
+                      <Edit3 className="h-4 w-4 mr-2" />
+                      Edit Profile
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

@@ -118,6 +118,9 @@ export default function FloristProfileSetup() {
       return response.json();
     },
     onSuccess: () => {
+      // Mark profile as complete in localStorage
+      localStorage.setItem('profile_setup_complete', 'true');
+      
       toast({
         title: "Profile Setup Complete!",
         description: "Your business profile has been created successfully.",
