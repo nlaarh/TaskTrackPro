@@ -196,7 +196,10 @@ export default function FloristDashboard() {
                   <p className="text-blue-700 text-sm mb-3">
                     Add your business information, photos, and services to start attracting customers.
                   </p>
-                  <Button className="bg-blue-600 hover:bg-blue-700">
+                  <Button 
+                    className="bg-blue-600 hover:bg-blue-700"
+                    onClick={() => setLocation('/florist-profile-setup')}
+                  >
                     <Plus className="h-4 w-4 mr-2" />
                     Complete Profile Setup
                   </Button>

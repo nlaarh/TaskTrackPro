@@ -53,8 +53,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         profileImageUrl
       } = req.body;
 
-      // Validate required fields
-      if (!firstName || !lastName || !email || !password || !phone || !businessName || !address || !city || !state || !zipCode) {
+      // Validate required fields for auth only
+      if (!firstName || !lastName || !email || !password) {
         return res.status(400).json({ message: "Missing required fields" });
       }
 
@@ -67,23 +67,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Hash password
       const hashedPassword = await bcrypt.hash(password, 12);
 
-      // Create florist account with all the form data
+      // Create florist authentication account
       const florist = await storage.createFloristAuth({
         email,
         passwordHash: hashedPassword,
         firstName,
         lastName,
-        businessName,
-        address,
-        city,
-        state,
-        zipCode,
-        phone,
-        website: website || null,
-        profileSummary: profileSummary || null,
-        yearsOfExperience: yearsOfExperience || 0,
-        specialties: specialties || [],
-        profileImageUrl: profileImageUrl || null,
+        isVerified: false,
       });
 
       // Generate JWT token
@@ -101,7 +91,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           email: florist.email,
           firstName: florist.firstName,
           lastName: florist.lastName,
-          businessName: florist.businessName,
         },
       });
     } catch (error: any) {
@@ -147,7 +136,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           email: florist.email,
           firstName: florist.firstName,
           lastName: florist.lastName,
-          businessName: florist.businessName,
+
         },
       });
     } catch (error: any) {
@@ -455,6 +444,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error unsubscribing from newsletter:", error);
       res.status(500).json({ message: "Failed to unsubscribe from newsletter" });
+    }
+  });
+
+  // Florist authentication middleware
+  const authenticateFlorist = async (req: any, res: any, next: any) => {
+    try {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      
+      if (!token) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'default-secret') as any;
+      const florist = await storage.getFloristAuthById(decoded.floristId);
+      
+      if (!florist) {
+        return res.status(401).json({ message: "Invalid token" });
+      }
+
+      req.florist = florist;
+      next();
+    } catch (error) {
+      res.status(401).json({ message: "Invalid token" });
+    }
+  };
+
+  // Florist profile setup
+  app.post('/api/florist/profile/setup', authenticateFlorist, async (req: any, res: any) => {
+    try {
+      const {
+        businessName,
+        address,
+        city,
+        state,
+        zipCode,
+        phone,
+        website,
+        profileSummary,
+        yearsOfExperience,
+        specialties,
+        services,
+        profileImageUrl
+      } = req.body;
+
+      // Create florist business profile
+      const florist = await storage.createFlorist({
+        userId: req.florist.id,
+        email: req.florist.email,
+        businessName,
+        address,
+        city,
+        state,
+        zipCode,
+        phone,
+        website: website || null,
+        profileSummary: profileSummary || null,
+        yearsOfExperience: yearsOfExperience || 0,
+        specialties: specialties || [],
+        services: services || [],
+        profileImageUrl: profileImageUrl || null,
+        isActive: true,
+        isFeatured: false,
+      });
+
+      res.json({
+        message: "Profile setup completed successfully",
+        florist,
+      });
+    } catch (error: any) {
+      console.error("Profile setup error:", error);
+      res.status(500).json({ 
+        message: error.message || "Profile setup failed" 
+      });
     }
   });
 
