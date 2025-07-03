@@ -67,12 +67,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Hash password
       const hashedPassword = await bcrypt.hash(password, 12);
 
-      // Create florist authentication account
+      // Create florist authentication account with minimal required fields
       const florist = await storage.createFloristAuth({
         email,
         passwordHash: hashedPassword,
         firstName,
         lastName,
+        businessName: "Temporary Business Name", // Will be updated during profile setup
+        address: "Temporary Address",
+        city: "Temporary City",
+        state: "Temporary State",
+        zipCode: "00000",
+        phone: "000-000-0000",
         isVerified: false,
       });
 
@@ -104,6 +110,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/auth/florist/login', async (req, res) => {
     try {
       const { email, password } = req.body;
+      console.log('Login attempt for email:', email);
 
       if (!email || !password) {
         return res.status(400).json({ message: "Email and password are required" });
@@ -111,12 +118,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Find florist by email
       const florist = await storage.getFloristAuthByEmail(email);
+      console.log('Florist found:', florist ? 'Yes' : 'No');
+      if (florist) {
+        console.log('Florist data:', { id: florist.id, email: florist.email, hasPasswordHash: !!florist.passwordHash });
+      }
+      
       if (!florist) {
         return res.status(401).json({ message: "Invalid email or password" });
       }
 
       // Verify password
+      console.log('Comparing passwords...');
+      if (!florist.passwordHash) {
+        console.log('No password hash found for florist');
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+      
       const isValidPassword = await bcrypt.compare(password, florist.passwordHash);
+      console.log('Password valid:', isValidPassword);
+      
       if (!isValidPassword) {
         return res.status(401).json({ message: "Invalid email or password" });
       }
@@ -539,6 +559,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Create florist business profile
+      console.log('About to call createFlorist...');
       const florist = await storage.createFlorist({
         userId: null, // We're using florist_auth system, not regular users
         email: req.florist.email,
@@ -549,14 +570,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         zipCode,
         phone,
         website: website || null,
-        profileSummary: profileSummary || null,
-        yearsOfExperience: yearsOfExperience || 0,
+        description: profileSummary || null,
         specialties: specialties || [],
         services: services || [],
-        profileImageUrl: profileImageUrl || null,
         isActive: true,
-        isFeatured: false,
+        isVerified: false,
       });
+      console.log('createFlorist returned:', florist);
 
       res.json({
         message: "Profile setup completed successfully",

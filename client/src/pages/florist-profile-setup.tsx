@@ -105,6 +105,25 @@ export default function FloristProfileSetup() {
     queryKey: ['/api/florist/profile'],
     enabled: isEditMode,
     retry: false,
+    queryFn: async () => {
+      const token = localStorage.getItem('florist_token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+      
+      const response = await fetch('/api/florist/profile', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch profile: ${response.statusText}`);
+      }
+      
+      return response.json();
+    },
   });
 
   // Populate form with existing data when editing

@@ -26,7 +26,7 @@ import {
   type InsertFloristAuth,
   type FloristAuth,
 } from "@shared/schema";
-import { db } from "./db";
+import { db, pool } from "./db";
 import { eq, and, desc, asc, ilike, or, sql, count } from "drizzle-orm";
 
 export interface IStorage {
@@ -113,8 +113,15 @@ export class DatabaseStorage implements IStorage {
 
   // Florist operations
   async createFlorist(florist: InsertFlorist): Promise<Florist> {
-    const [newFlorist] = await db.insert(florists).values(florist).returning();
-    return newFlorist;
+    try {
+      console.log('Creating florist with data:', florist);
+      const [newFlorist] = await db.insert(florists).values(florist).returning();
+      console.log('Florist created successfully:', newFlorist);
+      return newFlorist;
+    } catch (error) {
+      console.error('Error creating florist:', error);
+      throw error;
+    }
   }
 
   async getFlorist(id: number): Promise<FloristWithDetails | undefined> {
@@ -552,12 +559,56 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getFloristAuthByEmail(email: string): Promise<FloristAuth | undefined> {
-    const [result] = await db
-      .select()
-      .from(floristAuth)
-      .where(eq(floristAuth.email, email))
-      .limit(1);
-    return result;
+    console.log('Looking for florist auth with email:', email);
+    try {
+      // Debug: Check which database we're connected to
+      const dbInfoResult = await pool.query('SELECT current_database(), current_user;');
+      console.log('Connected to database:', dbInfoResult.rows[0]);
+      
+      // Use raw SQL query to bypass any Drizzle ORM issues
+      const result = await pool.query(
+        'SELECT * FROM florist_auth WHERE email = $1 LIMIT 1',
+        [email]
+      );
+      
+      console.log('Raw SQL query result:', result.rows);
+      
+      if (result.rows.length === 0) {
+        return undefined;
+      }
+      
+      const row = result.rows[0];
+      const floristAuth: FloristAuth = {
+        id: row.id,
+        email: row.email,
+        password: row.password,
+        firstName: row.first_name,
+        lastName: row.last_name,
+        businessName: row.business_name,
+        address: row.address,
+        city: row.city,
+        state: row.state,
+        zipCode: row.zip_code,
+        phone: row.phone,
+        profileImageUrl: row.profile_image_url,
+        profileSummary: row.profile_summary,
+        yearsOfExperience: row.years_of_experience,
+        specialties: row.specialties,
+        businessHours: row.business_hours,
+        website: row.website,
+        socialMedia: row.social_media,
+        isVerified: row.is_verified,
+        passwordHash: row.password_hash,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+      };
+      
+      console.log('Parsed florist auth:', floristAuth);
+      return floristAuth;
+    } catch (error) {
+      console.error('Error in getFloristAuthByEmail:', error);
+      return undefined;
+    }
   }
 
   async getFloristAuthById(id: number): Promise<FloristAuth | undefined> {
