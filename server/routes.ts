@@ -225,12 +225,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const profileData = req.body;
       console.log('Profile setup data received:', profileData);
 
-      // For now, just store the image URL if provided and return success
-      // This handles the immediate issue with profile image storage
+      // Update the florist_auth record with profile data including profile image
+      const updatedProfile = await storage.updateFloristProfile(decoded.floristId, profileData);
+
       res.json({ 
         message: "Profile setup saved successfully",
         profileComplete: true,
-        profileImageUrl: profileData.profileImageUrl || null
+        profile: {
+          businessName: updatedProfile.business_name,
+          address: updatedProfile.address,
+          city: updatedProfile.city,
+          state: updatedProfile.state,
+          zipCode: updatedProfile.zip_code,
+          phone: updatedProfile.phone,
+          website: updatedProfile.website,
+          profileImageUrl: updatedProfile.profile_image_url,
+          profileSummary: updatedProfile.profile_summary,
+          yearsOfExperience: updatedProfile.years_of_experience,
+          specialties: updatedProfile.specialties
+        }
       });
     } catch (error) {
       console.error("Error setting up profile:", error);
