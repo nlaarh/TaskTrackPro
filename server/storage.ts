@@ -149,41 +149,41 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getFloristByEmail(email: string): Promise<FloristWithDetails | undefined> {
-    const result = await db
-      .select({
-        florist: florists,
-        user: users,
-        images: floristImages,
-      })
+    // For florist auth system, get the florist without complex joins
+    const [florist] = await db
+      .select()
       .from(florists)
-      .leftJoin(users, eq(florists.userId, users.id))
-      .leftJoin(floristImages, eq(florists.id, floristImages.floristId))
-      .where(eq(florists.email, email));
+      .where(eq(florists.email, email))
+      .limit(1);
 
-    if (result.length === 0) {
+    if (!florist) {
       return undefined;
     }
 
-    // Group images and build the florist with details
-    const firstResult = result[0];
-    const images = result
-      .filter(r => r.images)
-      .map(r => r.images!);
+    // Get images separately to avoid join issues (temporarily disabled for debugging)
+    const images: any[] = [];
+    // const images = await db
+    //   .select()
+    //   .from(floristImages)
+    //   .where(eq(floristImages.floristId, florist.id));
+
+    // Create a mock user object since florists use their own auth system
+    const mockUser = {
+      id: florist.email || '',
+      email: florist.email,
+      firstName: null,
+      lastName: null,
+      profileImageUrl: florist.profileImageUrl,
+      role: 'florist',
+      createdAt: florist.createdAt,
+      updatedAt: florist.updatedAt,
+    };
 
     return {
-      ...firstResult.florist,
-      user: firstResult.user || {
-        id: '',
-        email: null,
-        firstName: null,
-        lastName: null,
-        profileImageUrl: null,
-        role: 'florist',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
+      ...florist,
+      user: mockUser,
       images,
-      averageRating: firstResult.florist.averageRating ? parseFloat(firstResult.florist.averageRating) : undefined,
+      averageRating: florist.averageRating ? parseFloat(florist.averageRating) : undefined,
     } as FloristWithDetails;
   }
 

@@ -450,7 +450,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Florist authentication middleware
   const authenticateFlorist = async (req: any, res: any, next: any) => {
     try {
-      const token = req.headers.authorization?.replace('Bearer ', '');
+      console.log('Auth middleware - Body before auth:', req.body);
+      console.log('Auth middleware - Content-Type:', req.headers['content-type']);
+      
+      const authHeader = req.headers.authorization;
+      const token = authHeader?.replace('Bearer ', '');
       
       if (!token) {
         return res.status(401).json({ message: "Authentication required" });
@@ -464,8 +468,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       req.florist = florist;
+      console.log('Auth middleware - Body after auth:', req.body);
       next();
     } catch (error) {
+      console.error('Auth error:', error);
       res.status(401).json({ message: "Invalid token" });
     }
   };
@@ -492,6 +498,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Florist profile setup
   app.post('/api/florist/profile/setup', authenticateFlorist, async (req: any, res: any) => {
     try {
+      console.log('Profile setup request body:', req.body);
       const {
         businessName,
         address,
@@ -506,6 +513,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         services,
         profileImageUrl
       } = req.body;
+
+      console.log('Extracted fields:', {
+        businessName,
+        address,
+        city,
+        state,
+        zipCode,
+        phone,
+        website,
+        profileSummary,
+        yearsOfExperience,
+        specialties,
+        services,
+        profileImageUrl
+      });
+
+      // Validate required fields
+      if (!businessName || !address || !city || !state || !zipCode) {
+        return res.status(400).json({ 
+          message: 'Missing required fields',
+          required: ['businessName', 'address', 'city', 'state', 'zipCode'],
+          received: { businessName, address, city, state, zipCode }
+        });
+      }
 
       // Create florist business profile
       const florist = await storage.createFlorist({
