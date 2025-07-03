@@ -39,15 +39,26 @@ export const users = pgTable("users", {
 export const floristAuth = pgTable("florist_auth", {
   id: serial("id").primaryKey(),
   email: varchar("email").notNull(),
-  passwordHash: varchar("password_hash"),
+  password: varchar("password"),
   firstName: varchar("first_name").notNull(),
   lastName: varchar("last_name").notNull(),
+  businessName: varchar("business_name").notNull(),
+  address: text("address").notNull(),
+  city: varchar("city").notNull(),
+  state: varchar("state").notNull(),
+  zipCode: varchar("zip_code").notNull(),
+  phone: varchar("phone").notNull(),
+  profileImageUrl: varchar("profile_image_url"),
+  profileSummary: text("profile_summary"),
+  yearsOfExperience: integer("years_of_experience"),
+  specialties: varchar("specialties").array(),
+  businessHours: jsonb("business_hours"),
+  website: varchar("website"),
+  socialMedia: jsonb("social_media"),
   isVerified: boolean("is_verified").default(false),
-  verificationToken: varchar("verification_token"),
-  resetToken: varchar("reset_token"),
-  resetTokenExpires: timestamp("reset_token_expires"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+  passwordHash: varchar("password_hash"),
 });
 
 // Florists business listing table
@@ -80,8 +91,8 @@ export const florists = pgTable("florists", {
   hours: jsonb("hours"),
 });
 
-// Business images
-export const floristImages = pgTable("florist_images", {
+// Florist catalog/portfolio images
+export const floristCatalog = pgTable("florist_catalog", {
   id: serial("id").primaryKey(),
   floristId: integer("florist_id").notNull(),
   imageUrl: varchar("image_url").notNull(),
@@ -154,7 +165,7 @@ export type InsertFloristAuth = z.infer<typeof insertFloristAuthSchema>;
 export type FloristAuth = typeof floristAuth.$inferSelect;
 export type InsertFlorist = z.infer<typeof insertFloristSchema>;
 export type Florist = typeof florists.$inferSelect;
-export type FloristImage = typeof floristImages.$inferSelect;
+export type FloristCatalogImage = typeof floristCatalog.$inferSelect;
 export type Review = typeof reviews.$inferSelect;
 export type Inquiry = typeof inquiries.$inferSelect;
 export type NewsletterSubscription = typeof newsletterSubscriptions.$inferSelect;
@@ -162,5 +173,5 @@ export type SavedFlorist = typeof savedFlorists.$inferSelect;
 
 // Extended types for API responses
 export type FloristWithDetails = Florist & {
-  images: FloristImage[];
+  catalogImages: FloristCatalogImage[];
 };

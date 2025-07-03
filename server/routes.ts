@@ -12,6 +12,12 @@ const registerSchema = z.object({
   password: z.string().min(8),
   firstName: z.string().min(1),
   lastName: z.string().min(1),
+  businessName: z.string().min(1),
+  address: z.string().min(1),
+  city: z.string().min(1),
+  state: z.string().min(1),
+  zipCode: z.string().min(1),
+  phone: z.string().min(1),
 });
 
 const loginSchema = z.object({
@@ -20,6 +26,15 @@ const loginSchema = z.object({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Test route to verify API routing works
+  app.get('/api/test', (req, res) => {
+    res.json({ message: "API routing works!" });
+  });
+
+  app.post('/api/test', (req, res) => {
+    res.json({ message: "POST API routing works!", body: req.body });
+  });
+
   // Setup Replit Auth middleware
   await setupAuth(app);
 
@@ -49,7 +64,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const { email, password, firstName, lastName } = parsed.data;
+      const { email, password, firstName, lastName, businessName, address, city, state, zipCode, phone } = parsed.data;
 
       // Check if email already exists
       const existingFlorist = await storage.getFloristAuthByEmail(email);
@@ -61,12 +76,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const hashedPassword = await bcrypt.hash(password, 12);
       console.log('Password hashed successfully');
 
-      // Create florist authentication account with only available fields
+      // Create florist authentication account with all required business fields
       const florist = await storage.createFloristAuth({
         email,
         passwordHash: hashedPassword,
         firstName,
         lastName,
+        businessName,
+        address,
+        city,
+        state,
+        zipCode,
+        phone,
         isVerified: false,
       });
 
