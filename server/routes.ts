@@ -244,7 +244,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const profileData = req.body;
-      console.log('Profile setup data received:', profileData);
+      console.log('Profile setup data received (size check):', {
+        hasImage: !!profileData.profileImageUrl,
+        imageSize: profileData.profileImageUrl ? profileData.profileImageUrl.length : 0
+      });
+
+      // Validate image size if provided
+      if (profileData.profileImageUrl && profileData.profileImageUrl.length > 500000) { // 500KB limit
+        return res.status(400).json({ 
+          message: "Profile image is too large. Please use an image smaller than 500KB." 
+        });
+      }
 
       // Update the florist_auth record with profile data including profile image
       const updatedProfile = await storage.updateFloristProfile(decoded.floristId, profileData);
