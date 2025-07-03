@@ -44,6 +44,7 @@ export interface IStorage {
   createFlorist(florist: InsertFlorist): Promise<Florist>;
   getFlorist(id: number): Promise<FloristWithDetails | undefined>;
   getFloristByUserId(userId: string): Promise<Florist | undefined>;
+  getFloristByEmail(email: string): Promise<FloristWithDetails | undefined>;
   updateFlorist(id: number, updates: Partial<InsertFlorist>): Promise<Florist | undefined>;
   deleteFlorist(id: number): Promise<boolean>;
   searchFlorists(params: {
@@ -147,6 +148,44 @@ export class DatabaseStorage implements IStorage {
     return florist;
   }
 
+  async getFloristByEmail(email: string): Promise<FloristWithDetails | undefined> {
+    const result = await db
+      .select({
+        florist: florists,
+        user: users,
+        images: floristImages,
+      })
+      .from(florists)
+      .leftJoin(users, eq(florists.userId, users.id))
+      .leftJoin(floristImages, eq(florists.id, floristImages.floristId))
+      .where(eq(florists.email, email));
+
+    if (result.length === 0) {
+      return undefined;
+    }
+
+    // Group images and build the florist with details
+    const firstResult = result[0];
+    const images = result
+      .filter(r => r.images)
+      .map(r => r.images!);
+
+    return {
+      ...firstResult.florist,
+      user: firstResult.user || {
+        id: '',
+        email: null,
+        firstName: null,
+        lastName: null,
+        profileImageUrl: null,
+        role: 'florist',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      images,
+      averageRating: firstResult.florist.averageRating ? parseFloat(firstResult.florist.averageRating) : undefined,
+    } as FloristWithDetails;
+  }
 
 
   async updateFlorist(id: number, updates: Partial<InsertFlorist>): Promise<Florist | undefined> {

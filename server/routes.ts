@@ -470,6 +470,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   };
 
+  // Get florist profile for editing
+  app.get('/api/florist/profile', authenticateFlorist, async (req: any, res: any) => {
+    try {
+      const floristEmail = req.florist.email;
+      
+      // Get the associated florist business profile by email
+      const florist = await storage.getFloristByEmail(floristEmail);
+      
+      if (!florist) {
+        return res.status(404).json({ message: 'Profile not found' });
+      }
+
+      res.json(florist);
+    } catch (error) {
+      console.error('Error fetching florist profile:', error);
+      res.status(500).json({ message: 'Failed to fetch profile' });
+    }
+  });
+
   // Florist profile setup
   app.post('/api/florist/profile/setup', authenticateFlorist, async (req: any, res: any) => {
     try {
