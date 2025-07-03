@@ -8,7 +8,7 @@ const DATABASE_URL = "postgresql://postgres:RwDPqwPPtxhBNDzKDGiJlrHDtdTBZBYx@yam
 export const pool = new Pool({ 
   connectionString: DATABASE_URL,
   ssl: false, // Railway typically doesn't require SSL for proxy connections
-  options: '-c search_path=floristdb' // Use floristdb schema
+  options: '-c search_path=public' // Use public schema where tables actually exist
 });
 
 export const db = drizzle(pool, { schema });

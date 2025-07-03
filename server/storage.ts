@@ -160,12 +160,11 @@ export class DatabaseStorage implements IStorage {
       return undefined;
     }
 
-    // Get images separately to avoid join issues (temporarily disabled for debugging)
-    const images: any[] = [];
-    // const images = await db
-    //   .select()
-    //   .from(floristImages)
-    //   .where(eq(floristImages.floristId, florist.id));
+    // Get images separately to avoid join issues
+    const images = await db
+      .select()
+      .from(floristImages)
+      .where(eq(floristImages.floristId, florist.id));
 
     // Create a mock user object since florists use their own auth system
     const mockUser = {
