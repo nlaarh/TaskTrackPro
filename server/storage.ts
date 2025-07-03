@@ -551,11 +551,62 @@ export class DatabaseStorage implements IStorage {
 
   // Florist authentication methods
   async createFloristAuth(florist: InsertFloristAuth): Promise<FloristAuth> {
-    const [result] = await db
-      .insert(floristAuth)
-      .values(florist)
-      .returning();
-    return result;
+    console.log('Creating florist auth with data:', florist);
+    
+    // Use raw SQL to bypass schema issues
+    const query = `
+      INSERT INTO florist_auth (
+        email, password_hash, first_name, last_name, business_name, 
+        address, city, state, zip_code, phone, is_verified
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      RETURNING *
+    `;
+    
+    const values = [
+      florist.email,
+      florist.passwordHash,
+      florist.firstName,
+      florist.lastName,
+      florist.businessName,
+      florist.address,
+      florist.city,
+      florist.state,
+      florist.zipCode,
+      florist.phone,
+      florist.isVerified
+    ];
+    
+    const result = await pool.query(query, values);
+    console.log('Raw insert result:', result.rows[0]);
+    
+    // Convert database result to match our type
+    const dbResult = result.rows[0];
+    const floristAuth: FloristAuth = {
+      id: dbResult.id,
+      email: dbResult.email,
+      password: dbResult.password,
+      firstName: dbResult.first_name,
+      lastName: dbResult.last_name,
+      businessName: dbResult.business_name,
+      address: dbResult.address,
+      city: dbResult.city,
+      state: dbResult.state,
+      zipCode: dbResult.zip_code,
+      phone: dbResult.phone,
+      profileImageUrl: dbResult.profile_image_url,
+      profileSummary: dbResult.profile_summary,
+      yearsOfExperience: dbResult.years_of_experience,
+      specialties: dbResult.specialties,
+      businessHours: dbResult.business_hours,
+      website: dbResult.website,
+      socialMedia: dbResult.social_media,
+      isVerified: dbResult.is_verified,
+      passwordHash: dbResult.password_hash,
+      createdAt: dbResult.created_at,
+      updatedAt: dbResult.updated_at,
+    };
+    
+    return floristAuth;
   }
 
   async getFloristAuthByEmail(email: string): Promise<FloristAuth | undefined> {
