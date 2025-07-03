@@ -190,12 +190,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Florist not found" });
       }
 
+      // Also get the business profile if it exists
+      const businessProfile = await storage.getFloristProfile(decoded.floristId);
+
       res.json({
         id: florist.id,
         email: florist.email,
         firstName: florist.firstName,
         lastName: florist.lastName,
         isVerified: florist.isVerified,
+        businessProfile: businessProfile
       });
     } catch (error) {
       console.error("Error fetching florist profile:", error);
@@ -218,11 +222,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid token type" });
       }
 
-      // For now, just return success since we don't have a business profile table yet
-      // In the future, this would save to a separate florists table
+      const profileData = req.body;
+      console.log('Saving profile data:', profileData);
+
+      // Save the business profile to the florists table
+      const savedProfile = await storage.createOrUpdateFloristProfile(decoded.floristId, profileData);
+      
+      // If there's a profile image, save it as the primary image
+      if (profileData.profileImageUrl && savedProfile) {
+        await storage.saveFloristImage(
+          savedProfile.id, 
+          profileData.profileImageUrl, 
+          'Profile Image', 
+          true
+        );
+      }
+
       res.json({ 
         message: "Profile setup saved successfully",
-        profileComplete: true 
+        profileComplete: true,
+        profile: savedProfile
       });
     } catch (error) {
       console.error("Error setting up profile:", error);

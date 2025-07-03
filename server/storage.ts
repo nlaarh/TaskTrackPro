@@ -15,6 +15,11 @@ export interface IStorage {
   createFloristAuth(florist: InsertFloristAuth): Promise<FloristAuth>;
   getFloristAuthByEmail(email: string): Promise<FloristAuth | undefined>;
   getFloristAuthById(id: number): Promise<FloristAuth | undefined>;
+  
+  // Business profile operations
+  createOrUpdateFloristProfile(floristAuthId: number, profileData: any): Promise<any>;
+  getFloristProfile(floristAuthId: number): Promise<any>;
+  saveFloristImage(floristId: number, imageUrl: string, caption?: string, isPrimary?: boolean): Promise<any>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -229,6 +234,127 @@ export class DatabaseStorage implements IStorage {
       };
     } catch (error) {
       console.error('Error getting florist auth by id:', error);
+      throw error;
+    }
+  }
+
+  async createOrUpdateFloristProfile(floristAuthId: number, profileData: any): Promise<any> {
+    console.log(`Creating/updating florist profile for auth ID: ${floristAuthId}`);
+    
+    try {
+      // First check if profile already exists
+      const existingResult = await pool.query(
+        'SELECT * FROM florists WHERE user_id = $1',
+        [floristAuthId.toString()]
+      );
+      
+      if (existingResult.rows.length > 0) {
+        // Update existing profile
+        const result = await pool.query(`
+          UPDATE florists 
+          SET business_name = $2, description = $3, address = $4, city = $5, 
+              state = $6, zip_code = $7, phone = $8, website = $9, 
+              services = $10, specialties = $11, updated_at = CURRENT_TIMESTAMP
+          WHERE user_id = $1
+          RETURNING *
+        `, [
+          floristAuthId.toString(),
+          profileData.businessName,
+          profileData.profileSummary,
+          profileData.address,
+          profileData.city,
+          profileData.state,
+          profileData.zipCode,
+          profileData.phone,
+          profileData.website || null,
+          profileData.services || [],
+          profileData.specialties || []
+        ]);
+        
+        return result.rows[0];
+      } else {
+        // Create new profile
+        const result = await pool.query(`
+          INSERT INTO florists (
+            user_id, business_name, description, address, city, state, zip_code, 
+            phone, website, services, specialties, is_verified, is_active, 
+            rating, review_count, created_at, updated_at
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, false, true, 0, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+          RETURNING *
+        `, [
+          floristAuthId.toString(),
+          profileData.businessName,
+          profileData.profileSummary,
+          profileData.address,
+          profileData.city,
+          profileData.state,
+          profileData.zipCode,
+          profileData.phone,
+          profileData.website || null,
+          profileData.services || [],
+          profileData.specialties || []
+        ]);
+        
+        return result.rows[0];
+      }
+    } catch (error) {
+      console.error('Error creating/updating florist profile:', error);
+      throw error;
+    }
+  }
+
+  async getFloristProfile(floristAuthId: number): Promise<any> {
+    console.log(`Getting florist profile for auth ID: ${floristAuthId}`);
+    
+    try {
+      const result = await pool.query(
+        'SELECT * FROM florists WHERE user_id = $1',
+        [floristAuthId.toString()]
+      );
+      
+      if (result.rows.length === 0) {
+        return null;
+      }
+      
+      const profile = result.rows[0];
+      
+      // Also get primary image
+      const imageResult = await pool.query(
+        'SELECT image_url FROM florist_images WHERE florist_id = $1 AND is_primary = true LIMIT 1',
+        [profile.id]
+      );
+      
+      return {
+        ...profile,
+        primaryImageUrl: imageResult.rows[0]?.image_url || null
+      };
+    } catch (error) {
+      console.error('Error getting florist profile:', error);
+      throw error;
+    }
+  }
+
+  async saveFloristImage(floristId: number, imageUrl: string, caption?: string, isPrimary?: boolean): Promise<any> {
+    console.log(`Saving florist image for florist ID: ${floristId}`);
+    
+    try {
+      // If setting as primary, first remove other primary flags
+      if (isPrimary) {
+        await pool.query(
+          'UPDATE florist_images SET is_primary = false WHERE florist_id = $1',
+          [floristId]
+        );
+      }
+      
+      const result = await pool.query(`
+        INSERT INTO florist_images (florist_id, image_url, caption, is_primary, created_at)
+        VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP)
+        RETURNING *
+      `, [floristId, imageUrl, caption || null, isPrimary || false]);
+      
+      return result.rows[0];
+    } catch (error) {
+      console.error('Error saving florist image:', error);
       throw error;
     }
   }
