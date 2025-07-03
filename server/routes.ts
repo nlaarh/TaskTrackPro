@@ -473,9 +473,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Florist profile setup
   app.post('/api/florist/profile/setup', authenticateFlorist, async (req: any, res: any) => {
     try {
-      console.log("Profile setup request body:", req.body);
-      console.log("Authenticated florist:", req.florist);
-
       const {
         businessName,
         address,
@@ -510,8 +507,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isActive: true,
         isFeatured: false,
       });
-
-      console.log("Created florist profile:", florist);
 
       res.json({
         message: "Profile setup completed successfully",
