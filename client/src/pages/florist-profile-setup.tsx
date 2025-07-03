@@ -100,6 +100,8 @@ export default function FloristProfileSetup() {
   const profileSetupMutation = useMutation({
     mutationFn: async (data: ProfileSetupForm & { profileImageUrl?: string }) => {
       const token = localStorage.getItem('florist_token');
+      console.log("Profile setup data:", data);
+      console.log("Token:", token);
       
       const response = await fetch('/api/florist/profile/setup', {
         method: 'POST',
@@ -110,12 +112,17 @@ export default function FloristProfileSetup() {
         body: JSON.stringify(data),
       });
       
+      console.log("Response status:", response.status);
+      
       if (!response.ok) {
         const error = await response.json();
+        console.error("Profile setup error:", error);
         throw new Error(error.message || 'Profile setup failed');
       }
       
-      return response.json();
+      const result = await response.json();
+      console.log("Profile setup success:", result);
+      return result;
     },
     onSuccess: () => {
       // Mark profile as complete in localStorage
