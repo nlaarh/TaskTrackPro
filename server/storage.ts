@@ -198,6 +198,13 @@ export class DatabaseStorage implements IStorage {
     console.log(`Updating florist profile for auth ID: ${floristAuthId}`);
     
     try {
+      // Get the florist auth record to get the email
+      const authResult = await pool.query('SELECT email FROM florist_auth WHERE id = $1', [floristAuthId]);
+      if (authResult.rows.length === 0) {
+        throw new Error('Florist auth record not found');
+      }
+      const email = authResult.rows[0].email;
+
       // Handle profile image - store binary data as base64 string
       let profileImageData = null;
       if (profileData.profileImageUrl) {
@@ -205,14 +212,13 @@ export class DatabaseStorage implements IStorage {
         if (profileData.profileImageUrl.startsWith('data:image/')) {
           profileImageData = profileData.profileImageUrl;
         } else {
-          // If it's a regular URL, store it as is for now
           profileImageData = profileData.profileImageUrl;
         }
       }
 
-      // Build dynamic update query - only update fields that are provided
+      // Build dynamic update query for florists table - only update fields that are provided
       const updateFields = [];
-      const values = [floristAuthId];
+      const values = [email]; // Use email to identify the florist record
       let paramCount = 1;
 
       if (profileData.businessName !== undefined) {
@@ -257,7 +263,11 @@ export class DatabaseStorage implements IStorage {
       }
       if (profileData.specialties !== undefined) {
         updateFields.push(`specialties = $${++paramCount}`);
-        values.push(profileData.specialties);
+        values.push(JSON.stringify(profileData.specialties));
+      }
+      if (profileData.services !== undefined) {
+        updateFields.push(`services = $${++paramCount}`);
+        values.push(JSON.stringify(profileData.services));
       }
 
       // Always update the timestamp
@@ -267,14 +277,75 @@ export class DatabaseStorage implements IStorage {
         throw new Error('No fields to update');
       }
 
-      const query = `
-        UPDATE florist_auth 
-        SET ${updateFields.join(', ')}
-        WHERE id = $1
-        RETURNING *
-      `;
-
-      const result = await pool.query(query, values);
+      // Check if florist record exists, if not create it
+      const existingFlorist = await pool.query('SELECT id FROM florists WHERE email = $1', [email]);
+      
+      let query;
+      let result;
+      
+      if (existingFlorist.rows.length === 0) {
+        // Create new florist record
+        const insertFields = ['email'];
+        const insertValues = [email];
+        let insertParamCount = 1;
+        
+        Object.keys(profileData).forEach(key => {
+          if (profileData[key] !== undefined) {
+            switch(key) {
+              case 'businessName':
+                insertFields.push('business_name');
+                insertValues.push(profileData[key]);
+                break;
+              case 'zipCode':
+                insertFields.push('zip_code');
+                insertValues.push(profileData[key]);
+                break;
+              case 'profileImageUrl':
+                insertFields.push('profile_image_url');
+                insertValues.push(profileImageData);
+                break;
+              case 'profileSummary':
+                insertFields.push('profile_summary');
+                insertValues.push(profileData[key]);
+                break;
+              case 'yearsOfExperience':
+                insertFields.push('years_of_experience');
+                insertValues.push(profileData[key]);
+                break;
+              case 'specialties':
+                insertFields.push('specialties');
+                insertValues.push(JSON.stringify(profileData[key]));
+                break;
+              case 'services':
+                insertFields.push('services');
+                insertValues.push(JSON.stringify(profileData[key]));
+                break;
+              default:
+                if (['address', 'city', 'state', 'phone', 'website'].includes(key)) {
+                  insertFields.push(key);
+                  insertValues.push(profileData[key]);
+                }
+            }
+          }
+        });
+        
+        const placeholders = insertValues.map((_, index) => `$${index + 1}`).join(', ');
+        query = `
+          INSERT INTO florists (${insertFields.join(', ')})
+          VALUES (${placeholders})
+          RETURNING *
+        `;
+        result = await pool.query(query, insertValues);
+      } else {
+        // Update existing florist record
+        query = `
+          UPDATE florists 
+          SET ${updateFields.join(', ')}
+          WHERE email = $1
+          RETURNING *
+        `;
+        result = await pool.query(query, values);
+      }
       
       return result.rows[0];
     } catch (error) {

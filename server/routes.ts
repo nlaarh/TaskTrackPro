@@ -5,7 +5,8 @@ import jwt from "jsonwebtoken";
 import { z } from "zod";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { pool } from "./db";
+import { db } from "./db";
+import { users } from "@shared/schema";
 
 // Simple validation schemas for florist auth
 const registerSchema = z.object({
@@ -280,17 +281,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error setting up profile:", error);
       res.status(500).json({ message: "Failed to setup profile" });
-    }
-  });
-
-  // Test route to verify database connection
-  app.get('/api/test-db', async (req, res) => {
-    try {
-      const result = await db.select().from(users).limit(1);
-      res.json({ message: 'Database connection working', count: result.length });
-    } catch (error) {
-      console.error('Database test error:', error);
-      res.status(500).json({ message: 'Database connection failed', error: error.message });
     }
   });
 

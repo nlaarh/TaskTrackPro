@@ -86,9 +86,9 @@ FloriHub is a modern, mobile-friendly florist directory platform that connects c
 ## External Dependencies
 
 ### Database & Storage
-- **Neon Database**: Serverless PostgreSQL hosting
+- **PostgreSQL**: External PostgreSQL database (floristdb)
 - **Drizzle Kit**: Database migrations and schema management
-- Connection pooling with `@neondatabase/serverless`
+- Connection pooling with standard `pg` library
 
 ### Authentication & Communication
 - **Replit Auth**: OAuth-based user authentication
