@@ -145,6 +145,27 @@ export const savedFlorists = pgTable("saved_florists", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Reference tables for admin-managed lists
+export const specialtiesReference = pgTable("specialties_reference", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 100 }).notNull().unique(),
+  description: text("description"),
+  isActive: boolean("is_active").default(true),
+  displayOrder: integer("display_order").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const servicesReference = pgTable("services_reference", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 100 }).notNull().unique(),
+  description: text("description"),
+  isActive: boolean("is_active").default(true),
+  displayOrder: integer("display_order").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Validation schemas
 export const insertFloristAuthSchema = createInsertSchema(floristAuth).omit({
   id: true,
@@ -175,3 +196,6 @@ export type SavedFlorist = typeof savedFlorists.$inferSelect;
 export type FloristWithDetails = Florist & {
   catalogImages: FloristCatalogImage[];
 };
+
+export type SpecialtyReference = typeof specialtiesReference.$inferSelect;
+export type ServiceReference = typeof servicesReference.$inferSelect;

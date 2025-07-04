@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import { z } from "zod";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { pool } from "./db";
 
 // Simple validation schemas for florist auth
 const registerSchema = z.object({
@@ -281,6 +282,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to setup profile" });
     }
   });
+
+  // Reference data endpoints for form dropdowns
+  app.get('/api/reference/specialties', async (req, res) => {
+    try {
+      const result = await pool.query(
+        'SELECT id, name, description FROM specialties_reference WHERE is_active = true ORDER BY display_order, name'
+      );
+      res.json(result.rows);
+    } catch (error) {
+      console.error('Error fetching specialties:', error);
+      res.status(500).json({ message: 'Failed to fetch specialties' });
+    }
+  });
+
+  app.get('/api/reference/services', async (req, res) => {
+    try {
+      const result = await pool.query(
+        'SELECT id, name, description FROM services_reference WHERE is_active = true ORDER BY display_order, name'
+      );
+      res.json(result.rows);
+    } catch (error) {
+      console.error('Error fetching services:', error);
+      res.status(500).json({ message: 'Failed to fetch services' });
+    }
+  });
+
+  // Admin endpoints for managing reference data (add later)
+  // TODO: Add admin authentication middleware
+  // app.post('/api/admin/specialties', adminAuth, async (req, res) => { ... });
+  // app.put('/api/admin/specialties/:id', adminAuth, async (req, res) => { ... });
+  // app.delete('/api/admin/specialties/:id', adminAuth, async (req, res) => { ... });
 
   const httpServer = createServer(app);
   return httpServer;
