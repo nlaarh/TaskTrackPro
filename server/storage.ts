@@ -1,19 +1,15 @@
-import { Pool } from 'pg';
 import {
   users,
   floristAuth,
+  specialtiesReference,
+  servicesReference,
   type User,
   type UpsertUser,
   type FloristAuth,
   type InsertFloristAuth
 } from "@shared/schema";
-import { db } from "./db";
-import { eq } from "drizzle-orm";
-
-// Create a separate pool for raw queries
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL
-});
+import { db, pool } from "./db";
+import { eq, asc } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (required for Replit Auth)
@@ -28,6 +24,10 @@ export interface IStorage {
   // Profile operations (updates florist_auth table which has all profile fields)
   updateFloristProfile(floristAuthId: number, profileData: any): Promise<any>;
   getFloristProfile(floristAuthId: number): Promise<any>;
+  
+  // Reference data operations
+  getSpecialties(): Promise<any[]>;
+  getServices(): Promise<any[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -321,6 +321,44 @@ export class DatabaseStorage implements IStorage {
       };
     } catch (error) {
       console.error('Error getting florist profile:', error);
+      throw error;
+    }
+  }
+
+  async getSpecialties(): Promise<any[]> {
+    try {
+      const result = await db
+        .select({
+          id: specialtiesReference.id,
+          name: specialtiesReference.name,
+          description: specialtiesReference.description
+        })
+        .from(specialtiesReference)
+        .where(eq(specialtiesReference.isActive, true))
+        .orderBy(asc(specialtiesReference.displayOrder), asc(specialtiesReference.name));
+      
+      return result;
+    } catch (error) {
+      console.error('Error fetching specialties:', error);
+      throw error;
+    }
+  }
+
+  async getServices(): Promise<any[]> {
+    try {
+      const result = await db
+        .select({
+          id: servicesReference.id,
+          name: servicesReference.name,
+          description: servicesReference.description
+        })
+        .from(servicesReference)
+        .where(eq(servicesReference.isActive, true))
+        .orderBy(asc(servicesReference.displayOrder), asc(servicesReference.name));
+      
+      return result;
+    } catch (error) {
+      console.error('Error fetching services:', error);
       throw error;
     }
   }

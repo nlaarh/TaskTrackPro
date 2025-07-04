@@ -283,13 +283,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test route to verify database connection
+  app.get('/api/test-db', async (req, res) => {
+    try {
+      const result = await db.select().from(users).limit(1);
+      res.json({ message: 'Database connection working', count: result.length });
+    } catch (error) {
+      console.error('Database test error:', error);
+      res.status(500).json({ message: 'Database connection failed', error: error.message });
+    }
+  });
+
   // Reference data endpoints for form dropdowns
   app.get('/api/reference/specialties', async (req, res) => {
     try {
-      const result = await pool.query(
-        'SELECT id, name, description FROM specialties_reference WHERE is_active = true ORDER BY display_order, name'
-      );
-      res.json(result.rows);
+      const specialties = await storage.getSpecialties();
+      res.json(specialties);
     } catch (error) {
       console.error('Error fetching specialties:', error);
       res.status(500).json({ message: 'Failed to fetch specialties' });
@@ -298,10 +307,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/reference/services', async (req, res) => {
     try {
-      const result = await pool.query(
-        'SELECT id, name, description FROM services_reference WHERE is_active = true ORDER BY display_order, name'
-      );
-      res.json(result.rows);
+      const services = await storage.getServices();
+      res.json(services);
     } catch (error) {
       console.error('Error fetching services:', error);
       res.status(500).json({ message: 'Failed to fetch services' });

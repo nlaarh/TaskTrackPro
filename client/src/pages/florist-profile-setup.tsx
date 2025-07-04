@@ -30,18 +30,11 @@ const profileSetupSchema = z.object({
 
 type ProfileSetupForm = z.infer<typeof profileSetupSchema>;
 
-const SPECIALTIES = [
-  "Wedding Arrangements", "Funeral Services", "Corporate Events", "Birthday Celebrations",
-  "Anniversary Flowers", "Baby Showers", "Graduation Events", "Holiday Decorations",
-  "Bridal Bouquets", "Centerpieces", "Sympathy Arrangements", "Exotic Flowers",
-  "Organic/Natural Arrangements", "Modern/Contemporary Style", "Traditional/Classic Style", "Seasonal Arrangements"
-];
-
-const SERVICES = [
-  "Same Day Delivery", "Custom Arrangements", "Wedding Planning", "Event Decoration",
-  "Subscription Services", "Corporate Accounts", "Funeral Services", "Consultation",
-  "Workshops/Classes", "Plant Care Services"
-];
+interface ReferenceItem {
+  id: number;
+  name: string;
+  description: string;
+}
 
 const US_STATES = [
   "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA",
@@ -59,6 +52,17 @@ export default function FloristProfileSetup() {
   const [selectedSpecialties, setSelectedSpecialties] = useState<string[]>([]);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Fetch reference data from API
+  const { data: specialtiesData = [] as ReferenceItem[], isLoading: specialtiesLoading } = useQuery<ReferenceItem[]>({
+    queryKey: ['/api/reference/specialties'],
+    retry: false,
+  });
+
+  const { data: servicesData = [] as ReferenceItem[], isLoading: servicesLoading } = useQuery<ReferenceItem[]>({
+    queryKey: ['/api/reference/services'],
+    retry: false,
+  });
 
   const form = useForm<ProfileSetupForm>({
     resolver: zodResolver(profileSetupSchema),
@@ -515,23 +519,28 @@ export default function FloristProfileSetup() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {SPECIALTIES.map((specialty) => (
-                  <Button
-                    key={specialty}
-                    type="button"
-                    variant={selectedSpecialties.includes(specialty) ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => handleSpecialtyToggle(specialty)}
-                    className="justify-start text-left h-auto py-2 px-3"
-                  >
-                    {selectedSpecialties.includes(specialty) && (
-                      <Check className="h-3 w-3 mr-2" />
-                    )}
-                    {specialty}
-                  </Button>
-                ))}
-              </div>
+              {specialtiesLoading ? (
+                <p className="text-gray-500">Loading specialties...</p>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {specialtiesData.map((specialty) => (
+                    <Button
+                      key={specialty.id}
+                      type="button"
+                      variant={selectedSpecialties.includes(specialty.name) ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => handleSpecialtyToggle(specialty.name)}
+                      className="justify-start text-left h-auto py-2 px-3"
+                      title={specialty.description}
+                    >
+                      {selectedSpecialties.includes(specialty.name) && (
+                        <Check className="h-3 w-3 mr-2" />
+                      )}
+                      {specialty.name}
+                    </Button>
+                  ))}
+                </div>
+              )}
               {form.formState.errors.specialties && (
                 <p className="text-sm text-red-600 mt-2">
                   {form.formState.errors.specialties.message}
@@ -549,23 +558,28 @@ export default function FloristProfileSetup() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {SERVICES.map((service) => (
-                  <Button
-                    key={service}
-                    type="button"
-                    variant={selectedServices.includes(service) ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => handleServiceToggle(service)}
-                    className="justify-start text-left h-auto py-2 px-3"
-                  >
-                    {selectedServices.includes(service) && (
-                      <Check className="h-3 w-3 mr-2" />
-                    )}
-                    {service}
-                  </Button>
-                ))}
-              </div>
+              {servicesLoading ? (
+                <p className="text-gray-500">Loading services...</p>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {servicesData.map((service) => (
+                    <Button
+                      key={service.id}
+                      type="button"
+                      variant={selectedServices.includes(service.name) ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => handleServiceToggle(service.name)}
+                      className="justify-start text-left h-auto py-2 px-3"
+                      title={service.description}
+                    >
+                      {selectedServices.includes(service.name) && (
+                        <Check className="h-3 w-3 mr-2" />
+                      )}
+                      {service.name}
+                    </Button>
+                  ))}
+                </div>
+              )}
               {form.formState.errors.services && (
                 <p className="text-sm text-red-600 mt-2">
                   {form.formState.errors.services.message}
