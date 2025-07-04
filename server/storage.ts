@@ -358,37 +358,60 @@ export class DatabaseStorage implements IStorage {
     console.log(`Getting florist profile for auth ID: ${floristAuthId}`);
     
     try {
-      const result = await pool.query(
-        'SELECT * FROM florist_auth WHERE id = $1',
-        [floristAuthId]
-      );
-      
-      if (result.rows.length === 0) {
+      // Get the email from florist_auth table
+      const authResult = await pool.query('SELECT email, first_name, last_name FROM florist_auth WHERE id = $1', [floristAuthId]);
+      if (authResult.rows.length === 0) {
         return null;
       }
       
-      const row = result.rows[0];
+      const authRow = authResult.rows[0];
+      
+      // Get the profile data from florists table
+      const profileResult = await pool.query('SELECT * FROM florists WHERE email = $1', [authRow.email]);
+      
+      if (profileResult.rows.length === 0) {
+        // Return basic info if no profile exists yet
+        return {
+          id: floristAuthId,
+          email: authRow.email,
+          firstName: authRow.first_name,
+          lastName: authRow.last_name,
+          businessName: null,
+          address: null,
+          city: null,
+          state: null,
+          zipCode: null,
+          phone: null,
+          profileImageUrl: null,
+          profileSummary: null,
+          yearsOfExperience: null,
+          specialties: [],
+          services: [],
+          website: null,
+        };
+      }
+      
+      const profileRow = profileResult.rows[0];
       return {
-        id: row.id,
-        email: row.email,
-        firstName: row.first_name,
-        lastName: row.last_name,
-        businessName: row.business_name,
-        address: row.address,
-        city: row.city,
-        state: row.state,
-        zipCode: row.zip_code,
-        phone: row.phone,
-        profileImageUrl: row.profile_image_url,
-        profileSummary: row.profile_summary,
-        yearsOfExperience: row.years_of_experience,
-        specialties: row.specialties,
-        businessHours: row.business_hours,
-        website: row.website,
-        socialMedia: row.social_media,
-        isVerified: row.is_verified,
-        createdAt: row.created_at,
-        updatedAt: row.updated_at,
+        id: floristAuthId,
+        email: authRow.email,
+        firstName: authRow.first_name,
+        lastName: authRow.last_name,
+        businessName: profileRow.business_name,
+        address: profileRow.address,
+        city: profileRow.city,
+        state: profileRow.state,
+        zipCode: profileRow.zip_code,
+        phone: profileRow.phone,
+        profileImageUrl: profileRow.profile_image_url,
+        profileSummary: profileRow.profile_summary,
+        yearsOfExperience: profileRow.years_of_experience,
+        specialties: profileRow.specialties ? JSON.parse(profileRow.specialties) : [],
+        services: profileRow.services ? JSON.parse(profileRow.services) : [],
+        website: profileRow.website,
+        isVerified: false, // This would come from auth table if needed
+        createdAt: profileRow.created_at,
+        updatedAt: profileRow.updated_at,
       };
     } catch (error) {
       console.error('Error getting florist profile:', error);
