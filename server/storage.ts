@@ -263,11 +263,11 @@ export class DatabaseStorage implements IStorage {
       }
       if (profileData.specialties !== undefined) {
         updateFields.push(`specialties = $${++paramCount}`);
-        values.push(JSON.stringify(profileData.specialties));
+        values.push(profileData.specialties); // PostgreSQL array, not JSON
       }
       if (profileData.services !== undefined) {
         updateFields.push(`services = $${++paramCount}`);
-        values.push(JSON.stringify(profileData.services));
+        values.push(profileData.services); // PostgreSQL array, not JSON
       }
 
       // Always update the timestamp
@@ -314,11 +314,11 @@ export class DatabaseStorage implements IStorage {
                 break;
               case 'specialties':
                 insertFields.push('specialties');
-                insertValues.push(JSON.stringify(profileData[key]));
+                insertValues.push(profileData[key]); // PostgreSQL array, not JSON
                 break;
               case 'services':
                 insertFields.push('services');
-                insertValues.push(JSON.stringify(profileData[key]));
+                insertValues.push(profileData[key]); // PostgreSQL array, not JSON
                 break;
               default:
                 if (['address', 'city', 'state', 'phone', 'website'].includes(key)) {
@@ -406,8 +406,8 @@ export class DatabaseStorage implements IStorage {
         profileImageUrl: profileRow.profile_image_url,
         profileSummary: profileRow.profile_summary,
         yearsOfExperience: profileRow.years_of_experience,
-        specialties: profileRow.specialties ? JSON.parse(profileRow.specialties) : [],
-        services: profileRow.services ? JSON.parse(profileRow.services) : [],
+        specialties: profileRow.specialties || [],
+        services: profileRow.services || [],
         website: profileRow.website,
         isVerified: false, // This would come from auth table if needed
         createdAt: profileRow.created_at,
