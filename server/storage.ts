@@ -277,75 +277,73 @@ export class DatabaseStorage implements IStorage {
         throw new Error('No fields to update');
       }
 
-      // Check if florist record exists, if not create it
-      const existingFlorist = await pool.query('SELECT id FROM florists WHERE email = $1', [email]);
+      // Use UPSERT to avoid duplicates - PostgreSQL ON CONFLICT
+      const insertFields = ['email'];
+      const insertValues = [email];
+      const updateAssignments = [];
       
-      let query;
-      let result;
-      
-      if (existingFlorist.rows.length === 0) {
-        // Create new florist record
-        const insertFields = ['email'];
-        const insertValues = [email];
-        let insertParamCount = 1;
-        
-        Object.keys(profileData).forEach(key => {
-          if (profileData[key] !== undefined) {
-            switch(key) {
-              case 'businessName':
-                insertFields.push('business_name');
-                insertValues.push(profileData[key]);
-                break;
-              case 'zipCode':
-                insertFields.push('zip_code');
-                insertValues.push(profileData[key]);
-                break;
-              case 'profileImageUrl':
-                insertFields.push('profile_image_url');
-                insertValues.push(profileImageData);
-                break;
-              case 'profileSummary':
-                insertFields.push('profile_summary');
-                insertValues.push(profileData[key]);
-                break;
-              case 'yearsOfExperience':
-                insertFields.push('years_of_experience');
-                insertValues.push(profileData[key]);
-                break;
-              case 'specialties':
-                insertFields.push('specialties');
-                insertValues.push(profileData[key]); // PostgreSQL array, not JSON
-                break;
-              case 'services':
-                insertFields.push('services');
-                insertValues.push(profileData[key]); // PostgreSQL array, not JSON
-                break;
-              default:
-                if (['address', 'city', 'state', 'phone', 'website'].includes(key)) {
-                  insertFields.push(key);
-                  insertValues.push(profileData[key]);
-                }
-            }
+      Object.keys(profileData).forEach(key => {
+        if (profileData[key] !== undefined) {
+          let dbField, dbValue;
+          switch(key) {
+            case 'businessName':
+              dbField = 'business_name';
+              dbValue = profileData[key];
+              break;
+            case 'zipCode':
+              dbField = 'zip_code';
+              dbValue = profileData[key];
+              break;
+            case 'profileImageUrl':
+              dbField = 'profile_image_url';
+              dbValue = profileImageData;
+              break;
+            case 'profileSummary':
+              dbField = 'profile_summary';
+              dbValue = profileData[key];
+              break;
+            case 'yearsOfExperience':
+              dbField = 'years_of_experience';
+              dbValue = profileData[key];
+              break;
+            case 'specialties':
+              dbField = 'specialties';
+              dbValue = profileData[key]; // PostgreSQL array
+              break;
+            case 'services':
+              dbField = 'services';
+              dbValue = profileData[key]; // PostgreSQL array
+              break;
+            default:
+              if (['address', 'city', 'state', 'phone', 'website'].includes(key)) {
+                dbField = key;
+                dbValue = profileData[key];
+              }
           }
-        });
-        
-        const placeholders = insertValues.map((_, index) => `$${index + 1}`).join(', ');
-        query = `
-          INSERT INTO florists (${insertFields.join(', ')})
-          VALUES (${placeholders})
-          RETURNING *
-        `;
-        result = await pool.query(query, insertValues);
-      } else {
-        // Update existing florist record
-        query = `
-          UPDATE florists 
-          SET ${updateFields.join(', ')}
-          WHERE email = $1
-          RETURNING *
-        `;
-        result = await pool.query(query, values);
-      }
+          
+          if (dbField) {
+            insertFields.push(dbField);
+            insertValues.push(dbValue);
+            updateAssignments.push(`${dbField} = EXCLUDED.${dbField}`);
+          }
+        }
+      });
+      
+      // Add updated_at to both insert and update
+      insertFields.push('updated_at');
+      insertValues.push(new Date());
+      updateAssignments.push('updated_at = EXCLUDED.updated_at');
+      
+      const placeholders = insertValues.map((_, index) => `$${index + 1}`).join(', ');
+      const query = `
+        INSERT INTO florists (${insertFields.join(', ')})
+        VALUES (${placeholders})
+        ON CONFLICT (email) 
+        DO UPDATE SET ${updateAssignments.join(', ')}
+        RETURNING *
+      `;
+      
+      const result = await pool.query(query, insertValues);
       
       return result.rows[0];
     } catch (error) {
