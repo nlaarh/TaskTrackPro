@@ -250,6 +250,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         hasImage: !!profileData.profileImageUrl,
         imageSize: profileData.profileImageUrl ? profileData.profileImageUrl.length : 0
       });
+      console.log('Full profile data received:', JSON.stringify(profileData, null, 2));
 
       // Validate image size if provided
       if (profileData.profileImageUrl && profileData.profileImageUrl.length > 500000) { // 500KB limit

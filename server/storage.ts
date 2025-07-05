@@ -196,6 +196,7 @@ export class DatabaseStorage implements IStorage {
 
   async updateFloristProfile(floristAuthId: number, profileData: any): Promise<any> {
     console.log(`Updating florist profile for auth ID: ${floristAuthId}`);
+    console.log('Profile data received:', JSON.stringify(profileData, null, 2));
     
     try {
       // Get the florist auth record to get the email
@@ -216,66 +217,7 @@ export class DatabaseStorage implements IStorage {
         }
       }
 
-      // Build dynamic update query for florists table - only update fields that are provided
-      const updateFields = [];
-      const values = [email]; // Use email to identify the florist record
-      let paramCount = 1;
 
-      if (profileData.businessName !== undefined) {
-        updateFields.push(`business_name = $${++paramCount}`);
-        values.push(profileData.businessName);
-      }
-      if (profileData.address !== undefined) {
-        updateFields.push(`address = $${++paramCount}`);
-        values.push(profileData.address);
-      }
-      if (profileData.city !== undefined) {
-        updateFields.push(`city = $${++paramCount}`);
-        values.push(profileData.city);
-      }
-      if (profileData.state !== undefined) {
-        updateFields.push(`state = $${++paramCount}`);
-        values.push(profileData.state);
-      }
-      if (profileData.zipCode !== undefined) {
-        updateFields.push(`zip_code = $${++paramCount}`);
-        values.push(profileData.zipCode);
-      }
-      if (profileData.phone !== undefined) {
-        updateFields.push(`phone = $${++paramCount}`);
-        values.push(profileData.phone);
-      }
-      if (profileData.website !== undefined) {
-        updateFields.push(`website = $${++paramCount}`);
-        values.push(profileData.website);
-      }
-      if (profileImageData !== null) {
-        updateFields.push(`profile_image_url = $${++paramCount}`);
-        values.push(profileImageData);
-      }
-      if (profileData.profileSummary !== undefined) {
-        updateFields.push(`profile_summary = $${++paramCount}`);
-        values.push(profileData.profileSummary);
-      }
-      if (profileData.yearsOfExperience !== undefined) {
-        updateFields.push(`years_of_experience = $${++paramCount}`);
-        values.push(profileData.yearsOfExperience);
-      }
-      if (profileData.specialties !== undefined) {
-        updateFields.push(`specialties = $${++paramCount}`);
-        values.push(profileData.specialties); // PostgreSQL array, not JSON
-      }
-      if (profileData.services !== undefined) {
-        updateFields.push(`services = $${++paramCount}`);
-        values.push(profileData.services); // PostgreSQL array, not JSON
-      }
-
-      // Always update the timestamp
-      updateFields.push('updated_at = CURRENT_TIMESTAMP');
-
-      if (updateFields.length === 1) { // Only timestamp
-        throw new Error('No fields to update');
-      }
 
       // Use UPSERT to avoid duplicates - PostgreSQL ON CONFLICT
       const insertFields = ['email'];
