@@ -101,13 +101,10 @@ export default function FloristProfileSetup() {
     }
   }, [setLocation, form]);
 
-  // Check if we have an existing profile for edit mode
-  const isEditMode = localStorage.getItem('profile_setup_complete') === 'true';
-  
-  // Query to fetch existing profile data in edit mode
+  // Always try to fetch existing profile data to determine edit vs create mode
   const { data: existingProfile, isLoading: isLoadingProfile } = useQuery({
     queryKey: ['/api/florist/profile'],
-    enabled: isEditMode,
+    enabled: true, // Always fetch to check if profile exists
     retry: false,
     queryFn: async () => {
       const token = localStorage.getItem('florist_token');
@@ -130,9 +127,12 @@ export default function FloristProfileSetup() {
     },
   });
 
+  // Determine if we're in edit mode based on existing profile data
+  const isEditMode = existingProfile && existingProfile.businessName;
+  
   // Populate form with existing data when editing
   useEffect(() => {
-    if (isEditMode && existingProfile && !isLoadingProfile) {
+    if (existingProfile && !isLoadingProfile && existingProfile.businessName) {
       form.setValue('businessName', existingProfile.businessName || '');
       form.setValue('address', existingProfile.address || '');
       form.setValue('city', existingProfile.city || '');
@@ -154,7 +154,7 @@ export default function FloristProfileSetup() {
         setProfileImage(existingProfile.profileImageUrl);
       }
     }
-  }, [isEditMode, existingProfile, isLoadingProfile, form]);
+  }, [existingProfile, isLoadingProfile, form]);
 
   const profileSetupMutation = useMutation({
     mutationFn: async (data: ProfileSetupForm & { profileImageUrl?: string }) => {
@@ -266,10 +266,10 @@ export default function FloristProfileSetup() {
             </Button>
             <div>
               <h1 className="text-xl font-semibold text-gray-900">
-                {isEditMode ? 'Edit Your Profile' : 'Complete Your Profile'}
+                {(existingProfile && existingProfile.businessName) ? 'Edit Your Profile' : 'Complete Your Profile'}
               </h1>
               <p className="text-sm text-gray-600">
-                {isEditMode ? 'Update your business information and services' : 'Set up your business information to start attracting customers'}
+                {(existingProfile && existingProfile.businessName) ? 'Update your business information and services' : 'Set up your business information to start attracting customers'}
               </p>
             </div>
           </div>
@@ -277,7 +277,7 @@ export default function FloristProfileSetup() {
       </header>
 
       {/* Loading state for existing profile */}
-      {isEditMode && isLoadingProfile && (
+      {(existingProfile && existingProfile.businessName) && isLoadingProfile && (
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -287,7 +287,7 @@ export default function FloristProfileSetup() {
       )}
 
       {/* Main form */}
-      {(!isEditMode || !isLoadingProfile) && (
+      {(!(existingProfile && existingProfile.businessName) || !isLoadingProfile) && (
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           {/* Business Photo */}
@@ -605,10 +605,10 @@ export default function FloristProfileSetup() {
               {profileSetupMutation.isPending ? (
                 <div className="flex items-center">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  {isEditMode ? 'Updating...' : 'Setting up...'}
+                  {(existingProfile && existingProfile.businessName) ? 'Updating...' : 'Setting up...'}
                 </div>
               ) : (
-                isEditMode ? 'Update Profile' : 'Complete Setup'
+                (existingProfile && existingProfile.businessName) ? 'Update Profile' : 'Complete Setup'
               )}
             </Button>
           </div>
