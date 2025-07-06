@@ -154,7 +154,10 @@ export default function FloristProfileSetup() {
       
       // Set profile image if exists
       if (profile.profileImageUrl) {
+        console.log('Setting profile image:', profile.profileImageUrl.substring(0, 50) + '...');
         setProfileImage(profile.profileImageUrl);
+      } else {
+        console.log('No profile image found in:', Object.keys(profile));
       }
     }
   }, [existingProfile, isLoadingProfile, form]);
