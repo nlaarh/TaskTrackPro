@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useLocation } from "wouter";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,6 +47,7 @@ const US_STATES = [
 export default function FloristProfileSetup() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [floristData, setFloristData] = useState<any>(null);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [selectedSpecialties, setSelectedSpecialties] = useState<string[]>([]);
@@ -182,15 +183,21 @@ export default function FloristProfileSetup() {
       // Mark profile as complete in localStorage
       localStorage.setItem('profile_setup_complete', 'true');
       
+      // Invalidate and refetch profile data to refresh cache
+      queryClient.invalidateQueries({ queryKey: ['/api/florist/profile'] });
+      
       toast({
-        title: "Profile Setup Complete!",
-        description: "Your business profile has been created successfully.",
+        title: isEditMode ? "Profile Updated!" : "Profile Setup Complete!",
+        description: isEditMode ? "Your business profile has been updated successfully." : "Your business profile has been created successfully.",
       });
-      setLocation('/florist-dashboard');
+      
+      if (!isEditMode) {
+        setLocation('/florist-dashboard');
+      }
     },
     onError: (error: any) => {
       toast({
-        title: "Setup Failed",
+        title: isEditMode ? "Update Failed" : "Setup Failed",
         description: error.message || "Something went wrong. Please try again.",
         variant: "destructive",
       });

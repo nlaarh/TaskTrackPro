@@ -210,7 +210,15 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
       const profileData = req.body;
       
       console.log('Profile setup for auth ID:', floristAuthId);
-      console.log('Full profile data received:', profileData);
+      console.log('Profile data received:', {
+        businessName: profileData.businessName,
+        address: profileData.address,
+        specialties: profileData.specialties,
+        services: profileData.services,
+        hasProfileImage: !!(profileData.profileImage || profileData.profileImageUrl),
+        imageSize: (profileData.profileImage || profileData.profileImageUrl || '').length,
+        imageFieldNames: Object.keys(profileData).filter(key => key.toLowerCase().includes('image'))
+      });
       
       // Validate required fields
       if (!profileData.businessName || !profileData.address || !profileData.city || !profileData.state || !profileData.zipCode) {
@@ -235,7 +243,7 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
           yearsOfExperience: profileData.yearsOfExperience,
           specialties: profileData.specialties,
           services: profileData.services,
-          profileImageUrl: profileData.profileImage, // Base64 image data
+          profileImageUrl: profileData.profileImageUrl || profileData.profileImage, // Handle both field names
         }
       );
 
