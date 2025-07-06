@@ -1,12 +1,14 @@
 import {
   users,
   floristAuth,
+  florists,
   specialtiesReference,
   servicesReference,
   type User,
   type UpsertUser,
   type FloristAuth,
-  type InsertFloristAuth
+  type InsertFloristAuth,
+  type Florist
 } from "@shared/schema";
 import { db, pool } from "./db";
 import { eq, asc } from "drizzle-orm";
@@ -21,7 +23,7 @@ export interface IStorage {
   getFloristAuthByEmail(email: string): Promise<FloristAuth | undefined>;
   getFloristAuthById(id: number): Promise<FloristAuth | undefined>;
   
-  // Profile operations (updates florist_auth table which has all profile fields)
+  // Profile operations (florist business data in separate florists table)
   updateFloristProfile(floristAuthId: number, profileData: any): Promise<any>;
   getFloristProfile(floristAuthId: number): Promise<any>;
   
