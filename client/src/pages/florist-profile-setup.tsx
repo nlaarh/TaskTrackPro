@@ -128,30 +128,32 @@ export default function FloristProfileSetup() {
   });
 
   // Determine if we're in edit mode based on existing profile data
-  const isEditMode = existingProfile && existingProfile.businessName;
+  const isEditMode = existingProfile && existingProfile.businessProfile && existingProfile.businessProfile.businessName;
   
   // Populate form with existing data when editing
   useEffect(() => {
-    if (existingProfile && !isLoadingProfile && existingProfile.businessName) {
-      form.setValue('businessName', existingProfile.businessName || '');
-      form.setValue('address', existingProfile.address || '');
-      form.setValue('city', existingProfile.city || '');
-      form.setValue('state', existingProfile.state || '');
-      form.setValue('zipCode', existingProfile.zipCode || '');
-      form.setValue('phone', existingProfile.phone || '');
-      form.setValue('website', existingProfile.website || '');
-      form.setValue('profileSummary', existingProfile.profileSummary || '');
-      form.setValue('yearsOfExperience', existingProfile.yearsOfExperience || 0);
-      form.setValue('specialties', existingProfile.specialties || []);
-      form.setValue('services', existingProfile.services || []);
+    if (existingProfile && !isLoadingProfile && existingProfile.businessProfile && existingProfile.businessProfile.businessName) {
+      const profile = existingProfile.businessProfile;
+      
+      form.setValue('businessName', profile.businessName || '');
+      form.setValue('address', profile.address || '');
+      form.setValue('city', profile.city || '');
+      form.setValue('state', profile.state || '');
+      form.setValue('zipCode', profile.zipCode || '');
+      form.setValue('phone', profile.phone || '');
+      form.setValue('website', profile.website || '');
+      form.setValue('profileSummary', profile.profileSummary || '');
+      form.setValue('yearsOfExperience', profile.yearsOfExperience || 0);
+      form.setValue('specialties', profile.specialties || []);
+      form.setValue('services', profile.services || []);
       
       // Set selected arrays for UI
-      setSelectedSpecialties(existingProfile.specialties || []);
-      setSelectedServices(existingProfile.services || []);
+      setSelectedSpecialties(profile.specialties || []);
+      setSelectedServices(profile.services || []);
       
       // Set profile image if exists
-      if (existingProfile.profileImageUrl) {
-        setProfileImage(existingProfile.profileImageUrl);
+      if (profile.profileImageUrl) {
+        setProfileImage(profile.profileImageUrl);
       }
     }
   }, [existingProfile, isLoadingProfile, form]);
