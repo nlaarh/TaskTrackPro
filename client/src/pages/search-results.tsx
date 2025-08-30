@@ -23,7 +23,7 @@ export default function SearchResults() {
     location: urlParams.get('location') || '',
     services: urlParams.get('services')?.split(',').filter(Boolean) || [],
     sortBy: (urlParams.get('sortBy') as 'distance' | 'rating' | 'newest') || 'distance',
-    limit: 100, // Show more florists per page
+    limit: 12, // Show 12 florists per page for proper pagination
     offset: 0,
   });
 
@@ -312,37 +312,123 @@ export default function SearchResults() {
                   ))}
                 </div>
                 
+                {/* Results Summary */}
+                <div className="text-sm text-muted-foreground mb-4">
+                  Showing {searchResults?.florists.length || 0} of {searchResults?.total || 0} florists
+                  {searchParams.location && ` in ${searchParams.location}`}
+                </div>
+
                 {/* Pagination */}
                 {searchResults && searchResults.total > searchParams.limit && (
-                  <div className="flex justify-center mt-12">
-                    <nav className="flex items-center space-x-2">
+                  <div className="flex flex-col items-center mt-12 space-y-4">
+                    <nav className="flex items-center space-x-1">
+                      {/* Previous Button */}
                       <Button
                         variant="outline"
+                        size="sm"
                         disabled={searchParams.offset === 0}
                         onClick={() => setSearchParams(prev => ({
                           ...prev,
                           offset: Math.max(0, prev.offset - prev.limit)
                         }))}
+                        className="px-3"
                       >
                         Previous
                       </Button>
                       
-                      <span className="px-4 py-2 text-sm text-muted-foreground">
-                        Page {Math.floor(searchParams.offset / searchParams.limit) + 1} of{' '}
-                        {Math.ceil(searchResults.total / searchParams.limit)}
-                      </span>
+                      {/* Page Numbers */}
+                      {(() => {
+                        const currentPage = Math.floor(searchParams.offset / searchParams.limit) + 1;
+                        const totalPages = Math.ceil(searchResults.total / searchParams.limit);
+                        const pages = [];
+                        
+                        // Show page numbers around current page
+                        const startPage = Math.max(1, currentPage - 2);
+                        const endPage = Math.min(totalPages, currentPage + 2);
+                        
+                        // First page
+                        if (startPage > 1) {
+                          pages.push(
+                            <Button
+                              key={1}
+                              variant={currentPage === 1 ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => setSearchParams(prev => ({
+                                ...prev,
+                                offset: 0
+                              }))}
+                              className="w-10 h-10"
+                            >
+                              1
+                            </Button>
+                          );
+                          if (startPage > 2) {
+                            pages.push(<span key="ellipsis1" className="px-2">...</span>);
+                          }
+                        }
+                        
+                        // Current range of pages
+                        for (let i = startPage; i <= endPage; i++) {
+                          pages.push(
+                            <Button
+                              key={i}
+                              variant={currentPage === i ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => setSearchParams(prev => ({
+                                ...prev,
+                                offset: (i - 1) * prev.limit
+                              }))}
+                              className="w-10 h-10"
+                            >
+                              {i}
+                            </Button>
+                          );
+                        }
+                        
+                        // Last page
+                        if (endPage < totalPages) {
+                          if (endPage < totalPages - 1) {
+                            pages.push(<span key="ellipsis2" className="px-2">...</span>);
+                          }
+                          pages.push(
+                            <Button
+                              key={totalPages}
+                              variant={currentPage === totalPages ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => setSearchParams(prev => ({
+                                ...prev,
+                                offset: (totalPages - 1) * prev.limit
+                              }))}
+                              className="w-10 h-10"
+                            >
+                              {totalPages}
+                            </Button>
+                          );
+                        }
+                        
+                        return pages;
+                      })()}
                       
+                      {/* Next Button */}
                       <Button
                         variant="outline"
+                        size="sm"
                         disabled={searchParams.offset + searchParams.limit >= searchResults.total}
                         onClick={() => setSearchParams(prev => ({
                           ...prev,
                           offset: prev.offset + prev.limit
                         }))}
+                        className="px-3"
                       >
                         Next
                       </Button>
                     </nav>
+                    
+                    {/* Page Info */}
+                    <div className="text-sm text-muted-foreground">
+                      Page {Math.floor(searchParams.offset / searchParams.limit) + 1} of{' '}
+                      {Math.ceil(searchResults.total / searchParams.limit)}
+                    </div>
                   </div>
                 )}
               </>
