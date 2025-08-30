@@ -23,14 +23,19 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
-// User storage table for Replit Auth
+// Customer authentication table - Updated for username/password auth
 export const users = pgTable("users", {
-  id: varchar("id").primaryKey().notNull(),
-  email: varchar("email").unique(),
+  id: serial("id").primaryKey(),
+  email: varchar("email").unique().notNull(),
+  passwordHash: varchar("password_hash"),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
-  role: varchar("role").default("user"),
+  role: varchar("role").default("customer"),
+  isVerified: boolean("is_verified").default(false),
+  verificationToken: varchar("verification_token"),
+  resetToken: varchar("reset_token"),
+  resetTokenExpires: timestamp("reset_token_expires"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -167,8 +172,21 @@ export const insertFloristSchema = createInsertSchema(florists).omit({
 });
 
 // Types
-export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
+export type UpsertUser = typeof users.$inferInsert;
+
+// Customer auth schemas for forms
+export const insertUserSchema = createInsertSchema(users).omit({ 
+  id: true, 
+  createdAt: true, 
+  updatedAt: true,
+  passwordHash: true,
+  verificationToken: true,
+  resetToken: true,
+  resetTokenExpires: true
+});
+
+export type InsertUser = z.infer<typeof insertUserSchema>;
 export type InsertFloristAuth = z.infer<typeof insertFloristAuthSchema>;
 export type FloristAuth = typeof floristAuth.$inferSelect;
 export type InsertFlorist = z.infer<typeof insertFloristSchema>;

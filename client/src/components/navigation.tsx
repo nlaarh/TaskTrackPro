@@ -152,15 +152,16 @@ export default function Navigation() {
                   </Button>
                 </Link>
                 
-                <Button 
-                  onClick={() => window.location.href = "/api/login"}
-                  variant="ghost"
-                  size="sm"
-                  className="text-gray-700 hover:text-gray-900"
-                >
-                  <User className="h-4 w-4 mr-2" />
-                  Customer Login
-                </Button>
+                <Link href="/auth">
+                  <Button 
+                    variant="ghost"
+                    size="sm"
+                    className="text-gray-700 hover:text-gray-900"
+                  >
+                    <User className="h-4 w-4 mr-2" />
+                    Customer Login
+                  </Button>
+                </Link>
               </div>
             )}
             

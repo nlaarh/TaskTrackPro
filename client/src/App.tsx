@@ -14,13 +14,15 @@ import FloristLogin from "@/pages/florist-login";
 import FloristRegister from "@/pages/florist-register";
 import FloristDashboard from "@/pages/florist-dashboard";
 import FloristProfileSetup from "@/pages/florist-profile-setup";
+import CustomerAuth from "@/pages/customer-auth";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
   return (
     <Switch>
-      {/* Florist authentication routes - always available */}
+      {/* Authentication routes - always available */}
+      <Route path="/auth" component={CustomerAuth} />
       <Route path="/florist-login" component={FloristLogin} />
       <Route path="/florist-register" component={FloristRegister} />
       <Route path="/florist-dashboard" component={FloristDashboard} />

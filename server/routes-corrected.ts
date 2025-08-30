@@ -32,21 +32,152 @@ const authenticateFlorist = async (req: any, res: any, next: any) => {
   }
 };
 
+// JWT Authentication middleware for customer routes
+const authenticateCustomer = async (req: any, res: any, next: any) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader?.startsWith('Bearer ')) {
+      return res.status(401).json({ message: 'No token provided' });
+    }
+
+    const token = authHeader.substring(7);
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    
+    // Get user record
+    const user = await correctedStorage.getUserById(decoded.userId);
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid token' });
+    }
+
+    req.user = { userId: user.id, email: user.email };
+    next();
+  } catch (error) {
+    console.error('Customer auth error:', error);
+    res.status(401).json({ message: 'Invalid token' });
+  }
+};
+
 export async function registerCorrectedRoutes(app: Express): Promise<Server> {
-  // Replit Auth setup
-  await setupAuth(app);
+  // No longer using Replit Auth - using custom username/password auth
 
   // Test endpoints
   app.get('/api/test', (req, res) => {
     res.json({ message: 'API is working', timestamp: new Date().toISOString() });
   });
 
-  // Replit Auth endpoint
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+  // Customer Authentication endpoints
+  
+  // Customer Registration
+  app.post('/api/auth/customer/register', async (req, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const user = await correctedStorage.getUser(userId);
-      res.json(user);
+      const { email, password, firstName, lastName } = req.body;
+      
+      // Validate required fields
+      if (!email || !password || !firstName || !lastName) {
+        return res.status(400).json({ message: 'All fields are required' });
+      }
+      
+      // Check if user already exists
+      const existingUser = await correctedStorage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ message: 'Email already registered' });
+      }
+      
+      // Hash password
+      const saltRounds = 10;
+      const passwordHash = await bcrypt.hash(password, saltRounds);
+      
+      // Create user
+      const user = await correctedStorage.createUser({
+        email,
+        passwordHash,
+        firstName,
+        lastName,
+      });
+      
+      // Generate JWT
+      const token = jwt.sign(
+        { userId: user.id, email: user.email },
+        JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+      
+      res.status(201).json({
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role,
+        },
+        token
+      });
+    } catch (error) {
+      console.error('Customer registration error:', error);
+      res.status(500).json({ message: 'Registration failed' });
+    }
+  });
+  
+  // Customer Login
+  app.post('/api/auth/customer/login', async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      // Validate required fields
+      if (!email || !password) {
+        return res.status(400).json({ message: 'Email and password are required' });
+      }
+      
+      // Get user by email
+      const user = await correctedStorage.getUserByEmail(email);
+      if (!user || !user.passwordHash) {
+        return res.status(401).json({ message: 'Invalid email or password' });
+      }
+      
+      // Verify password
+      const isValidPassword = await bcrypt.compare(password, user.passwordHash);
+      if (!isValidPassword) {
+        return res.status(401).json({ message: 'Invalid email or password' });
+      }
+      
+      // Generate JWT
+      const token = jwt.sign(
+        { userId: user.id, email: user.email },
+        JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+      
+      res.json({
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role,
+        },
+        token
+      });
+    } catch (error) {
+      console.error('Customer login error:', error);
+      res.status(500).json({ message: 'Login failed' });
+    }
+  });
+
+  // Get current customer
+  app.get('/api/auth/user', authenticateCustomer, async (req: any, res) => {
+    try {
+      const user = await correctedStorage.getUserById(req.user.userId);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      
+      res.json({
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+      });
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });

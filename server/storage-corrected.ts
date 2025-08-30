@@ -13,9 +13,15 @@ import { eq, and, or, ilike, desc, sql } from "drizzle-orm";
 
 // Corrected storage interface reflecting actual database structure
 export interface IStorage {
-  // User operations (required for Replit Auth)
-  getUser(id: string): Promise<User | undefined>;
-  upsertUser(user: UpsertUser): Promise<User>;
+  // Customer operations (username/password auth)
+  createUser(userData: {
+    email: string;
+    passwordHash: string;
+    firstName: string;
+    lastName: string;
+  }): Promise<User>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  getUserById(id: number): Promise<User | undefined>;
   
   // Florist authentication operations (florist_auth table)
   createFloristAuth(authData: {
@@ -63,25 +69,50 @@ export interface IStorage {
 }
 
 export class CorrectedDatabaseStorage implements IStorage {
-  // User operations (Replit Auth)
-  async getUser(id: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user;
+  // Customer operations (username/password auth)
+  async createUser(userData: {
+    email: string;
+    passwordHash: string;
+    firstName: string;
+    lastName: string;
+  }): Promise<User> {
+    try {
+      const [newUser] = await db
+        .insert(users)
+        .values({
+          email: userData.email,
+          passwordHash: userData.passwordHash,
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          role: 'customer',
+          isVerified: false,
+        })
+        .returning();
+      return newUser;
+    } catch (error) {
+      console.error('Error creating user:', error);
+      throw error;
+    }
   }
 
-  async upsertUser(userData: UpsertUser): Promise<User> {
-    const [user] = await db
-      .insert(users)
-      .values(userData)
-      .onConflictDoUpdate({
-        target: users.id,
-        set: {
-          ...userData,
-          updatedAt: new Date(),
-        },
-      })
-      .returning();
-    return user;
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    try {
+      const [user] = await db.select().from(users).where(eq(users.email, email));
+      return user;
+    } catch (error) {
+      console.error('Error getting user by email:', error);
+      return undefined;
+    }
+  }
+
+  async getUserById(id: number): Promise<User | undefined> {
+    try {
+      const [user] = await db.select().from(users).where(eq(users.id, id));
+      return user;
+    } catch (error) {
+      console.error('Error getting user by ID:', error);
+      return undefined;
+    }
   }
 
   // Florist authentication (florist_auth table only)
