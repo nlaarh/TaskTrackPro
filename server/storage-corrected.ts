@@ -343,7 +343,44 @@ export class CorrectedDatabaseStorage implements IStorage {
       const results = await query;
       console.log(`Found ${results.length} florists`);
       
-      return results;
+      // Transform data to match frontend expectations
+      const transformedResults = results.map(florist => ({
+        id: florist.id,
+        businessName: florist.businessName,
+        address: florist.address,
+        city: florist.city,
+        state: florist.state,
+        zipCode: florist.zipCode,
+        phone: florist.phone,
+        website: florist.website,
+        profileSummary: florist.profileSummary,
+        yearsOfExperience: florist.yearsOfExperience,
+        specialties: florist.specialties || [],
+        services: florist.services || [],
+        firstName: florist.firstName,
+        lastName: florist.lastName,
+        email: florist.email,
+        createdAt: florist.createdAt,
+        // Transform profileImageUrl to expected images array format
+        images: florist.profileImageUrl ? [{
+          id: 1,
+          url: florist.profileImageUrl,
+          isPrimary: true,
+          alt: `${florist.businessName} profile photo`
+        }] : [],
+        // Add default values for missing fields expected by frontend
+        rating: "4.5", // Default rating
+        distance: null,
+        reviewCount: 0,
+        isOpen: true,
+        tags: [],
+        location: {
+          lat: null,
+          lng: null
+        }
+      }));
+      
+      return transformedResults;
     } catch (error) {
       console.error('Search florists error:', error);
       throw error;
