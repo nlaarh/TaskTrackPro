@@ -194,9 +194,8 @@ export default function FloristProfileSetup() {
         description: isEditMode ? "Your business profile has been updated successfully." : "Your business profile has been created successfully.",
       });
       
-      if (!isEditMode) {
-        setLocation('/florist-dashboard');
-      }
+      // Always redirect to dashboard after successful setup/update
+      setLocation('/florist-dashboard');
     },
     onError: (error: any) => {
       toast({
