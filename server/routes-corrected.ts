@@ -303,7 +303,13 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
       
       const florists = await correctedStorage.searchFlorists(searchParams);
       
-      res.json(florists);
+      // Return data in the format expected by frontend
+      res.json({
+        florists: florists,
+        total: florists.length,
+        page: Math.floor((searchParams.offset || 0) / (searchParams.limit || 50)) + 1,
+        limit: searchParams.limit || 50
+      });
     } catch (error) {
       console.error("Error searching florists:", error);
       res.status(500).json({ message: "Failed to search florists" });
