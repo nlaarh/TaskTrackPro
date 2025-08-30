@@ -2,6 +2,7 @@ import {
   users,
   floristAuth,
   florists,
+  reviews,
   type User,
   type UpsertUser,
   type FloristAuth,
@@ -399,6 +400,28 @@ export class CorrectedDatabaseStorage implements IStorage {
       return transformedResults;
     } catch (error) {
       console.error('Search florists error:', error);
+      throw error;
+    }
+  }
+
+  async getReviewsByFloristId(floristId: number) {
+    try {
+      const reviewsResult = await db
+        .select({
+          id: reviews.id,
+          floristId: reviews.floristId,
+          userId: reviews.userId,
+          rating: reviews.rating,
+          comment: reviews.comment,
+          createdAt: reviews.createdAt,
+        })
+        .from(reviews)
+        .where(eq(reviews.floristId, floristId))
+        .orderBy(desc(reviews.createdAt));
+
+      return reviewsResult;
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
       throw error;
     }
   }

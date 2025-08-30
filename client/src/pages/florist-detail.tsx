@@ -606,13 +606,13 @@ export default function FloristDetail() {
                         <div className="flex items-start gap-4">
                           <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
                             <span className="font-medium text-primary">
-                              {review.user.firstName?.[0] || review.user.email[0].toUpperCase()}
+                              {review.userId?.[0]?.toUpperCase() || 'U'}
                             </span>
                           </div>
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
                               <span className="font-medium">
-                                {review.user.firstName} {review.user.lastName}
+                                {review.userId?.replace('customer_', '').replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()) || 'Anonymous Customer'}
                               </span>
                               <div className="flex items-center gap-1">
                                 {generateStars(review.rating).map((star, i) => (

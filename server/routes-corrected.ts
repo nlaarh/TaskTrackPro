@@ -378,6 +378,24 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get reviews for a specific florist
+  app.get('/api/florists/:id/reviews', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const floristId = parseInt(id);
+      
+      if (isNaN(floristId)) {
+        return res.status(400).json({ message: "Invalid florist ID" });
+      }
+      
+      const reviews = await correctedStorage.getReviewsByFloristId(floristId);
+      res.json(reviews);
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
+      res.status(500).json({ message: "Failed to fetch reviews" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
