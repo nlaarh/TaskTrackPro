@@ -8,7 +8,7 @@ import {
   type Florist
 } from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, and, or, ilike, desc, sql } from "drizzle-orm";
 
 // Corrected storage interface reflecting actual database structure
 export interface IStorage {
@@ -50,6 +50,15 @@ export interface IStorage {
   // Reference data
   getSpecialties(): Promise<any[]>;
   getServices(): Promise<any[]>;
+  
+  // Search functionality
+  searchFlorists(params: {
+    location?: string;
+    specialty?: string;
+    service?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<any[]>;
 }
 
 export class CorrectedDatabaseStorage implements IStorage {
@@ -225,6 +234,120 @@ export class CorrectedDatabaseStorage implements IStorage {
       { id: 4, name: "Consultation", description: "Expert advice for your floral needs" },
       { id: 5, name: "Custom Arrangements", description: "Personalized flower designs" }
     ];
+  }
+
+  // Search functionality
+  async searchFlorists(params: {
+    location?: string;
+    specialty?: string;
+    service?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<any[]> {
+    try {
+      console.log('Searching florists with params:', params);
+      
+      let query = db
+        .select({
+          id: florists.id,
+          businessName: florists.businessName,
+          address: florists.address,
+          city: florists.city,
+          state: florists.state,
+          zipCode: florists.zipCode,
+          phone: florists.phone,
+          website: florists.website,
+          profileSummary: florists.profileSummary,
+          yearsOfExperience: florists.yearsOfExperience,
+          specialties: florists.specialties,
+          services: florists.services,
+          profileImageUrl: florists.profileImageUrl,
+          createdAt: florists.createdAt,
+          // Include auth data for complete profile
+          firstName: floristAuth.firstName,
+          lastName: floristAuth.lastName,
+          email: floristAuth.email
+        })
+        .from(florists)
+        .innerJoin(floristAuth, eq(florists.userId, floristAuth.id))
+        .where(eq(florists.businessName, ''));  // Start with a condition that will be modified
+
+      // Remove the dummy where condition
+      query = db
+        .select({
+          id: florists.id,
+          businessName: florists.businessName,
+          address: florists.address,
+          city: florists.city,
+          state: florists.state,
+          zipCode: florists.zipCode,
+          phone: florists.phone,
+          website: florists.website,
+          profileSummary: florists.profileSummary,
+          yearsOfExperience: florists.yearsOfExperience,
+          specialties: florists.specialties,
+          services: florists.services,
+          profileImageUrl: florists.profileImageUrl,
+          createdAt: florists.createdAt,
+          firstName: floristAuth.firstName,
+          lastName: floristAuth.lastName,
+          email: floristAuth.email
+        })
+        .from(florists)
+        .innerJoin(floristAuth, eq(florists.userId, floristAuth.id));
+
+      // Add filters based on search parameters
+      const conditions: any[] = [];
+
+      if (params.location) {
+        // Search in city, state, or zipCode
+        const locationPattern = `%${params.location.toLowerCase()}%`;
+        conditions.push(
+          or(
+            ilike(florists.city, locationPattern),
+            ilike(florists.state, locationPattern),
+            ilike(florists.zipCode, locationPattern)
+          )
+        );
+      }
+
+      // TODO: Fix array filtering - temporarily disabled to get basic search working
+      // if (params.specialty) {
+      //   conditions.push(
+      //     sql`${florists.specialties} && ${[params.specialty]}`
+      //   );
+      // }
+
+      // if (params.service) {
+      //   conditions.push(
+      //     sql`${florists.services} && ${[params.service]}`
+      //   );
+      // }
+
+      // Apply filters if any exist
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions));
+      }
+
+      // Add ordering (by creation date, newest first)
+      query = query.orderBy(desc(florists.createdAt));
+
+      // Add pagination
+      if (params.limit) {
+        query = query.limit(params.limit);
+      }
+      if (params.offset) {
+        query = query.offset(params.offset);
+      }
+
+      const results = await query;
+      console.log(`Found ${results.length} florists`);
+      
+      return results;
+    } catch (error) {
+      console.error('Search florists error:', error);
+      throw error;
+    }
   }
 }
 

@@ -286,6 +286,30 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Florist search endpoint
+  app.get('/api/florists/search', async (req, res) => {
+    try {
+      const { location, specialty, service, limit, offset } = req.query;
+      
+      const searchParams = {
+        location: location as string | undefined,
+        specialty: specialty as string | undefined,
+        service: service as string | undefined,
+        limit: limit ? parseInt(limit as string) : 50,
+        offset: offset ? parseInt(offset as string) : 0,
+      };
+
+      console.log('Search request:', searchParams);
+      
+      const florists = await correctedStorage.searchFlorists(searchParams);
+      
+      res.json(florists);
+    } catch (error) {
+      console.error("Error searching florists:", error);
+      res.status(500).json({ message: "Failed to search florists" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
