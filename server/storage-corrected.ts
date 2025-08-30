@@ -260,7 +260,7 @@ export class CorrectedDatabaseStorage implements IStorage {
     service?: string;
     limit?: number;
     offset?: number;
-  }): Promise<any[]> {
+  }): Promise<{ florists: any[]; total: number }> {
     try {
       console.log('Searching florists with params:', params);
       
@@ -357,8 +357,21 @@ export class CorrectedDatabaseStorage implements IStorage {
         query = query.offset(params.offset);
       }
 
+      // Get total count for pagination (before applying limit/offset)
+      let countQuery = db
+        .select({ count: sql`count(*)` })
+        .from(florists)
+        .innerJoin(floristAuth, eq(florists.userId, floristAuth.id));
+
+      if (conditions.length > 0) {
+        countQuery = countQuery.where(and(...conditions));
+      }
+
+      const [totalResult] = await countQuery;
+      const total = Number(totalResult.count);
+
       const results = await query;
-      console.log(`Found ${results.length} florists`);
+      console.log(`Found ${results.length} florists out of ${total} total`);
       
       // Transform data to match frontend expectations
       const transformedResults = results.map(florist => ({
@@ -397,7 +410,10 @@ export class CorrectedDatabaseStorage implements IStorage {
         }
       }));
       
-      return transformedResults;
+      return {
+        florists: transformedResults,
+        total: total
+      };
     } catch (error) {
       console.error('Search florists error:', error);
       throw error;

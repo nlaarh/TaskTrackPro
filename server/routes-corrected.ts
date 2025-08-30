@@ -363,12 +363,12 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
 
       console.log('Search request:', searchParams);
       
-      const florists = await correctedStorage.searchFlorists(searchParams);
+      const searchResult = await correctedStorage.searchFlorists(searchParams);
       
       // Return data in the format expected by frontend
       res.json({
-        florists: florists,
-        total: florists.length,
+        florists: searchResult.florists,
+        total: searchResult.total,
         page: Math.floor((searchParams.offset || 0) / (searchParams.limit || 50)) + 1,
         limit: searchParams.limit || 50
       });

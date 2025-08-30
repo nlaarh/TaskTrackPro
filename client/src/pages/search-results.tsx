@@ -23,7 +23,7 @@ export default function SearchResults() {
     location: urlParams.get('location') || '',
     services: urlParams.get('services')?.split(',').filter(Boolean) || [],
     sortBy: (urlParams.get('sortBy') as 'distance' | 'rating' | 'newest') || 'distance',
-    limit: 12,
+    limit: 100, // Show more florists per page
     offset: 0,
   });
 
