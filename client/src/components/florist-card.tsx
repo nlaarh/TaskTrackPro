@@ -34,6 +34,9 @@ export default function FloristCard({ florist, viewMode }: FloristCardProps) {
   const [isSaved, setIsSaved] = useState(false);
 
   const primaryImage = florist.images.find(img => img.isPrimary) || florist.images[0];
+  
+  // Debug: log the image data to see what we're getting
+  console.log('Florist:', florist.businessName, 'Primary image URL length:', primaryImage?.url?.length, 'URL start:', primaryImage?.url?.substring(0, 50));
   const stars = generateStars(parseFloat(florist.rating));
 
   const saveFloristMutation = useMutation({
@@ -94,7 +97,7 @@ export default function FloristCard({ florist, viewMode }: FloristCardProps) {
           {/* Image */}
           <div className="md:w-80 h-64 md:h-auto relative">
             <img
-              src={getImageUrl(primaryImage?.imageUrl)}
+              src={getImageUrl(primaryImage?.url)}
               alt={`${florist.businessName} storefront`}
               className="w-full h-full object-cover"
             />
@@ -206,7 +209,7 @@ export default function FloristCard({ florist, viewMode }: FloristCardProps) {
       {/* Image */}
       <div className="aspect-video relative overflow-hidden">
         <img
-          src={getImageUrl(primaryImage?.imageUrl)}
+          src={getImageUrl(primaryImage?.url)}
           alt={`${florist.businessName} storefront`}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
