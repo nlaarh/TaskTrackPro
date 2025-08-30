@@ -448,24 +448,24 @@ export default function FloristDetail() {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
             {/* Gallery */}
-            {florist.images.length > 0 && (
+            {florist?.images && florist.images.length > 0 && (
               <Card>
                 <CardContent className="p-0">
                   <div className="aspect-video relative overflow-hidden rounded-t-lg">
                     <img
-                      src={getImageUrl(primaryImage?.imageUrl)}
-                      alt={florist.businessName}
+                      src={getImageUrl(primaryImage?.url)}
+                      alt={florist?.businessName || "Florist"}
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  {florist.images.length > 1 && (
+                  {florist?.images && florist.images.length > 1 && (
                     <div className="p-4">
                       <div className="grid grid-cols-4 gap-2">
                         {florist.images.slice(1, 5).map((image) => (
                           <div key={image.id} className="aspect-square relative overflow-hidden rounded-lg">
                             <img
-                              src={getImageUrl(image.imageUrl)}
-                              alt={image.caption || florist.businessName}
+                              src={getImageUrl(image.url)}
+                              alt={image.caption || florist?.businessName || "Florist"}
                               className="w-full h-full object-cover"
                             />
                           </div>
