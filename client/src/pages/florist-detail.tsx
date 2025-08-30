@@ -58,6 +58,11 @@ export default function FloristDetail() {
   const [isReviewOpen, setIsReviewOpen] = useState(false);
 
   const { data: florist, isLoading } = useQuery({
+    queryKey: [`/api/florists/detail/${id}`],
+    enabled: !!id,
+  });
+
+  const { data: reviews } = useQuery({
     queryKey: [`/api/florists/${id}/reviews`],
     enabled: !!id,
   });
@@ -96,7 +101,7 @@ export default function FloristDetail() {
   const inquiryForm = useForm<z.infer<typeof inquirySchema>>({
     resolver: zodResolver(inquirySchema),
     defaultValues: {
-      name: user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : '',
+      name: user ? `${user?.firstName || ''} ${user?.lastName || ''}`.trim() : '',
       email: user?.email || '',
       phone: '',
       message: '',
@@ -168,7 +173,7 @@ export default function FloristDetail() {
     },
   });
 
-  if (isLoading) {
+  if (isLoading || !florist) {
     return (
       <div className="min-h-screen bg-background">
         <Navigation />
@@ -216,9 +221,9 @@ export default function FloristDetail() {
     );
   }
 
-  const primaryImage = florist.images.find(img => img.isPrimary) || florist.images[0];
-  const stars = generateStars(parseFloat(florist.rating));
-  const businessHours = getBusinessHours(florist.hours);
+  const primaryImage = florist?.images?.find((img: any) => img.isPrimary) || florist?.images?.[0];
+  const stars = generateStars(parseFloat(florist?.rating || "4.5"));
+  const businessHours = getBusinessHours(florist?.hours);
 
   return (
     <div className="min-h-screen bg-background">
@@ -230,7 +235,7 @@ export default function FloristDetail() {
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
               <h1 className="text-3xl md:text-4xl font-bold text-foreground">
-                {florist.businessName}
+                {florist?.businessName || "Florist"}
               </h1>
               {florist.isVerified && (
                 <Badge variant="secondary" className="bg-green-100 text-green-700">
@@ -242,7 +247,7 @@ export default function FloristDetail() {
             <div className="flex items-center gap-4 text-muted-foreground mb-4">
               <div className="flex items-center gap-1">
                 <MapPin className="h-4 w-4" />
-                <span>{florist.address}</span>
+                <span>{florist?.address || "Address not available"}</span>
               </div>
               {florist.distance && (
                 <span className="text-sm">{formatDistance(florist.distance)}</span>
@@ -260,8 +265,8 @@ export default function FloristDetail() {
                     <Star key={i} className="h-5 w-5 text-gray-300" />
                   )
                 ))}
-                <span className="font-medium ml-2">{formatRating(parseFloat(florist.rating))}</span>
-                <span className="text-muted-foreground">({florist.reviewCount} reviews)</span>
+                <span className="font-medium ml-2">{formatRating(parseFloat(florist?.rating || "4.5"))}</span>
+                <span className="text-muted-foreground">({florist?.reviewCount || 0} reviews)</span>
               </div>
             </div>
           </div>
@@ -591,12 +596,12 @@ export default function FloristDetail() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
-                  {florist.reviews.length === 0 ? (
+                  {(!reviews || reviews.length === 0) ? (
                     <p className="text-muted-foreground text-center py-8">
                       No reviews yet. Be the first to review this florist!
                     </p>
                   ) : (
-                    florist.reviews.map((review) => (
+                    reviews.map((review: any) => (
                       <div key={review.id} className="border-b border-border pb-6 last:border-0">
                         <div className="flex items-start gap-4">
                           <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">

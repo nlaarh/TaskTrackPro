@@ -122,6 +122,22 @@ export class CorrectedDatabaseStorage implements IStorage {
     return authRecord;
   }
 
+  // Get florist by ID
+  async getFloristById(id: number): Promise<Florist | null> {
+    try {
+      const result = await db
+        .select()
+        .from(florists)
+        .where(eq(florists.id, id))
+        .limit(1);
+      
+      return result[0] || null;
+    } catch (error) {
+      console.error("Error getting florist by ID:", error);
+      throw error;
+    }
+  }
+
   // Business profile operations (florists table)
   async createOrUpdateFloristProfile(floristAuthId: number, profileData: {
     businessName: string;

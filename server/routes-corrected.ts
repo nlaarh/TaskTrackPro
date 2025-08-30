@@ -286,6 +286,68 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
     }
   });
 
+
+
+  // Get individual florist by ID (use more specific route first)
+  app.get('/api/florists/detail/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const floristId = parseInt(id);
+      
+      if (isNaN(floristId)) {
+        return res.status(400).json({ message: "Invalid florist ID" });
+      }
+      
+      const florist = await correctedStorage.getFloristById(floristId);
+      
+      if (!florist) {
+        return res.status(404).json({ message: "Florist not found" });
+      }
+      
+      // Transform data to match frontend expectations (same format as search)
+      const transformedFlorist = {
+        id: florist.id,
+        businessName: florist.businessName,
+        address: florist.address,
+        city: florist.city,
+        state: florist.state,
+        zipCode: florist.zipCode,
+        phone: florist.phone,
+        website: florist.website,
+        profileSummary: florist.profileSummary,
+        yearsOfExperience: florist.yearsOfExperience,
+        specialties: florist.specialties || [],
+        services: florist.services || [],
+        firstName: florist.firstName,
+        lastName: florist.lastName,
+        email: florist.email,
+        createdAt: florist.createdAt,
+        // Transform profileImageUrl to expected images array format
+        images: florist.profileImageUrl ? [{
+          id: 1,
+          url: florist.profileImageUrl,
+          isPrimary: true,
+          alt: `${florist.businessName} profile photo`
+        }] : [],
+        // Add default values for missing fields expected by frontend
+        rating: "4.5", // Default rating
+        distance: null,
+        reviewCount: 0,
+        isOpen: true,
+        tags: [],
+        location: {
+          lat: null,
+          lng: null
+        }
+      };
+      
+      res.json(transformedFlorist);
+    } catch (error) {
+      console.error("Error fetching florist:", error);
+      res.status(500).json({ message: "Failed to fetch florist" });
+    }
+  });
+
   // Florist search endpoint
   app.get('/api/florists/search', async (req, res) => {
     try {
