@@ -54,10 +54,13 @@ interface Florist {
 
 export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState("users");
   const { toast } = useToast();
 
-  // API Queries
-  const { data: users = [], isLoading: usersLoading } = useQuery({
+  console.log("🎯 RENDER: activeTab =", activeTab);
+
+  // API Queries with no retry and proper error handling
+  const { data: users = [], isLoading: usersLoading, error: usersError } = useQuery({
     queryKey: ['/api/admin-clean/users'],
     queryFn: async () => {
       const token = localStorage.getItem('customerToken');
@@ -74,11 +77,16 @@ export default function AdminDashboard() {
         throw new Error(`Error loading users: ${response.statusText}`);
       }
       
-      return response.json();
+      const data = await response.json();
+      console.log("👥 Users loaded:", data.length);
+      return data;
     },
+    retry: false,
+    refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  const { data: florists = [], isLoading: floristsLoading } = useQuery({
+  const { data: florists = [], isLoading: floristsLoading, error: floristsError } = useQuery({
     queryKey: ['/api/admin-clean/florists'],
     queryFn: async () => {
       const token = localStorage.getItem('customerToken');
@@ -95,8 +103,13 @@ export default function AdminDashboard() {
         throw new Error('Failed to fetch florists');
       }
       
-      return response.json();
+      const data = await response.json();
+      console.log("🏪 Florists loaded:", data.length);
+      return data;
     },
+    retry: false,
+    refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   // Filter functions
@@ -135,12 +148,31 @@ export default function AdminDashboard() {
     }
   };
 
-  if (usersLoading || floristsLoading) {
+  // Only show loading for initial load, not tab switches
+  const isInitialLoading = (usersLoading && users.length === 0) || (floristsLoading && florists.length === 0);
+  
+  if (isInitialLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading admin dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (usersError || floristsError) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-red-600 mb-4">Error Loading Data</h1>
+          <p className="text-gray-600 mb-4">
+            {usersError?.message || floristsError?.message}
+          </p>
+          <Button onClick={() => window.location.reload()} variant="outline">
+            Retry
+          </Button>
         </div>
       </div>
     );
@@ -175,11 +207,15 @@ export default function AdminDashboard() {
         </div>
 
         {/* Tabs Section */}
-        <Tabs defaultValue="users" className="space-y-8">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
           <TabsList className="grid w-full grid-cols-3 bg-white border shadow-sm rounded-lg p-1">
             <TabsTrigger 
               value="users" 
               className="flex items-center gap-2 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700"
+              onClick={() => {
+                console.log("🔥 Users tab clicked!");
+                setActiveTab("users");
+              }}
             >
               <Users className="h-4 w-4" />
               All Users
@@ -187,6 +223,10 @@ export default function AdminDashboard() {
             <TabsTrigger 
               value="customers" 
               className="flex items-center gap-2 data-[state=active]:bg-green-50 data-[state=active]:text-green-700"
+              onClick={() => {
+                console.log("🔥 Customers tab clicked!");
+                setActiveTab("customers");
+              }}
             >
               <User className="h-4 w-4" />
               Customers
@@ -194,6 +234,10 @@ export default function AdminDashboard() {
             <TabsTrigger 
               value="florists" 
               className="flex items-center gap-2 data-[state=active]:bg-purple-50 data-[state=active]:text-purple-700"
+              onClick={() => {
+                console.log("🔥 Florists tab clicked!");
+                setActiveTab("florists");
+              }}
             >
               <Store className="h-4 w-4" />
               Florists
