@@ -123,55 +123,51 @@ export default function AdminDashboard() {
 
         {/* Simple Tab Navigation */}
         <div className="mb-6">
-          <div className="flex space-x-1 bg-white p-1 rounded-lg border shadow-sm">
-            <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                console.log("🔥 Users button clicked!");
-                setCurrentView("users");
-              }}
-              className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors cursor-pointer ${
-                currentView === "users"
-                  ? "bg-blue-100 text-blue-700 font-medium"
-                  : "text-gray-600 hover:bg-gray-50"
-              }`}
-            >
-              <Users className="h-4 w-4" />
-              All Users
-            </button>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                console.log("🔥 Customers button clicked!");
-                setCurrentView("customers");
-              }}
-              className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors cursor-pointer ${
-                currentView === "customers"
-                  ? "bg-green-100 text-green-700 font-medium"
-                  : "text-gray-600 hover:bg-gray-50"
-              }`}
-            >
-              <User className="h-4 w-4" />
-              Customers
-            </button>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                console.log("🔥 Florists button clicked!");
-                setCurrentView("florists");
-              }}
-              className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors cursor-pointer ${
-                currentView === "florists"
-                  ? "bg-purple-100 text-purple-700 font-medium"
-                  : "text-gray-600 hover:bg-gray-50"
-              }`}
-            >
-              <Store className="h-4 w-4" />
-              Florists
-            </button>
+          <div className="bg-white p-2 rounded-lg border shadow-sm">
+            <div className="flex gap-2">
+              <div
+                onClick={() => {
+                  console.log("🔥 Users div clicked!");
+                  setCurrentView("users");
+                }}
+                className={`flex items-center gap-2 px-6 py-3 rounded-md transition-all cursor-pointer select-none ${
+                  currentView === "users"
+                    ? "bg-blue-100 text-blue-700 font-medium shadow-sm"
+                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-800"
+                }`}
+              >
+                <Users className="h-5 w-5" />
+                <span className="font-medium">All Users</span>
+              </div>
+              <div
+                onClick={() => {
+                  console.log("🔥 Customers div clicked!");
+                  setCurrentView("customers");
+                }}
+                className={`flex items-center gap-2 px-6 py-3 rounded-md transition-all cursor-pointer select-none ${
+                  currentView === "customers"
+                    ? "bg-green-100 text-green-700 font-medium shadow-sm"
+                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-800"
+                }`}
+              >
+                <User className="h-5 w-5" />
+                <span className="font-medium">Customers</span>
+              </div>
+              <div
+                onClick={() => {
+                  console.log("🔥 Florists div clicked!");
+                  setCurrentView("florists");
+                }}
+                className={`flex items-center gap-2 px-6 py-3 rounded-md transition-all cursor-pointer select-none ${
+                  currentView === "florists"
+                    ? "bg-purple-100 text-purple-700 font-medium shadow-sm"
+                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-800"
+                }`}
+              >
+                <Store className="h-5 w-5" />
+                <span className="font-medium">Florists</span>
+              </div>
+            </div>
           </div>
         </div>
 
