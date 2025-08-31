@@ -662,45 +662,65 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Admin routes
+  // Admin routes - using direct PostgreSQL connection
   app.get('/api/admin/users', authenticateCustomer, checkAdminRole, async (req, res) => {
     try {
-      // Fetch real users from database with correct column names
-      const usersResult = await db.execute(sql`
+      console.log('Fetching users directly from PostgreSQL...');
+      
+      // Use the same pg client approach as authentication
+      const { Pool } = require('pg');
+      const pool = new Pool({
+        connectionString: process.env.DATABASE_URL
+      });
+      
+      const result = await pool.query(`
         SELECT id, email, first_name, last_name, role, created_at
         FROM users
         ORDER BY created_at DESC
       `);
       
-      const users = usersResult.rows.map((user: any) => ({
+      console.log('Direct users query result:', result.rows.length, 'rows');
+      
+      const users = result.rows.map((user: any) => ({
         id: user.id,
         email: user.email,
         firstName: user.first_name,
         lastName: user.last_name,
         role: user.role,
         roles: [user.role],
-        isVerified: true, // Default since column structure shows is_verified exists but may have issues
+        isVerified: true,
         createdAt: user.created_at
       }));
       
+      await pool.end();
+      console.log('Returning users:', users);
       res.json(users);
     } catch (error) {
       console.error('Error fetching users:', error);
-      res.status(500).json({ message: 'Failed to fetch users' });
+      res.status(500).json({ message: 'Failed to fetch users', error: error.message });
     }
   });
 
   app.get('/api/admin/florists', authenticateCustomer, checkAdminRole, async (req, res) => {
     try {
-      // Fetch real florists from florist_auth table (your actual 8 florists)
-      const floristsResult = await db.execute(sql`
+      console.log('Fetching florists directly from PostgreSQL...');
+      
+      // Use the same pg client approach as authentication
+      const { Pool } = require('pg');
+      const pool = new Pool({
+        connectionString: process.env.DATABASE_URL
+      });
+      
+      const result = await pool.query(`
         SELECT id, email, first_name, last_name, business_name, phone, address, 
                city, state, zip_code, website, specialties, services_offered, created_at
         FROM florist_auth
         ORDER BY created_at DESC
       `);
       
-      const florists = floristsResult.rows.map((florist: any) => ({
+      console.log('Direct florists query result:', result.rows.length, 'rows');
+      
+      const florists = result.rows.map((florist: any) => ({
         id: florist.id,
         businessName: florist.business_name,
         email: florist.email,
@@ -714,17 +734,19 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
         website: florist.website,
         services: florist.services_offered,
         specialties: florist.specialties,
-        rating: 4.5, // Default since this table doesn't have ratings
+        rating: 4.5,
         reviewCount: 0,
         createdAt: florist.created_at,
         isVerified: true,
         isActive: true
       }));
       
+      await pool.end();
+      console.log('Returning florists:', florists);
       res.json(florists);
     } catch (error) {
       console.error('Error fetching florists:', error);
-      res.status(500).json({ message: 'Failed to fetch florists' });
+      res.status(500).json({ message: 'Failed to fetch florists', error: error.message });
     }
   });
 
