@@ -665,41 +665,25 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
   // Admin routes
   app.get('/api/admin/users', authenticateCustomer, checkAdminRole, async (req, res) => {
     try {
-      // For demo purposes, return some sample data to test the UI
-      const sampleUsers = [
-        {
-          id: 'admin-1',
-          email: 'admin@test.com',
-          firstName: 'Admin',
-          lastName: 'User',
-          role: 'admin',
-          roles: ['admin', 'customer'],
-          isVerified: true,
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: 'customer-1',
-          email: 'customer@test.com',
-          firstName: 'Test',
-          lastName: 'Customer',
-          role: 'customer',
-          roles: ['customer'],
-          isVerified: true,
-          createdAt: new Date(Date.now() - 86400000).toISOString()
-        },
-        {
-          id: 'florist-1',
-          email: 'florist@test.com',
-          firstName: 'Flower',
-          lastName: 'Shop',
-          role: 'florist',
-          roles: ['florist'],
-          isVerified: false,
-          createdAt: new Date(Date.now() - 172800000).toISOString()
-        }
-      ];
+      // Fetch real users from database (with simplified query to match actual structure)
+      const usersResult = await db.execute(sql`
+        SELECT id, email, first_name, last_name, role, is_verified, created_at
+        FROM users
+        ORDER BY created_at DESC
+      `);
       
-      res.json(sampleUsers);
+      const users = usersResult.rows.map((user: any) => ({
+        id: user.id,
+        email: user.email,
+        firstName: user.first_name,
+        lastName: user.last_name,
+        role: user.role,
+        roles: [user.role], // Use primary role for now
+        isVerified: user.is_verified || false,
+        createdAt: user.created_at
+      }));
+      
+      res.json(users);
     } catch (error) {
       console.error('Error fetching users:', error);
       res.status(500).json({ message: 'Failed to fetch users' });
@@ -708,52 +692,36 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
 
   app.get('/api/admin/florists', authenticateCustomer, checkAdminRole, async (req, res) => {
     try {
-      // For demo purposes, return some sample florist data
-      const sampleFlorists = [
-        {
-          id: 1,
-          businessName: 'Garden Bloom Florists',
-          email: 'contact@gardenbloom.com',
-          phone: '(555) 123-4567',
-          address: '123 Flower St',
-          city: 'New York',
-          state: 'NY',
-          zipCode: '10001',
-          website: 'www.gardenbloom.com',
-          rating: 4.8,
-          reviewCount: 127,
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: 2,
-          businessName: 'Rose & Petals',
-          email: 'info@rosepetals.com',
-          phone: '(555) 987-6543',
-          address: '456 Rose Ave',
-          city: 'Brooklyn',
-          state: 'NY',
-          zipCode: '11201',
-          website: 'www.rosepetals.com',
-          rating: 4.6,
-          reviewCount: 93,
-          createdAt: new Date(Date.now() - 86400000).toISOString()
-        },
-        {
-          id: 3,
-          businessName: 'Wedding Flowers NYC',
-          email: 'orders@weddingflowersnyc.com',
-          phone: '(555) 456-7890',
-          address: '789 Wedding Way',
-          city: 'Manhattan',
-          state: 'NY',
-          zipCode: '10012',
-          rating: 4.9,
-          reviewCount: 201,
-          createdAt: new Date(Date.now() - 172800000).toISOString()
-        }
-      ];
+      // Fetch real florists from florist_auth table (this is where your actual florist data is)
+      const floristsResult = await db.execute(sql`
+        SELECT id, email, first_name, last_name, business_name, phone, address, 
+               city, state, zip_code, website, specialties, services, created_at
+        FROM florist_auth
+        ORDER BY created_at DESC
+      `);
       
-      res.json(sampleFlorists);
+      const florists = floristsResult.rows.map((florist: any) => ({
+        id: florist.id,
+        businessName: florist.business_name,
+        email: florist.email,
+        firstName: florist.first_name,
+        lastName: florist.last_name,
+        phone: florist.phone,
+        address: florist.address,
+        city: florist.city,
+        state: florist.state,
+        zipCode: florist.zip_code,
+        website: florist.website,
+        services: florist.services,
+        specialties: florist.specialties,
+        createdAt: florist.created_at,
+        isVerified: true, // Default for now
+        isActive: true, // Default for now
+        rating: 4.5, // Default for now
+        reviewCount: 0 // Default for now
+      }));
+      
+      res.json(florists);
     } catch (error) {
       console.error('Error fetching florists:', error);
       res.status(500).json({ message: 'Failed to fetch florists' });
