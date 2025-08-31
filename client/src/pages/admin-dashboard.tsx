@@ -32,6 +32,8 @@ interface Florist {
 export default function AdminDashboard() {
   const [currentView, setCurrentView] = useState<"users" | "customers" | "florists">("users");
   const [searchTerm, setSearchTerm] = useState("");
+  
+  console.log("🎯 Current view:", currentView);
 
   const { data: users = [], isLoading: usersLoading } = useQuery({
     queryKey: ['/api/admin-clean/users'],
@@ -123,8 +125,13 @@ export default function AdminDashboard() {
         <div className="mb-6">
           <div className="flex space-x-1 bg-white p-1 rounded-lg border shadow-sm">
             <button
-              onClick={() => setCurrentView("users")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                console.log("🔥 Users button clicked!");
+                setCurrentView("users");
+              }}
+              className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors cursor-pointer ${
                 currentView === "users"
                   ? "bg-blue-100 text-blue-700 font-medium"
                   : "text-gray-600 hover:bg-gray-50"
@@ -134,8 +141,13 @@ export default function AdminDashboard() {
               All Users
             </button>
             <button
-              onClick={() => setCurrentView("customers")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                console.log("🔥 Customers button clicked!");
+                setCurrentView("customers");
+              }}
+              className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors cursor-pointer ${
                 currentView === "customers"
                   ? "bg-green-100 text-green-700 font-medium"
                   : "text-gray-600 hover:bg-gray-50"
@@ -145,8 +157,13 @@ export default function AdminDashboard() {
               Customers
             </button>
             <button
-              onClick={() => setCurrentView("florists")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                console.log("🔥 Florists button clicked!");
+                setCurrentView("florists");
+              }}
+              className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors cursor-pointer ${
                 currentView === "florists"
                   ? "bg-purple-100 text-purple-700 font-medium"
                   : "text-gray-600 hover:bg-gray-50"
