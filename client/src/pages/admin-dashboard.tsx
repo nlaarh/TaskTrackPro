@@ -89,10 +89,14 @@ export default function AdminDashboard() {
 
   // Handle tab changes and reset search/sort when switching tabs
   const handleTabChange = (newTab: string) => {
+    console.log(`🔄 TAB CHANGE: Switching from ${activeTab} to ${newTab}`);
     setActiveTab(newTab);
     setSearchTerm(""); // Reset search when switching tabs
     setSortField(""); // Reset sort when switching tabs
     setSortDirection("asc");
+    
+    // Force re-render by logging current data
+    console.log(`🔄 TAB CHANGE: Users count: ${users.length}, Florists count: ${florists.length}`);
   };
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [selectedFlorist, setSelectedFlorist] = useState<Florist | null>(null);
@@ -777,6 +781,15 @@ export default function AdminDashboard() {
 
           {/* Customer Management Tab */}
           <TabsContent value="customers" className="space-y-6">
+            {/* Debug info */}
+            <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg mb-4">
+              <p className="text-sm text-yellow-800">
+                🎯 DEBUG: Found {filteredCustomers.length} customers out of {users.length} total users. Active tab: {activeTab}
+              </p>
+              <p className="text-xs text-yellow-700 mt-1">
+                Users loading: {usersLoading ? 'YES' : 'NO'}, Search term: "{searchTerm}"
+              </p>
+            </div>
             <Card className="shadow-lg border-0 bg-white">
               <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50 border-b">
                 <CardTitle className="flex items-center justify-between">
