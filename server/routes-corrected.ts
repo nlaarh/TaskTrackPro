@@ -4,6 +4,8 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { correctedStorage } from "./storage-corrected";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { db } from "./db";
+import { sql } from "drizzle-orm";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
@@ -139,21 +141,44 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
   app.post('/api/auth/customer/login', async (req, res) => {
     try {
       const { email, password } = req.body;
+      console.log('Login attempt for:', email);
       
       // Validate required fields
       if (!email || !password) {
+        console.log('Missing email or password');
         return res.status(400).json({ message: 'Email and password are required' });
       }
       
-      // Get user by email
-      const user = await correctedStorage.getUserByEmail(email);
-      if (!user || !user.passwordHash) {
+      // Direct SQL query to bypass storage layer issues
+      const result = await db.execute(sql`
+        SELECT id, email, first_name, last_name, role, password_hash
+        FROM users 
+        WHERE email = ${email} 
+        LIMIT 1
+      `);
+      
+      console.log('Query result rows:', result.rows.length);
+      
+      if (result.rows.length === 0) {
+        console.log('User not found');
+        return res.status(401).json({ message: 'Invalid email or password' });
+      }
+
+      const user = result.rows[0] as any;
+      console.log('Found user:', user.email, 'has password hash:', !!user.password_hash);
+      
+      if (!user.password_hash) {
+        console.log('No password hash found');
         return res.status(401).json({ message: 'Invalid email or password' });
       }
       
       // Verify password
-      const isValidPassword = await bcrypt.compare(password, user.passwordHash);
+      console.log('Comparing password...');
+      const isValidPassword = await bcrypt.compare(password, user.password_hash);
+      console.log('Password valid:', isValidPassword);
+      
       if (!isValidPassword) {
+        console.log('Password verification failed');
         return res.status(401).json({ message: 'Invalid email or password' });
       }
       
@@ -164,12 +189,13 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
         { expiresIn: '24h' }
       );
       
+      console.log('Login successful, returning token');
       res.json({
         user: {
           id: user.id,
           email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
+          firstName: user.first_name,
+          lastName: user.last_name,
           role: user.role,
         },
         token

@@ -116,10 +116,7 @@ export class CorrectedDatabaseStorage implements IStorage {
     try {
       // Use raw SQL query to avoid Drizzle schema mismatch
       const result = await db.execute(sql`
-        SELECT id, email, password_hash, first_name, last_name, profile_image_url, role, is_verified, created_at, updated_at 
-        FROM users 
-        WHERE email = ${email}
-        LIMIT 1
+        SELECT * FROM users WHERE email = ${email} LIMIT 1
       `);
       
       if (result.rows.length === 0) return undefined;
@@ -133,10 +130,10 @@ export class CorrectedDatabaseStorage implements IStorage {
         lastName: row.last_name,
         profileImageUrl: row.profile_image_url,
         role: row.role,
-        isVerified: row.is_verified,
-        verificationToken: null,
-        resetToken: null,
-        resetTokenExpires: null,
+        isVerified: row.is_verified || false,
+        verificationToken: row.verification_token,
+        resetToken: row.reset_token,
+        resetTokenExpires: row.reset_token_expires,
         createdAt: row.created_at,
         updatedAt: row.updated_at,
       };
