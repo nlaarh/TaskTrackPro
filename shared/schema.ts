@@ -23,9 +23,9 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
-// Customer authentication table - Updated for username/password auth
+// Customer authentication table - Updated for username/password auth with string ID (matching existing database)
 export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
+  id: varchar("id").primaryKey(),
   email: varchar("email").unique().notNull(),
   passwordHash: varchar("password_hash"),
   firstName: varchar("first_name"),
@@ -39,6 +39,16 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
+
+// User roles table for multiple roles per user
+export const userRoles = pgTable("user_roles", {
+  id: serial("id").primaryKey(),
+  userEmail: varchar("user_email").notNull(),
+  role: varchar("role").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  { unique: [table.userEmail, table.role] }
+]);
 
 // Florist authentication table - ACTUAL database structure
 export const floristAuth = pgTable("florist_auth", {
@@ -187,6 +197,7 @@ export const insertUserSchema = createInsertSchema(users).omit({
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
+export type UserRole = typeof userRoles.$inferSelect;
 export type InsertFloristAuth = z.infer<typeof insertFloristAuthSchema>;
 export type FloristAuth = typeof floristAuth.$inferSelect;
 export type InsertFlorist = z.infer<typeof insertFloristSchema>;

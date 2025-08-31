@@ -49,7 +49,7 @@ const authenticateCustomer = async (req: any, res: any, next: any) => {
       return res.status(401).json({ message: 'Invalid token' });
     }
 
-    req.user = { userId: user.id, email: user.email };
+    req.user = { userId: user.id, email: user.email, userObj: user };
     next();
   } catch (error) {
     console.error('Customer auth error:', error);
@@ -163,7 +163,7 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get current customer
+  // Get current customer with roles
   app.get('/api/auth/user', authenticateCustomer, async (req: any, res) => {
     try {
       const user = await correctedStorage.getUserById(req.user.userId);
@@ -171,12 +171,16 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'User not found' });
       }
       
+      // Get all roles for this user
+      const roles = await correctedStorage.getUserRoles(user.email);
+      
       res.json({
         id: user.id,
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
         role: user.role,
+        roles: roles, // All roles this user has
       });
     } catch (error) {
       console.error("Error fetching user:", error);

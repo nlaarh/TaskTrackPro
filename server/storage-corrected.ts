@@ -1,5 +1,6 @@
 import {
   users,
+  userRoles,
   floristAuth,
   florists,
   reviews,
@@ -21,7 +22,9 @@ export interface IStorage {
     lastName: string;
   }): Promise<User>;
   getUserByEmail(email: string): Promise<User | undefined>;
-  getUserById(id: number): Promise<User | undefined>;
+  getUserById(id: string): Promise<User | undefined>;
+  getUserRoles(email: string): Promise<string[]>;
+  addUserRole(email: string, role: string): Promise<void>;
   
   // Florist authentication operations (florist_auth table)
   createFloristAuth(authData: {
@@ -77,9 +80,13 @@ export class CorrectedDatabaseStorage implements IStorage {
     lastName: string;
   }): Promise<User> {
     try {
+      // Generate a unique ID
+      const userId = `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      
       const [newUser] = await db
         .insert(users)
         .values({
+          id: userId,
           email: userData.email,
           passwordHash: userData.passwordHash,
           firstName: userData.firstName,
@@ -88,6 +95,10 @@ export class CorrectedDatabaseStorage implements IStorage {
           isVerified: false,
         })
         .returning();
+      
+      // Add customer role to user_roles table
+      await this.addUserRole(userData.email, 'customer');
+      
       return newUser;
     } catch (error) {
       console.error('Error creating user:', error);
@@ -97,21 +108,94 @@ export class CorrectedDatabaseStorage implements IStorage {
 
   async getUserByEmail(email: string): Promise<User | undefined> {
     try {
-      const [user] = await db.select().from(users).where(eq(users.email, email));
-      return user;
+      // Use raw SQL query to avoid Drizzle schema mismatch
+      const result = await db.execute(sql`
+        SELECT id, email, password_hash, first_name, last_name, profile_image_url, role, is_verified, created_at, updated_at 
+        FROM users 
+        WHERE email = ${email}
+        LIMIT 1
+      `);
+      
+      if (result.rows.length === 0) return undefined;
+      
+      const row = result.rows[0] as any;
+      return {
+        id: row.id,
+        email: row.email,
+        passwordHash: row.password_hash,
+        firstName: row.first_name,
+        lastName: row.last_name,
+        profileImageUrl: row.profile_image_url,
+        role: row.role,
+        isVerified: row.is_verified,
+        verificationToken: null,
+        resetToken: null,
+        resetTokenExpires: null,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+      };
     } catch (error) {
       console.error('Error getting user by email:', error);
       return undefined;
     }
   }
 
-  async getUserById(id: number): Promise<User | undefined> {
+  async getUserById(id: string): Promise<User | undefined> {
     try {
-      const [user] = await db.select().from(users).where(eq(users.id, id));
-      return user;
+      // Use raw SQL query to avoid Drizzle schema mismatch
+      const result = await db.execute(sql`
+        SELECT id, email, password_hash, first_name, last_name, profile_image_url, role, is_verified, created_at, updated_at 
+        FROM users 
+        WHERE id = ${id}
+        LIMIT 1
+      `);
+      
+      if (result.rows.length === 0) return undefined;
+      
+      const row = result.rows[0] as any;
+      return {
+        id: row.id,
+        email: row.email,
+        passwordHash: row.password_hash,
+        firstName: row.first_name,
+        lastName: row.last_name,
+        profileImageUrl: row.profile_image_url,
+        role: row.role,
+        isVerified: row.is_verified,
+        verificationToken: null,
+        resetToken: null,
+        resetTokenExpires: null,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+      };
     } catch (error) {
       console.error('Error getting user by ID:', error);
       return undefined;
+    }
+  }
+
+  async getUserRoles(email: string): Promise<string[]> {
+    try {
+      const roles = await db
+        .select({ role: userRoles.role })
+        .from(userRoles)
+        .where(eq(userRoles.userEmail, email));
+      return roles.map(r => r.role);
+    } catch (error) {
+      console.error('Error getting user roles:', error);
+      return [];
+    }
+  }
+
+  async addUserRole(email: string, role: string): Promise<void> {
+    try {
+      await db
+        .insert(userRoles)
+        .values({ userEmail: email, role })
+        .onConflictDoNothing();
+    } catch (error) {
+      console.error('Error adding user role:', error);
+      throw error;
     }
   }
 
