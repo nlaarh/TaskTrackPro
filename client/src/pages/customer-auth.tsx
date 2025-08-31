@@ -80,7 +80,13 @@ export default function CustomerAuth() {
         title: "Welcome back!",
         description: `Hello ${data.user.firstName}, you're now logged in.`,
       });
-      setLocation('/');
+      
+      // Redirect admin users to admin dashboard
+      if (data.user.role === 'admin') {
+        setLocation('/admin');
+      } else {
+        setLocation('/');
+      }
     },
     onError: (error: Error) => {
       toast({
@@ -113,7 +119,13 @@ export default function CustomerAuth() {
         title: "Account created!",
         description: `Welcome to FloriHub, ${data.user.firstName}!`,
       });
-      setLocation('/');
+      
+      // Redirect admin users to admin dashboard
+      if (data.user.role === 'admin') {
+        setLocation('/admin');
+      } else {
+        setLocation('/');
+      }
     },
     onError: (error: Error) => {
       toast({
