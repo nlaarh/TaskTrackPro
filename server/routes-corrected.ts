@@ -78,13 +78,24 @@ const authenticateCustomer = async (req: any, res: any, next: any) => {
       return next();
     }
     
-    // Get user record for regular users
-    const user = await correctedStorage.getUserById(decoded.userId);
-    if (!user) {
+    // Get user record for regular users using pool directly
+    const result = await pool.query('SELECT * FROM users WHERE id = $1', [decoded.userId]);
+    if (result.rows.length === 0) {
       return res.status(401).json({ message: 'Invalid token' });
     }
 
-    req.user = { userId: user.id, email: user.email, userObj: user };
+    const user = result.rows[0];
+    req.user = { 
+      userId: user.id, 
+      email: user.email, 
+      userObj: {
+        id: user.id,
+        email: user.email,
+        firstName: user.first_name,
+        lastName: user.last_name,
+        role: user.role
+      }
+    };
     next();
   } catch (error) {
     console.error('Customer auth error:', error);
@@ -101,9 +112,8 @@ const checkAdminRole = async (req: any, res: any, next: any) => {
     }
     
     const user = req.user.userObj;
-    const roles = await correctedStorage.getUserRoles(user.email);
-    
-    if (!roles.includes('admin')) {
+    // Check if user has admin role directly from the users table
+    if (user.role !== 'admin') {
       return res.status(403).json({ message: 'Admin access required' });
     }
     
@@ -693,38 +703,33 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
 
   app.get('/api/admin/florists', authenticateCustomer, checkAdminRole, async (req, res) => {
     try {
-      console.log('Fetching florists using correctedStorage...');
+      const result = await pool.query(`
+        SELECT * FROM florists 
+        ORDER BY created_at DESC
+      `);
       
-      // Use the same approach as the working authentication system
-      const realFlorists = await correctedStorage.getAllFlorists();
-      console.log('Retrieved florists:', realFlorists.length, 'florists');
-      
-      const florists = realFlorists.map((florist: any) => ({
-        id: florist.id,
-        businessName: florist.businessName || florist.business_name,
-        email: florist.email,
-        firstName: florist.firstName || florist.first_name,
-        lastName: florist.lastName || florist.last_name,
-        phone: florist.phone,
-        address: florist.address,
-        city: florist.city,
-        state: florist.state,
-        zipCode: florist.zipCode || florist.zip_code,
-        website: florist.website,
-        services: florist.servicesOffered || florist.services_offered,
-        specialties: florist.specialties,
-        rating: 4.5,
-        reviewCount: 0,
-        createdAt: florist.createdAt || florist.created_at,
+      const florists = result.rows.map((row: any) => ({
+        id: row.id,
+        businessName: row.business_name,
+        email: row.email,
+        phone: row.phone,
+        address: row.address,
+        city: row.city,
+        state: row.state,
+        zipCode: row.zip_code,
+        website: row.website,
+        specialties: row.specialties,
+        rating: row.rating || 4.5,
+        reviewCount: row.review_count || 0,
+        createdAt: row.created_at,
         isVerified: true,
         isActive: true
       }));
       
-      console.log('Returning formatted florists:', florists);
       res.json(florists);
     } catch (error) {
-      console.error('Error fetching florists:', error);
-      res.status(500).json({ message: 'Failed to fetch florists', error: error.message });
+      console.error('Admin florists error:', error);
+      res.status(500).json({ message: 'Failed to fetch florists' });
     }
   });
 
@@ -732,23 +737,24 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
     try {
       const { firstName, lastName, email, role } = req.body;
       
-      // Generate a temporary password
       const tempPassword = Math.random().toString(36).slice(-8);
       const passwordHash = await bcrypt.hash(tempPassword, 10);
       
-      const user = await correctedStorage.createUser({
-        email,
-        passwordHash,
-        firstName,
-        lastName,
-      });
+      const result = await pool.query(`
+        INSERT INTO users (email, password_hash, first_name, last_name, role, created_at)
+        VALUES ($1, $2, $3, $4, $5, NOW())
+        RETURNING id, email, first_name, last_name, role, created_at
+      `, [email, passwordHash, firstName, lastName, role]);
       
-      // Add role to user_roles table
-      await correctedStorage.addUserRole(email, role);
-      
-      res.status(201).json({ 
-        ...user, 
-        tempPassword // Include temp password in response for admin
+      const user = result.rows[0];
+      res.status(201).json({
+        id: user.id,
+        email: user.email,
+        firstName: user.first_name,
+        lastName: user.last_name,
+        role: user.role,
+        createdAt: user.created_at,
+        tempPassword
       });
     } catch (error) {
       console.error('Error creating user:', error);
@@ -759,10 +765,24 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
   app.put('/api/admin/users/:id', authenticateCustomer, checkAdminRole, async (req, res) => {
     try {
       const { id } = req.params;
-      const userData = req.body;
+      const { firstName, lastName, email, role } = req.body;
       
-      const updatedUser = await correctedStorage.updateUser(id, userData);
-      res.json(updatedUser);
+      const result = await pool.query(`
+        UPDATE users 
+        SET first_name = $1, last_name = $2, email = $3, role = $4
+        WHERE id = $5
+        RETURNING id, email, first_name, last_name, role, created_at
+      `, [firstName, lastName, email, role, id]);
+      
+      const user = result.rows[0];
+      res.json({
+        id: user.id,
+        email: user.email,
+        firstName: user.first_name,
+        lastName: user.last_name,
+        role: user.role,
+        createdAt: user.created_at
+      });
     } catch (error) {
       console.error('Error updating user:', error);
       res.status(500).json({ message: 'Failed to update user' });
@@ -772,7 +792,7 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
   app.delete('/api/admin/users/:id', authenticateCustomer, checkAdminRole, async (req, res) => {
     try {
       const { id } = req.params;
-      await correctedStorage.deleteUser(id);
+      await pool.query('DELETE FROM users WHERE id = $1', [id]);
       res.status(204).send();
     } catch (error) {
       console.error('Error deleting user:', error);
