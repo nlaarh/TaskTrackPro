@@ -121,7 +121,7 @@ export default function AdminDashboard() {
 
   // API Queries
   const { data: users = [], isLoading: usersLoading, error: usersError } = useQuery({
-    queryKey: ['/api/admin/users'],
+    queryKey: ['/api/admin-clean/users'],
     queryFn: async () => {
       const token = localStorage.getItem('customerToken');
       if (!token) {
@@ -132,7 +132,7 @@ export default function AdminDashboard() {
       console.log('Making request with token:', token.substring(0, 20) + '...');
       console.log('Full token available:', !!token);
       
-      const response = await fetch('/api/admin/users', {
+      const response = await fetch('/api/admin-clean/users', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -153,12 +153,12 @@ export default function AdminDashboard() {
   });
 
   const { data: florists = [], isLoading: floristsLoading, error: floristsError } = useQuery({
-    queryKey: ['/api/admin/florists'],
+    queryKey: ['/api/admin-clean/florists'],
     queryFn: async () => {
       const token = localStorage.getItem('customerToken');
       if (!token) throw new Error('No authentication token');
       
-      const response = await fetch('/api/admin/florists', {
+      const response = await fetch('/api/admin-clean/florists', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',

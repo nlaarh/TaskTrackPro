@@ -16,17 +16,25 @@ const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
 // Simple admin authentication middleware
 const adminAuth = async (req: any, res: any, next: any) => {
+  console.log('ADMIN AUTH: Starting authentication...');
   try {
     const authHeader = req.headers.authorization;
+    console.log('ADMIN AUTH: Auth header present:', !!authHeader);
+    
     if (!authHeader?.startsWith('Bearer ')) {
+      console.log('ADMIN AUTH: No Bearer token found');
       return res.status(401).json({ message: 'No token provided' });
     }
 
     const token = authHeader.substring(7);
-    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    console.log('ADMIN AUTH: Token extracted, length:', token.length);
     
-    // Handle main admin special case
-    if (decoded.email === 'alaaroubi@gmail.com' && decoded.isMainAdmin) {
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    console.log('ADMIN AUTH: Token decoded successfully:', { email: decoded.email, userId: decoded.userId });
+    
+    // Handle main admin special case - check the actual token structure
+    if (decoded.userId === 'main-admin' && decoded.email === 'alaaroubi@gmail.com') {
+      console.log('ADMIN AUTH: Main admin bypass granted');
       req.user = {
         id: 'main-admin',
         email: 'alaaroubi@gmail.com',
@@ -38,9 +46,11 @@ const adminAuth = async (req: any, res: any, next: any) => {
     // For other users, check database
     const result = await pool.query('SELECT * FROM users WHERE email = $1', [decoded.email]);
     if (result.rows.length === 0 || result.rows[0].role !== 'admin') {
+      console.log('ADMIN AUTH: Access denied - user not admin or not found');
       return res.status(403).json({ message: 'Admin access required' });
     }
 
+    console.log('ADMIN AUTH: Regular admin user granted access');
     req.user = result.rows[0];
     next();
   } catch (error) {
@@ -98,7 +108,7 @@ export function setupAdminRoutes(app: Express) {
   });
 
   // Get all florists
-  app.get('/api/admin/florists', adminAuth, async (req, res) => {
+  app.get('/api/admin-clean/florists', adminAuth, async (req, res) => {
     try {
       const result = await pool.query(`
         SELECT * FROM florists 
