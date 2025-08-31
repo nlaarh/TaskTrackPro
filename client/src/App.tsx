@@ -15,7 +15,7 @@ import FloristRegister from "@/pages/florist-register";
 import FloristDashboard from "@/pages/florist-dashboard";
 import FloristProfileSetup from "@/pages/florist-profile-setup";
 import CustomerAuth from "@/pages/customer-auth";
-import AdminDashboard from "@/pages/admin-dashboard-new";
+import AdminDashboard from "@/pages/admin-dashboard-clean";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
