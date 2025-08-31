@@ -91,8 +91,9 @@ export default function AdminDashboard() {
   const handleTabChange = (newTab: string) => {
     console.log(`🔄 TAB CHANGE REQUESTED: ${activeTab} -> ${newTab}`);
     console.log(`🔄 Before change - activeTab: ${activeTab}`);
+    console.log(`🔄 Available data - Users: ${users.length}, Florists: ${florists.length}`);
     
-    // Force tab change immediately
+    // Force tab change immediately with state update
     setActiveTab(newTab);
     
     // Clear filters
@@ -100,10 +101,8 @@ export default function AdminDashboard() {
     setSortField(""); 
     setSortDirection("asc");
     
-    // Log after state change
-    setTimeout(() => {
-      console.log(`🔄 After change - activeTab should be: ${newTab}`);
-    }, 10);
+    // Force component re-render
+    console.log(`🔄 TAB SWITCHED TO: ${newTab}`);
   };
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [selectedFlorist, setSelectedFlorist] = useState<Florist | null>(null);
@@ -443,8 +442,12 @@ export default function AdminDashboard() {
         <div className="space-y-8">
           {/* Custom Tab Navigation */}
           <div className="grid w-full grid-cols-3 bg-white border shadow-sm rounded-lg p-1">
-            <button 
-              onClick={() => handleTabChange("users")}
+            <Button 
+              variant="ghost"
+              onClick={() => {
+                console.log("🔥 Users tab clicked!");
+                handleTabChange("users");
+              }}
               className={`flex items-center justify-center gap-2 px-4 py-2 rounded-md transition-colors ${
                 activeTab === "users" 
                   ? "bg-blue-50 text-blue-700 shadow-sm font-medium" 
@@ -453,9 +456,13 @@ export default function AdminDashboard() {
             >
               <Users className="h-4 w-4" />
               All Users
-            </button>
-            <button 
-              onClick={() => handleTabChange("customers")}
+            </Button>
+            <Button 
+              variant="ghost"
+              onClick={() => {
+                console.log("🔥 Customers tab clicked!");
+                handleTabChange("customers");
+              }}
               className={`flex items-center justify-center gap-2 px-4 py-2 rounded-md transition-colors ${
                 activeTab === "customers" 
                   ? "bg-green-50 text-green-700 shadow-sm font-medium" 
@@ -464,9 +471,13 @@ export default function AdminDashboard() {
             >
               <User className="h-4 w-4" />
               Customers
-            </button>
-            <button 
-              onClick={() => handleTabChange("florists")}
+            </Button>
+            <Button 
+              variant="ghost"
+              onClick={() => {
+                console.log("🔥 Florists tab clicked!");
+                handleTabChange("florists");
+              }}
               className={`flex items-center justify-center gap-2 px-4 py-2 rounded-md transition-colors ${
                 activeTab === "florists" 
                   ? "bg-purple-50 text-purple-700 shadow-sm font-medium" 
@@ -475,7 +486,7 @@ export default function AdminDashboard() {
             >
               <Store className="h-4 w-4" />
               Florists
-            </button>
+            </Button>
           </div>
 
           {/* All Users Tab */}
