@@ -124,7 +124,12 @@ export default function AdminDashboard() {
     queryKey: ['/api/admin/users'],
     queryFn: async () => {
       const token = localStorage.getItem('customerToken');
-      if (!token) throw new Error('No authentication token');
+      if (!token) {
+        console.error('No authentication token found in localStorage');
+        throw new Error('No authentication token when going to admin');
+      }
+      
+      console.log('Making request with token:', token.substring(0, 20) + '...');
       
       const response = await fetch('/api/admin/users', {
         headers: {
@@ -134,11 +139,14 @@ export default function AdminDashboard() {
       });
       
       if (!response.ok) {
-        const error = await response.json().catch(() => ({ message: 'Failed to fetch users' }));
-        throw new Error(error.message || 'Failed to fetch users');
+        const errorText = await response.text();
+        console.error('API Error:', response.status, errorText);
+        throw new Error(`Error loading users: ${errorText}`);
       }
       
-      return response.json();
+      const data = await response.json();
+      console.log('Users data received:', data);
+      return data;
     },
     retry: false,
   });
