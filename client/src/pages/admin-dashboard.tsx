@@ -87,16 +87,14 @@ export default function AdminDashboard() {
   const [sortField, setSortField] = useState("");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
-  // Handle tab changes and reset search/sort when switching tabs
+  // Handle tab changes - simplified approach
   const handleTabChange = (newTab: string) => {
-    console.log(`🔄 TAB CHANGE: Switching from ${activeTab} to ${newTab}`);
+    console.log(`🔄 TAB CHANGE: From ${activeTab} to ${newTab}`);
+    console.log(`🔄 Data available: Users=${users.length}, Florists=${florists.length}`);
     setActiveTab(newTab);
-    setSearchTerm(""); // Reset search when switching tabs
-    setSortField(""); // Reset sort when switching tabs
+    setSearchTerm(""); 
+    setSortField(""); 
     setSortDirection("asc");
-    
-    // Force re-render by logging current data
-    console.log(`🔄 TAB CHANGE: Users count: ${users.length}, Florists count: ${florists.length}`);
   };
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [selectedFlorist, setSelectedFlorist] = useState<Florist | null>(null);
@@ -298,7 +296,12 @@ export default function AdminDashboard() {
         : String(bValue).localeCompare(String(aValue));
     });
 
-  console.log(`Active tab: ${activeTab}, Users total: ${users.length}, Customers filtered: ${filteredCustomers.length}, Florists: ${florists.length}`);
+  console.log(`🎯 RENDER: Tab=${activeTab}, Users=${users.length}, Customers=${filteredCustomers.length}, Florists=${florists.length}`);
+  
+  // Add effect to track tab changes
+  useEffect(() => {
+    console.log(`🎯 EFFECT: activeTab changed to ${activeTab}`);
+  }, [activeTab]);
 
   const filteredFlorists = florists
     .filter((florist: Florist) => 
@@ -428,7 +431,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-8">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-8" key={`${users.length}-${florists.length}`}>
           <TabsList className="grid w-full grid-cols-3 bg-white border shadow-sm rounded-lg p-1">
             <TabsTrigger 
               value="users" 
