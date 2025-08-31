@@ -24,7 +24,26 @@ function Router() {
     <Switch>
       {/* Authentication routes - always available */}
       <Route path="/auth" component={CustomerAuth} />
-      <Route path="/admin" component={AdminDashboard} />
+      <Route path="/admin" component={() => {
+        // Check admin authentication before rendering
+        const token = localStorage.getItem('customerToken');
+        const user = localStorage.getItem('customerUser');
+        
+        if (!token) {
+          window.location.href = '/auth';
+          return <div>Redirecting to login...</div>;
+        }
+        
+        if (user) {
+          const userData = JSON.parse(user);
+          if (userData.role !== 'admin') {
+            window.location.href = '/';
+            return <div>Access denied. Redirecting...</div>;
+          }
+        }
+        
+        return <AdminDashboard />;
+      }} />
       <Route path="/florist-login" component={FloristLogin} />
       <Route path="/florist-register" component={FloristRegister} />
       <Route path="/florist-dashboard" component={FloristDashboard} />
