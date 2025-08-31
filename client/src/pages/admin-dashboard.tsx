@@ -120,30 +120,50 @@ export default function AdminDashboard() {
   });
 
   // API Queries
-  const { data: users = [], isLoading: usersLoading } = useQuery({
+  const { data: users = [], isLoading: usersLoading, error: usersError } = useQuery({
     queryKey: ['/api/admin/users'],
     queryFn: async () => {
+      const token = localStorage.getItem('customerToken');
+      if (!token) throw new Error('No authentication token');
+      
       const response = await fetch('/api/admin/users', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('customerToken')}`,
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
       });
-      if (!response.ok) throw new Error('Failed to fetch users');
+      
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: 'Failed to fetch users' }));
+        throw new Error(error.message || 'Failed to fetch users');
+      }
+      
       return response.json();
     },
+    retry: false,
   });
 
-  const { data: florists = [], isLoading: floristsLoading } = useQuery({
+  const { data: florists = [], isLoading: floristsLoading, error: floristsError } = useQuery({
     queryKey: ['/api/admin/florists'],
     queryFn: async () => {
+      const token = localStorage.getItem('customerToken');
+      if (!token) throw new Error('No authentication token');
+      
       const response = await fetch('/api/admin/florists', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('customerToken')}`,
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
       });
-      if (!response.ok) throw new Error('Failed to fetch florists');
+      
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: 'Failed to fetch florists' }));
+        throw new Error(error.message || 'Failed to fetch florists');
+      }
+      
       return response.json();
     },
+    retry: false,
   });
 
   // Mutations
@@ -218,10 +238,26 @@ export default function AdminDashboard() {
   // Filter and sort data
   const filteredUsers = users
     .filter((user: User) => 
-      user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.role.toLowerCase().includes(searchTerm.toLowerCase())
+      user.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.role?.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .sort((a: User, b: User) => {
+      if (!sortField) return 0;
+      const aValue = a[sortField as keyof User] || "";
+      const bValue = b[sortField as keyof User] || "";
+      return sortDirection === "asc" 
+        ? String(aValue).localeCompare(String(bValue))
+        : String(bValue).localeCompare(String(aValue));
+    });
+
+  const filteredCustomers = users
+    .filter((user: User) => user.role === 'customer' || (user.roles && user.roles.includes('customer')))
+    .filter((user: User) => 
+      user.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchTerm.toLowerCase())
     )
     .sort((a: User, b: User) => {
       if (!sortField) return 0;
@@ -234,10 +270,10 @@ export default function AdminDashboard() {
 
   const filteredFlorists = florists
     .filter((florist: Florist) => 
-      florist.businessName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      florist.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      florist.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      florist.state.toLowerCase().includes(searchTerm.toLowerCase())
+      florist.businessName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      florist.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      florist.city?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      florist.state?.toLowerCase().includes(searchTerm.toLowerCase())
     )
     .sort((a: Florist, b: Florist) => {
       if (!sortField) return 0;
@@ -333,35 +369,71 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100">
       <Navigation />
       
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
-          <p className="text-gray-600">Manage users, florists, and system settings</p>
+      <div className="container mx-auto px-6 py-12">
+        {/* Header Section */}
+        <div className="mb-12">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-bold text-gray-900 mb-3 flex items-center gap-3">
+                <Shield className="h-10 w-10 text-blue-600" />
+                Admin Dashboard
+              </h1>
+              <p className="text-lg text-gray-600">Comprehensive management for users, customers, and florist businesses</p>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="bg-white px-4 py-2 rounded-lg shadow-sm border">
+                <span className="text-sm text-gray-500">Total Users</span>
+                <div className="text-2xl font-bold text-gray-900">{users.length}</div>
+              </div>
+              <div className="bg-white px-4 py-2 rounded-lg shadow-sm border">
+                <span className="text-sm text-gray-500">Total Florists</span>
+                <div className="text-2xl font-bold text-gray-900">{florists.length}</div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="users" className="flex items-center gap-2">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
+          <TabsList className="grid w-full grid-cols-3 bg-white border shadow-sm rounded-lg p-1">
+            <TabsTrigger 
+              value="users" 
+              className="flex items-center gap-2 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700 data-[state=active]:shadow-sm rounded-md"
+            >
               <Users className="h-4 w-4" />
-              Users
+              All Users
             </TabsTrigger>
-            <TabsTrigger value="florists" className="flex items-center gap-2">
+            <TabsTrigger 
+              value="customers" 
+              className="flex items-center gap-2 data-[state=active]:bg-green-50 data-[state=active]:text-green-700 data-[state=active]:shadow-sm rounded-md"
+            >
+              <User className="h-4 w-4" />
+              Customers
+            </TabsTrigger>
+            <TabsTrigger 
+              value="florists" 
+              className="flex items-center gap-2 data-[state=active]:bg-purple-50 data-[state=active]:text-purple-700 data-[state=active]:shadow-sm rounded-md"
+            >
               <Store className="h-4 w-4" />
               Florists
             </TabsTrigger>
           </TabsList>
 
-          {/* Users Tab */}
+          {/* All Users Tab */}
           <TabsContent value="users" className="space-y-6">
-            <Card>
-              <CardHeader>
+            <Card className="shadow-lg border-0 bg-white">
+              <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b">
                 <CardTitle className="flex items-center justify-between">
-                  <span className="flex items-center gap-2">
-                    <Users className="h-5 w-5" />
-                    User Management
+                  <span className="flex items-center gap-3">
+                    <div className="p-2 bg-blue-100 rounded-lg">
+                      <Users className="h-6 w-6 text-blue-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-semibold text-gray-900">All Users Management</h3>
+                      <p className="text-sm text-gray-600 mt-1">Manage all user accounts across the platform</p>
+                    </div>
                   </span>
                   <div className="flex items-center gap-2">
                     <input
@@ -491,114 +563,345 @@ export default function AdminDashboard() {
                     </Dialog>
                   </div>
                 </CardTitle>
-                <CardDescription>
-                  Manage user accounts and permissions
-                </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="flex items-center gap-4 mb-6">
+              <CardContent className="p-8">
+                {usersError && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                    <div className="flex items-center gap-2 text-red-700">
+                      <span className="font-medium">Error loading users:</span>
+                      <span>{usersError.message}</span>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex items-center gap-4 mb-8">
                   <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                     <Input
-                      placeholder="Search users..."
+                      placeholder="Search users by name, email, or role..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
+                      className="pl-12 h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg"
                     />
                   </div>
                 </div>
 
-                <div className="border rounded-lg">
+                <div className="border border-gray-200 rounded-xl shadow-sm bg-white overflow-hidden">
                   <Table>
-                    <TableHeader>
+                    <TableHeader className="bg-gray-50">
                       <TableRow>
                         <TableHead 
-                          className="cursor-pointer"
+                          className="cursor-pointer hover:bg-gray-100 transition-colors py-4 px-6 font-semibold text-gray-700"
                           onClick={() => handleSort('firstName')}
                         >
-                          Name <ArrowUpDown className="ml-2 h-4 w-4 inline" />
+                          <div className="flex items-center gap-2">
+                            Name 
+                            <ArrowUpDown className="h-4 w-4" />
+                          </div>
                         </TableHead>
                         <TableHead 
-                          className="cursor-pointer"
+                          className="cursor-pointer hover:bg-gray-100 transition-colors py-4 px-6 font-semibold text-gray-700"
                           onClick={() => handleSort('email')}
                         >
-                          Email <ArrowUpDown className="ml-2 h-4 w-4 inline" />
+                          <div className="flex items-center gap-2">
+                            Email 
+                            <ArrowUpDown className="h-4 w-4" />
+                          </div>
                         </TableHead>
                         <TableHead 
-                          className="cursor-pointer"
+                          className="cursor-pointer hover:bg-gray-100 transition-colors py-4 px-6 font-semibold text-gray-700"
                           onClick={() => handleSort('role')}
                         >
-                          Role <ArrowUpDown className="ml-2 h-4 w-4 inline" />
+                          <div className="flex items-center gap-2">
+                            Primary Role 
+                            <ArrowUpDown className="h-4 w-4" />
+                          </div>
                         </TableHead>
-                        <TableHead>Status</TableHead>
+                        <TableHead className="py-4 px-6 font-semibold text-gray-700">All Roles</TableHead>
+                        <TableHead className="py-4 px-6 font-semibold text-gray-700">Status</TableHead>
                         <TableHead 
-                          className="cursor-pointer"
+                          className="cursor-pointer hover:bg-gray-100 transition-colors py-4 px-6 font-semibold text-gray-700"
                           onClick={() => handleSort('createdAt')}
                         >
-                          Created <ArrowUpDown className="ml-2 h-4 w-4 inline" />
+                          <div className="flex items-center gap-2">
+                            Created 
+                            <ArrowUpDown className="h-4 w-4" />
+                          </div>
                         </TableHead>
-                        <TableHead>Actions</TableHead>
+                        <TableHead className="py-4 px-6 font-semibold text-gray-700">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {usersLoading ? (
                         <TableRow>
-                          <TableCell colSpan={6} className="text-center py-8">
-                            Loading users...
+                          <TableCell colSpan={7} className="text-center py-12">
+                            <div className="flex items-center justify-center gap-3">
+                              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                              <span className="text-gray-600">Loading users...</span>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ) : filteredUsers.length === 0 ? (
                         <TableRow>
-                          <TableCell colSpan={6} className="text-center py-8">
-                            No users found
+                          <TableCell colSpan={7} className="text-center py-12">
+                            <div className="text-gray-500">
+                              <Users className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                              <p className="text-lg font-medium">No users found</p>
+                              <p className="text-sm">Try adjusting your search criteria</p>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ) : (
-                        filteredUsers.map((user: User) => (
-                          <TableRow key={user.id}>
-                            <TableCell className="font-medium">
-                              {user.firstName} {user.lastName}
+                        filteredUsers.map((user: User, index) => (
+                          <TableRow key={user.id} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                            <TableCell className="font-medium py-4 px-6">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-medium text-sm">
+                                  {user.firstName?.[0]}{user.lastName?.[0]}
+                                </div>
+                                <div>
+                                  <div className="font-semibold text-gray-900">{user.firstName} {user.lastName}</div>
+                                  <div className="text-sm text-gray-500">ID: {user.id}</div>
+                                </div>
+                              </div>
                             </TableCell>
-                            <TableCell>{user.email}</TableCell>
-                            <TableCell>
+                            <TableCell className="py-4 px-6">
+                              <div className="text-gray-900">{user.email}</div>
+                            </TableCell>
+                            <TableCell className="py-4 px-6">
                               <Badge 
                                 variant={getRoleBadgeVariant(user.role)}
-                                className="flex items-center gap-1 w-fit"
+                                className="flex items-center gap-1 w-fit font-medium"
                               >
                                 {getRoleIcon(user.role)}
                                 {user.role}
                               </Badge>
                             </TableCell>
-                            <TableCell>
-                              <Badge variant={user.isVerified ? "default" : "secondary"}>
-                                {user.isVerified ? "Verified" : "Pending"}
+                            <TableCell className="py-4 px-6">
+                              {user.roles && user.roles.length > 0 ? (
+                                <div className="flex flex-wrap gap-1">
+                                  {user.roles.map((role, idx) => (
+                                    <Badge 
+                                      key={idx}
+                                      variant="outline" 
+                                      className="text-xs"
+                                    >
+                                      {role}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              ) : (
+                                <Badge variant="outline" className="text-xs">
+                                  {user.role}
+                                </Badge>
+                              )}
+                            </TableCell>
+                            <TableCell className="py-4 px-6">
+                              <Badge 
+                                variant={user.isVerified ? "default" : "secondary"}
+                                className={user.isVerified ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}
+                              >
+                                {user.isVerified ? "✓ Verified" : "⏳ Pending"}
                               </Badge>
                             </TableCell>
-                            <TableCell>
-                              {new Date(user.createdAt).toLocaleDateString()}
+                            <TableCell className="py-4 px-6 text-gray-600">
+                              {new Date(user.createdAt).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric'
+                              })}
                             </TableCell>
-                            <TableCell>
+                            <TableCell className="py-4 px-6">
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="sm">
+                                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                                     <MoreHorizontal className="h-4 w-4" />
                                   </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent>
+                                <DropdownMenuContent align="end" className="w-48">
                                   <DropdownMenuItem onClick={() => handleViewUser(user)}>
                                     <Eye className="h-4 w-4 mr-2" />
-                                    View
+                                    View Details
                                   </DropdownMenuItem>
                                   <DropdownMenuItem onClick={() => handleEditUser(user)}>
                                     <Edit className="h-4 w-4 mr-2" />
-                                    Edit
+                                    Edit User
                                   </DropdownMenuItem>
                                   <DropdownMenuItem 
                                     onClick={() => handleDeleteUser(user.id)}
-                                    className="text-red-600"
+                                    className="text-red-600 focus:text-red-600"
                                   >
                                     <Trash2 className="h-4 w-4 mr-2" />
-                                    Delete
+                                    Delete User
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Customer Management Tab */}
+          <TabsContent value="customers" className="space-y-6">
+            <Card className="shadow-lg border-0 bg-white">
+              <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50 border-b">
+                <CardTitle className="flex items-center justify-between">
+                  <span className="flex items-center gap-3">
+                    <div className="p-2 bg-green-100 rounded-lg">
+                      <User className="h-6 w-6 text-green-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-semibold text-gray-900">Customer Management</h3>
+                      <p className="text-sm text-gray-600 mt-1">Manage customer accounts and profiles</p>
+                    </div>
+                  </span>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="file"
+                      accept=".xlsx,.xls"
+                      onChange={(e) => handleImport(e, 'users')}
+                      className="hidden"
+                      id="import-customers"
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => document.getElementById('import-customers')?.click()}
+                      className="border-green-200 text-green-700 hover:bg-green-50"
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      Import
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => exportToExcel(filteredCustomers, 'customers')}
+                      className="border-green-200 text-green-700 hover:bg-green-50"
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Export
+                    </Button>
+                    <Dialog open={isUserDialogOpen} onOpenChange={setIsUserDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button 
+                          className="bg-green-600 hover:bg-green-700 text-white"
+                          onClick={() => {
+                            setIsEditing(false);
+                            userForm.reset({ role: 'customer' });
+                          }}
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Customer
+                        </Button>
+                      </DialogTrigger>
+                    </Dialog>
+                  </div>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-8">
+                <div className="flex items-center gap-4 mb-8">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                    <Input
+                      placeholder="Search customers by name or email..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-12 h-12 border-gray-300 focus:border-green-500 focus:ring-green-500 rounded-lg"
+                    />
+                  </div>
+                </div>
+
+                <div className="border border-gray-200 rounded-xl shadow-sm bg-white overflow-hidden">
+                  <Table>
+                    <TableHeader className="bg-gray-50">
+                      <TableRow>
+                        <TableHead className="py-4 px-6 font-semibold text-gray-700">Customer</TableHead>
+                        <TableHead className="py-4 px-6 font-semibold text-gray-700">Contact</TableHead>
+                        <TableHead className="py-4 px-6 font-semibold text-gray-700">Status</TableHead>
+                        <TableHead className="py-4 px-6 font-semibold text-gray-700">Member Since</TableHead>
+                        <TableHead className="py-4 px-6 font-semibold text-gray-700">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {usersLoading ? (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center py-12">
+                            <div className="flex items-center justify-center gap-3">
+                              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-600"></div>
+                              <span className="text-gray-600">Loading customers...</span>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ) : filteredCustomers.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center py-12">
+                            <div className="text-gray-500">
+                              <User className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                              <p className="text-lg font-medium">No customers found</p>
+                              <p className="text-sm">Try adjusting your search criteria</p>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        filteredCustomers.map((customer: User, index) => (
+                          <TableRow key={customer.id} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                            <TableCell className="py-4 px-6">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center text-white font-medium">
+                                  {customer.firstName?.[0]}{customer.lastName?.[0]}
+                                </div>
+                                <div>
+                                  <div className="font-semibold text-gray-900">{customer.firstName} {customer.lastName}</div>
+                                  <div className="text-sm text-gray-500">Customer ID: {customer.id}</div>
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell className="py-4 px-6">
+                              <div className="text-gray-900">{customer.email}</div>
+                            </TableCell>
+                            <TableCell className="py-4 px-6">
+                              <Badge 
+                                variant={customer.isVerified ? "default" : "secondary"}
+                                className={customer.isVerified ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}
+                              >
+                                {customer.isVerified ? "✓ Active" : "⏳ Pending"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="py-4 px-6 text-gray-600">
+                              {new Date(customer.createdAt).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric'
+                              })}
+                            </TableCell>
+                            <TableCell className="py-4 px-6">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                    <MoreHorizontal className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-48">
+                                  <DropdownMenuItem onClick={() => handleViewUser(customer)}>
+                                    <Eye className="h-4 w-4 mr-2" />
+                                    View Profile
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleEditUser(customer)}>
+                                    <Edit className="h-4 w-4 mr-2" />
+                                    Edit Customer
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem 
+                                    onClick={() => handleDeleteUser(customer.id)}
+                                    className="text-red-600 focus:text-red-600"
+                                  >
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    Delete Customer
                                   </DropdownMenuItem>
                                 </DropdownMenuContent>
                               </DropdownMenu>
@@ -615,12 +918,17 @@ export default function AdminDashboard() {
 
           {/* Florists Tab */}
           <TabsContent value="florists" className="space-y-6">
-            <Card>
-              <CardHeader>
+            <Card className="shadow-lg border-0 bg-white">
+              <CardHeader className="bg-gradient-to-r from-purple-50 to-violet-50 border-b">
                 <CardTitle className="flex items-center justify-between">
-                  <span className="flex items-center gap-2">
-                    <Store className="h-5 w-5" />
-                    Florist Management
+                  <span className="flex items-center gap-3">
+                    <div className="p-2 bg-purple-100 rounded-lg">
+                      <Store className="h-6 w-6 text-purple-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-semibold text-gray-900">Florist Business Management</h3>
+                      <p className="text-sm text-gray-600 mt-1">Manage florist businesses and their profiles</p>
+                    </div>
                   </span>
                   <div className="flex items-center gap-2">
                     <input
