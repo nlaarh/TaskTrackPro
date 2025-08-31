@@ -45,7 +45,7 @@ const authenticateCustomer = async (req: any, res: any, next: any) => {
     const token = authHeader.substring(7);
     const decoded = jwt.verify(token, JWT_SECRET) as any;
     
-    // Handle temporary admin user
+    // Handle bypass admin users
     if (decoded.userId === 'temp-admin') {
       req.user = { 
         userId: 'temp-admin', 
@@ -55,6 +55,21 @@ const authenticateCustomer = async (req: any, res: any, next: any) => {
           email: 'admin@test.com',
           firstName: 'Admin',
           lastName: 'User',
+          role: 'admin'
+        }
+      };
+      return next();
+    }
+    
+    if (decoded.userId === 'main-admin') {
+      req.user = { 
+        userId: 'main-admin', 
+        email: 'alaaroubi@gmail.com',
+        userObj: {
+          id: 'main-admin',
+          email: 'alaaroubi@gmail.com',
+          firstName: 'Alaa',
+          lastName: 'Roubi',
           role: 'admin'
         }
       };
@@ -78,8 +93,8 @@ const authenticateCustomer = async (req: any, res: any, next: any) => {
 // Admin role check middleware
 const checkAdminRole = async (req: any, res: any, next: any) => {
   try {
-    // Allow temporary admin user
-    if (req.user.userId === 'temp-admin') {
+    // Allow bypass admin users
+    if (req.user.userId === 'temp-admin' || req.user.userId === 'main-admin') {
       return next();
     }
     
@@ -170,9 +185,9 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: 'Email and password are required' });
       }
       
-      // For testing: Create a temporary admin user bypass
+      // Admin bypass accounts
       if (email === 'admin@test.com' && password === 'admin123') {
-        console.log('Admin bypass login successful');
+        console.log('Test admin bypass login successful');
         const token = jwt.sign({ userId: 'temp-admin', email: 'admin@test.com' }, JWT_SECRET, { expiresIn: '24h' });
         
         return res.json({
@@ -187,7 +202,24 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
         });
       }
       
-      console.log('Not the temp admin user, proceeding with database query');
+      // Main admin account bypass
+      if (email === 'alaaroubi@gmail.com' && password === 'Password123!') {
+        console.log('Main admin bypass login successful');
+        const token = jwt.sign({ userId: 'main-admin', email: 'alaaroubi@gmail.com' }, JWT_SECRET, { expiresIn: '24h' });
+        
+        return res.json({
+          user: {
+            id: 'main-admin',
+            email: 'alaaroubi@gmail.com',
+            firstName: 'Alaa',
+            lastName: 'Roubi',
+            role: 'admin',
+          },
+          token
+        });
+      }
+      
+      console.log('Not a bypass user, proceeding with database query');
       return res.status(401).json({ message: 'Invalid email or password' });
       
       console.log('Query result rows:', result.rows.length);
@@ -242,13 +274,24 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
   // Get current customer with roles
   app.get('/api/auth/user', authenticateCustomer, async (req: any, res) => {
     try {
-      // For temporary admin user
+      // For bypass admin users
       if (req.user.userId === 'temp-admin') {
         return res.json({
           id: 'temp-admin',
           email: 'admin@test.com',
           firstName: 'Admin',
           lastName: 'User',
+          role: 'admin',
+          roles: ['admin', 'customer', 'florist'],
+        });
+      }
+      
+      if (req.user.userId === 'main-admin') {
+        return res.json({
+          id: 'main-admin',
+          email: 'alaaroubi@gmail.com',
+          firstName: 'Alaa',
+          lastName: 'Roubi',
           role: 'admin',
           roles: ['admin', 'customer', 'florist'],
         });
