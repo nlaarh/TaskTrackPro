@@ -69,6 +69,12 @@ export interface IStorage {
     limit?: number;
     offset?: number;
   }): Promise<any[]>;
+  
+  // Admin operations
+  getAllUsers(): Promise<User[]>;
+  getAllFlorists(): Promise<Florist[]>;
+  updateUser(id: string, userData: Partial<User>): Promise<User>;
+  deleteUser(id: string): Promise<void>;
 }
 
 export class CorrectedDatabaseStorage implements IStorage {
@@ -553,6 +559,119 @@ export class CorrectedDatabaseStorage implements IStorage {
       return reviewsResult;
     } catch (error) {
       console.error("Error fetching reviews:", error);
+      throw error;
+    }
+  }
+
+  // Admin operations
+  async getAllUsers(): Promise<User[]> {
+    try {
+      const result = await db.execute(sql`
+        SELECT id, email, password_hash, first_name, last_name, profile_image_url, role, is_verified, created_at, updated_at 
+        FROM users 
+        ORDER BY created_at DESC
+      `);
+      
+      return result.rows.map((row: any) => ({
+        id: row.id,
+        email: row.email,
+        passwordHash: row.password_hash,
+        firstName: row.first_name,
+        lastName: row.last_name,
+        profileImageUrl: row.profile_image_url,
+        role: row.role,
+        isVerified: row.is_verified,
+        verificationToken: null,
+        resetToken: null,
+        resetTokenExpires: null,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+      }));
+    } catch (error) {
+      console.error('Error getting all users:', error);
+      throw error;
+    }
+  }
+
+  async getAllFlorists(): Promise<Florist[]> {
+    try {
+      const result = await db.execute(sql`
+        SELECT * FROM florists 
+        ORDER BY created_at DESC
+      `);
+      
+      return result.rows as Florist[];
+    } catch (error) {
+      console.error('Error getting all florists:', error);
+      throw error;
+    }
+  }
+
+  async updateUser(id: string, userData: Partial<User>): Promise<User> {
+    try {
+      const updateFields = [];
+      const values = [];
+      let paramIndex = 1;
+
+      if (userData.firstName) {
+        updateFields.push(`first_name = $${paramIndex++}`);
+        values.push(userData.firstName);
+      }
+      if (userData.lastName) {
+        updateFields.push(`last_name = $${paramIndex++}`);
+        values.push(userData.lastName);
+      }
+      if (userData.email) {
+        updateFields.push(`email = $${paramIndex++}`);
+        values.push(userData.email);
+      }
+      if (userData.role) {
+        updateFields.push(`role = $${paramIndex++}`);
+        values.push(userData.role);
+      }
+      
+      updateFields.push(`updated_at = $${paramIndex++}`);
+      values.push(new Date());
+      values.push(id);
+
+      const result = await db.execute(sql.raw(`
+        UPDATE users 
+        SET ${updateFields.join(', ')}
+        WHERE id = $${paramIndex}
+        RETURNING id, email, password_hash, first_name, last_name, profile_image_url, role, is_verified, created_at, updated_at
+      `, values));
+      
+      if (result.rows.length === 0) {
+        throw new Error('User not found');
+      }
+
+      const row = result.rows[0] as any;
+      return {
+        id: row.id,
+        email: row.email,
+        passwordHash: row.password_hash,
+        firstName: row.first_name,
+        lastName: row.last_name,
+        profileImageUrl: row.profile_image_url,
+        role: row.role,
+        isVerified: row.is_verified,
+        verificationToken: null,
+        resetToken: null,
+        resetTokenExpires: null,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+      };
+    } catch (error) {
+      console.error('Error updating user:', error);
+      throw error;
+    }
+  }
+
+  async deleteUser(id: string): Promise<void> {
+    try {
+      await db.execute(sql`DELETE FROM users WHERE id = ${id}`);
+    } catch (error) {
+      console.error('Error deleting user:', error);
       throw error;
     }
   }

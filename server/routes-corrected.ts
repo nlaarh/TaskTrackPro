@@ -57,6 +57,23 @@ const authenticateCustomer = async (req: any, res: any, next: any) => {
   }
 };
 
+// Admin role check middleware
+const checkAdminRole = async (req: any, res: any, next: any) => {
+  try {
+    const user = req.user.userObj;
+    const roles = await correctedStorage.getUserRoles(user.email);
+    
+    if (!roles.includes('admin')) {
+      return res.status(403).json({ message: 'Admin access required' });
+    }
+    
+    next();
+  } catch (error) {
+    console.error('Admin role check error:', error);
+    res.status(500).json({ message: 'Authorization check failed' });
+  }
+};
+
 export async function registerCorrectedRoutes(app: Express): Promise<Server> {
   // No longer using Replit Auth - using custom username/password auth
 
@@ -528,6 +545,79 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching reviews:", error);
       res.status(500).json({ message: "Failed to fetch reviews" });
+    }
+  });
+
+  // Admin routes
+  app.get('/api/admin/users', authenticateCustomer, checkAdminRole, async (req, res) => {
+    try {
+      const users = await correctedStorage.getAllUsers();
+      res.json(users);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      res.status(500).json({ message: 'Failed to fetch users' });
+    }
+  });
+
+  app.get('/api/admin/florists', authenticateCustomer, checkAdminRole, async (req, res) => {
+    try {
+      const florists = await correctedStorage.getAllFlorists();
+      res.json(florists);
+    } catch (error) {
+      console.error('Error fetching florists:', error);
+      res.status(500).json({ message: 'Failed to fetch florists' });
+    }
+  });
+
+  app.post('/api/admin/users', authenticateCustomer, checkAdminRole, async (req, res) => {
+    try {
+      const { firstName, lastName, email, role } = req.body;
+      
+      // Generate a temporary password
+      const tempPassword = Math.random().toString(36).slice(-8);
+      const passwordHash = await bcrypt.hash(tempPassword, 10);
+      
+      const user = await correctedStorage.createUser({
+        email,
+        passwordHash,
+        firstName,
+        lastName,
+      });
+      
+      // Add role to user_roles table
+      await correctedStorage.addUserRole(email, role);
+      
+      res.status(201).json({ 
+        ...user, 
+        tempPassword // Include temp password in response for admin
+      });
+    } catch (error) {
+      console.error('Error creating user:', error);
+      res.status(500).json({ message: 'Failed to create user' });
+    }
+  });
+
+  app.put('/api/admin/users/:id', authenticateCustomer, checkAdminRole, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const userData = req.body;
+      
+      const updatedUser = await correctedStorage.updateUser(id, userData);
+      res.json(updatedUser);
+    } catch (error) {
+      console.error('Error updating user:', error);
+      res.status(500).json({ message: 'Failed to update user' });
+    }
+  });
+
+  app.delete('/api/admin/users/:id', authenticateCustomer, checkAdminRole, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await correctedStorage.deleteUser(id);
+      res.status(204).send();
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      res.status(500).json({ message: 'Failed to delete user' });
     }
   });
 

@@ -15,6 +15,7 @@ import FloristRegister from "@/pages/florist-register";
 import FloristDashboard from "@/pages/florist-dashboard";
 import FloristProfileSetup from "@/pages/florist-profile-setup";
 import CustomerAuth from "@/pages/customer-auth";
+import AdminDashboard from "@/pages/admin-dashboard";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -23,6 +24,7 @@ function Router() {
     <Switch>
       {/* Authentication routes - always available */}
       <Route path="/auth" component={CustomerAuth} />
+      <Route path="/admin" component={AdminDashboard} />
       <Route path="/florist-login" component={FloristLogin} />
       <Route path="/florist-register" component={FloristRegister} />
       <Route path="/florist-dashboard" component={FloristDashboard} />

@@ -11,7 +11,7 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Heart, Menu, Phone, User, LogOut, Store, Search } from "lucide-react";
+import { Heart, Menu, Phone, User, LogOut, Store, Search, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function Navigation() {
@@ -164,6 +164,13 @@ export default function Navigation() {
                 </Link>
               </div>
             )}
+            
+            <Link href="/admin">
+              <Button variant="ghost" size="sm" className="text-gray-700 hover:text-gray-900">
+                <Shield className="h-4 w-4 mr-2" />
+                Admin
+              </Button>
+            </Link>
             
             <Button asChild className="bg-gray-900 hover:bg-gray-800 text-white">
               <Link href="/florist-register">
