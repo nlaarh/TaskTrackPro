@@ -1,16 +1,7 @@
 import type { Express } from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import { Pool } from 'pg';
-
-// Use the exact same connection as db.ts
-const pool = new Pool({ 
-  connectionString: "postgresql://postgres:RwDPqwPPtxhBNDzKDGiJlrHDtdTBZBYx@yamanote.proxy.rlwy.net:18615/floristdb",
-  ssl: false,
-  max: 10,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
-});
+import { pool } from './db';
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
@@ -65,20 +56,7 @@ export function setupAdminRoutes(app: Express) {
     try {
       console.log('CLEAN ADMIN: Fetching users...');
       
-      // First check if we can connect to database
-      const testResult = await pool.query('SELECT current_database()');
-      console.log('CLEAN ADMIN: Connected to database:', testResult.rows[0].current_database);
-      
-      // Check if users table exists
-      const tableCheck = await pool.query(`
-        SELECT COUNT(*) as count FROM information_schema.tables 
-        WHERE table_name = 'users' AND table_schema = 'public'
-      `);
-      console.log('CLEAN ADMIN: Users table exists:', tableCheck.rows[0].count > 0);
-      
-      // Get total count
-      const countResult = await pool.query('SELECT COUNT(*) as total FROM users');
-      console.log('CLEAN ADMIN: Total users in database:', countResult.rows[0].total);
+      // Direct query without debugging - use same pool as working routes
       
       const result = await pool.query(`
         SELECT id, email, first_name, last_name, role, created_at 
