@@ -73,12 +73,13 @@ export default function AdminDashboard() {
     user.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const filteredCustomers = users.filter((user: User) => 
-    user.role === 'customer' &&
-    (user.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-     user.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-     user.email?.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const filteredCustomers = users.filter((user: User) => {
+    console.log("🔍 User role:", user.role, "for email:", user.email);
+    return user.role === 'customer' &&
+      (user.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+       user.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+       user.email?.toLowerCase().includes(searchTerm.toLowerCase()));
+  });
 
   const filteredFlorists = florists.filter((florist: Florist) => 
     florist.businessName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -246,82 +247,106 @@ export default function AdminDashboard() {
 
             {/* Customers Table */}
             {currentView === "customers" && (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Member Since</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredCustomers.map((customer: User) => (
-                    <TableRow key={customer.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
-                            {customer.firstName?.[0]}{customer.lastName?.[0]}
-                          </div>
-                          <div>
-                            <div className="font-medium">{customer.firstName} {customer.lastName}</div>
-                            <div className="text-sm text-gray-500">ID: {customer.id}</div>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>{customer.email}</TableCell>
-                      <TableCell>
-                        <Badge variant={customer.isVerified ? 'default' : 'secondary'}>
-                          {customer.isVerified ? 'Active' : 'Pending'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{new Date(customer.createdAt).toLocaleDateString()}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              <div>
+                <div className="mb-4 text-sm text-gray-600">
+                  Showing {filteredCustomers.length} customers
+                </div>
+                {filteredCustomers.length > 0 ? (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Member Since</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredCustomers.map((customer: User) => (
+                        <TableRow key={customer.id}>
+                          <TableCell>
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                                {customer.firstName?.[0] || 'C'}{customer.lastName?.[0] || 'U'}
+                              </div>
+                              <div>
+                                <div className="font-medium">{customer.firstName || 'Unknown'} {customer.lastName || 'User'}</div>
+                                <div className="text-sm text-gray-500">ID: {customer.id}</div>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>{customer.email}</TableCell>
+                          <TableCell>
+                            <Badge variant={customer.isVerified ? 'default' : 'secondary'}>
+                              {customer.isVerified ? 'Active' : 'Pending'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{customer.createdAt ? new Date(customer.createdAt).toLocaleDateString() : 'Unknown'}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <User className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                    <p>No customers found</p>
+                  </div>
+                )}
+              </div>
             )}
 
             {/* Florists Table */}
             {currentView === "florists" && (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Business</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Location</TableHead>
-                    <TableHead>Created</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredFlorists.map((florist: Florist) => (
-                    <TableRow key={florist.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
-                            {florist.businessName?.[0]}
-                          </div>
-                          <div>
-                            <div className="font-medium">{florist.businessName}</div>
-                            <div className="text-sm text-gray-500">ID: {florist.id}</div>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div>{florist.email}</div>
-                        {florist.phone && (
-                          <div className="text-sm text-gray-500">{florist.phone}</div>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <div>{florist.city}, {florist.state}</div>
-                        <div className="text-sm text-gray-500">{florist.zipCode}</div>
-                      </TableCell>
-                      <TableCell>{new Date(florist.createdAt).toLocaleDateString()}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              <div>
+                <div className="mb-4 text-sm text-gray-600">
+                  Showing {filteredFlorists.length} florists
+                </div>
+                {filteredFlorists.length > 0 ? (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Business</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Location</TableHead>
+                        <TableHead>Created</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredFlorists.map((florist: Florist) => (
+                        <TableRow key={florist.id}>
+                          <TableCell>
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                                {florist.businessName?.[0] || 'F'}
+                              </div>
+                              <div>
+                                <div className="font-medium">{florist.businessName || 'Unknown Business'}</div>
+                                <div className="text-sm text-gray-500">ID: {florist.id}</div>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div>{florist.email}</div>
+                            {florist.phone && (
+                              <div className="text-sm text-gray-500">{florist.phone}</div>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <div>{florist.city || 'Unknown'}, {florist.state || 'Unknown'}</div>
+                            <div className="text-sm text-gray-500">{florist.zipCode || 'No ZIP'}</div>
+                          </TableCell>
+                          <TableCell>{florist.createdAt ? new Date(florist.createdAt).toLocaleDateString() : 'Unknown'}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <Store className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                    <p>No florists found</p>
+                  </div>
+                )}
+              </div>
             )}
           </CardContent>
         </Card>

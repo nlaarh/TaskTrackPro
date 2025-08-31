@@ -62,7 +62,7 @@ export default function CustomerAuth() {
     mutationFn: async (data: LoginForm) => {
       console.log('🔐 LOGIN MUTATION: Starting login for', data.email);
       
-      const response = await fetch('/api/auth/customer/login', {
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -102,8 +102,8 @@ export default function CustomerAuth() {
       // Force a small delay before redirect to ensure localStorage is written
       setTimeout(() => {
         if (data.user.role === 'admin') {
-          console.log('🔐 LOGIN MUTATION: Redirecting to /admin');
-          window.location.href = '/admin'; // Use window.location for hard redirect
+          console.log('🔐 LOGIN MUTATION: Redirecting to /admin-dashboard');
+          window.location.href = '/admin-dashboard'; // Use window.location for hard redirect
         } else {
           console.log('🔐 LOGIN MUTATION: Redirecting to /');
           setLocation('/');
