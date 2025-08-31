@@ -16,6 +16,9 @@ import FloristDashboard from "@/pages/florist-dashboard";
 import FloristProfileSetup from "@/pages/florist-profile-setup";
 import CustomerAuth from "@/pages/customer-auth";
 import AdminDashboard from "@/pages/admin-dashboard";
+import AdminUsers from "@/pages/admin-users";
+import AdminCustomers from "@/pages/admin-customers";
+import AdminFlorists from "@/pages/admin-florists";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -53,6 +56,9 @@ function Router() {
         window.location.href = '/admin-dashboard';
         return <div>Redirecting...</div>;
       }} />
+      <Route path="/admin/users" component={AdminUsers} />
+      <Route path="/admin/customers" component={AdminCustomers} />
+      <Route path="/admin/florists" component={AdminFlorists} />
       <Route path="/florist-login" component={FloristLogin} />
       <Route path="/florist-register" component={FloristRegister} />
       <Route path="/florist-dashboard" component={FloristDashboard} />
