@@ -668,7 +668,7 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
     try {
       console.log('Fetching users using correctedStorage...');
       
-      // Use correctedStorage to get users data properly
+      // Get users data directly using the same approach as working florists API
       const realUsers = await correctedStorage.getAllUsers();
       console.log('Retrieved users:', realUsers.length, 'users');
       

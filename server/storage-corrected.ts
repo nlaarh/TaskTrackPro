@@ -11,6 +11,7 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, or, ilike, desc, sql } from "drizzle-orm";
+import { Pool } from 'pg';
 
 // Corrected storage interface reflecting actual database structure
 export interface IStorage {
@@ -566,8 +567,7 @@ export class CorrectedDatabaseStorage implements IStorage {
       console.log('getAllUsers: Starting query...');
       console.log('Database URL:', process.env.DATABASE_URL ? 'configured' : 'missing');
       
-      // Test with direct pool query first to debug
-      const { Pool } = require('pg');
+      // Use direct pool connection to bypass any Drizzle ORM issues  
       const testPool = new Pool({
         connectionString: "postgresql://postgres:RwDPqwPPtxhBNDzKDGiJlrHDtdTBZBYx@yamanote.proxy.rlwy.net:18615/floristdb",
         ssl: false
