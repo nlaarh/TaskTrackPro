@@ -664,54 +664,14 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Test endpoint to verify database connection exactly like SQL tool
-  app.get('/api/admin/test-db', authenticateCustomer, checkAdminRole, async (req, res) => {
-    try {
-      console.log('TEST DATABASE: Creating new connection...');
-      const { Client } = require('pg');
-      const client = new Client({
-        connectionString: "postgresql://postgres:RwDPqwPPtxhBNDzKDGiJlrHDtdTBZBYx@yamanote.proxy.rlwy.net:18615/floristdb",
-        ssl: false
-      });
-      
-      await client.connect();
-      console.log('TEST DATABASE: Connected successfully');
-      
-      const result = await client.query('SELECT id, email, first_name, last_name, role FROM users ORDER BY created_at DESC');
-      console.log('TEST DATABASE: Query returned', result.rows.length, 'users');
-      
-      await client.end();
-      
-      res.json({
-        success: true,
-        count: result.rows.length,
-        users: result.rows
-      });
-    } catch (error) {
-      console.error('TEST DATABASE: Error:', error);
-      res.status(500).json({ error: error.message });
-    }
-  });
-
-  // Admin routes - fixed users endpoint
+  // Admin endpoints - fresh implementation using working pool connection
   app.get('/api/admin/users', authenticateCustomer, checkAdminRole, async (req, res) => {
     try {
-      console.log('ADMIN USERS: Using pg Client like test endpoint...');
-      const { Client } = require('pg');
-      const client = new Client({
-        connectionString: "postgresql://postgres:RwDPqwPPtxhBNDzKDGiJlrHDtdTBZBYx@yamanote.proxy.rlwy.net:18615/floristdb",
-        ssl: false
-      });
-      
-      await client.connect();
-      const result = await client.query(`
+      const result = await pool.query(`
         SELECT id, email, first_name, last_name, role, created_at 
         FROM users 
         ORDER BY created_at DESC
       `);
-      await client.end();
-      
-      console.log('ADMIN USERS: Retrieved', result.rows.length, 'users');
       
       const users = result.rows.map((row: any) => ({
         id: row.id,
@@ -726,8 +686,8 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
       
       res.json(users);
     } catch (error) {
-      console.error('ADMIN USERS: Error:', error);
-      res.status(500).json({ message: 'Failed to fetch users', error: error.message });
+      console.error('Admin users error:', error);
+      res.status(500).json({ message: 'Failed to fetch users' });
     }
   });
 
