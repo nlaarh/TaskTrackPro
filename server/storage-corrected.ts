@@ -564,7 +564,7 @@ export class CorrectedDatabaseStorage implements IStorage {
   async getAllUsers(): Promise<User[]> {
     try {
       const result = await db.execute(sql`
-        SELECT id, email, first_name, last_name, profile_image_url, role, created_at, updated_at 
+        SELECT id, email, first_name, last_name, role, created_at 
         FROM users 
         ORDER BY created_at DESC
       `);
@@ -572,17 +572,17 @@ export class CorrectedDatabaseStorage implements IStorage {
       return result.rows.map((row: any) => ({
         id: row.id,
         email: row.email,
-        passwordHash: '', // Exclude password for admin display
+        passwordHash: '',
         firstName: row.first_name,
         lastName: row.last_name,
-        profileImageUrl: row.profile_image_url,
+        profileImageUrl: null,
         role: row.role,
-        isVerified: true, // Default value since column might not exist
+        isVerified: true,
         verificationToken: null,
         resetToken: null,
         resetTokenExpires: null,
         createdAt: row.created_at,
-        updatedAt: row.updated_at,
+        updatedAt: null,
       }));
     } catch (error) {
       console.error('Error getting all users:', error);

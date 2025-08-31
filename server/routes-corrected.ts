@@ -668,9 +668,22 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
     try {
       console.log('Fetching users using correctedStorage...');
       
-      // Use the same approach as the working authentication system
-      const realUsers = await correctedStorage.getAllUsers();
-      console.log('Retrieved users:', realUsers.length, 'users');
+      // Use direct SQL query like we did for florists (which works)
+      const { Pool } = require('pg');
+      const pool = new (require('pg')).Pool({
+        connectionString: process.env.DATABASE_URL
+      });
+      
+      const result = await pool.query(`
+        SELECT id, email, first_name, last_name, role, created_at
+        FROM users
+        ORDER BY created_at DESC
+      `);
+      
+      await pool.end();
+      console.log('Direct SQL retrieved users:', result.rows.length, 'users');
+      
+      const realUsers = result.rows;
       
       const users = realUsers.map((user: any) => ({
         id: user.id,
