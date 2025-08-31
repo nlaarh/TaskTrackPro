@@ -60,22 +60,38 @@ export default function CustomerAuth() {
 
   const loginMutation = useMutation({
     mutationFn: async (data: LoginForm) => {
+      console.log('🔐 LOGIN MUTATION: Starting login for', data.email);
+      
       const response = await fetch('/api/auth/customer/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
       
+      console.log('🔐 LOGIN MUTATION: Response status', response.status);
+      
       if (!response.ok) {
         const error = await response.json();
+        console.error('🔐 LOGIN MUTATION: Error', error);
         throw new Error(error.message || 'Login failed');
       }
       
-      return response.json();
+      const result = await response.json();
+      console.log('🔐 LOGIN MUTATION: Success - Token received:', !!result.token);
+      console.log('🔐 LOGIN MUTATION: User role:', result.user?.role);
+      
+      return result;
     },
     onSuccess: (data) => {
+      console.log('🔐 LOGIN MUTATION: onSuccess - Token:', !!data.token, 'Role:', data.user?.role);
+      
       localStorage.setItem('customerToken', data.token);
       localStorage.setItem('customerUser', JSON.stringify(data.user));
+      
+      // Verify storage
+      const storedToken = localStorage.getItem('customerToken');
+      console.log('🔐 LOGIN MUTATION: Token stored in localStorage:', !!storedToken);
+      
       toast({
         title: "Welcome back!",
         description: `Hello ${data.user.firstName}, you're now logged in.`,
@@ -83,12 +99,15 @@ export default function CustomerAuth() {
       
       // Redirect admin users to admin dashboard
       if (data.user.role === 'admin') {
+        console.log('🔐 LOGIN MUTATION: Redirecting to /admin');
         setLocation('/admin');
       } else {
+        console.log('🔐 LOGIN MUTATION: Redirecting to /');
         setLocation('/');
       }
     },
     onError: (error: Error) => {
+      console.error('🔐 LOGIN MUTATION: onError -', error.message);
       toast({
         title: "Login failed",
         description: error.message,
