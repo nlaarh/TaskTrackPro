@@ -2,147 +2,296 @@ import { Link } from "wouter";
 import Navigation from "@/components/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, Users, Store, User, BarChart3, Settings } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { 
+  Shield, 
+  Users, 
+  Store, 
+  User, 
+  BarChart3, 
+  Settings, 
+  TrendingUp, 
+  Activity, 
+  Star,
+  ChevronRight,
+  Calendar,
+  Eye
+} from "lucide-react";
 
 export default function AdminDashboard() {
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
       <Navigation />
       
-      <div className="container mx-auto px-6 py-12">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4 flex items-center gap-3">
-            <Shield className="h-8 w-8 text-blue-600" />
-            Admin Dashboard
-          </h1>
-          <p className="text-gray-600">Manage your florist directory platform</p>
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
+        {/* Modern Header */}
+        <div className="mb-12">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="relative">
+                <Avatar className="h-16 w-16 bg-gradient-to-br from-blue-500 to-purple-600">
+                  <AvatarFallback className="text-white text-xl font-bold">
+                    <Shield className="h-8 w-8" />
+                  </AvatarFallback>
+                </Avatar>
+                <div className="absolute -bottom-1 -right-1 h-5 w-5 bg-green-500 rounded-full border-2 border-white" />
+              </div>
+              <div>
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+                  Admin Dashboard
+                </h1>
+                <p className="text-gray-500 mt-1 font-medium">Welcome back, manage your platform with ease</p>
+              </div>
+            </div>
+            <Badge variant="secondary" className="px-3 py-1 text-sm">
+              <Activity className="h-4 w-4 mr-1" />
+              All Systems Operational
+            </Badge>
+          </div>
         </div>
 
-        {/* Management Menu Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Users Management */}
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <Link to="/admin/users">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-lg font-medium">
-                  User Management
-                </CardTitle>
-                <Users className="h-6 w-6 text-blue-600" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-gray-900 mb-2">All Users</div>
-                <p className="text-sm text-gray-600">
-                  View, edit, and manage all user accounts including admins, customers, and florists.
-                </p>
-                <Button className="w-full mt-4" variant="outline">
-                  Manage Users
-                </Button>
-              </CardContent>
-            </Link>
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <Card className="border-0 shadow-sm bg-gradient-to-br from-blue-50 to-blue-100/50">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-blue-600">Total Users</p>
+                  <p className="text-3xl font-bold text-blue-900">Loading...</p>
+                  <p className="text-xs text-blue-600/70 mt-1">
+                    <TrendingUp className="h-3 w-3 inline mr-1" />
+                    +12% from last month
+                  </p>
+                </div>
+                <Users className="h-8 w-8 text-blue-500" />
+              </div>
+            </CardContent>
           </Card>
 
-          {/* Customers Management */}
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <Link to="/admin/customers">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-lg font-medium">
-                  Customer Management  
-                </CardTitle>
-                <User className="h-6 w-6 text-green-600" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-gray-900 mb-2">Customers</div>
-                <p className="text-sm text-gray-600">
-                  Manage customer accounts, view activity, and handle customer support requests.
-                </p>
-                <Button className="w-full mt-4" variant="outline">
-                  Manage Customers
-                </Button>
-              </CardContent>
-            </Link>
+          <Card className="border-0 shadow-sm bg-gradient-to-br from-green-50 to-green-100/50">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-green-600">Active Florists</p>
+                  <p className="text-3xl font-bold text-green-900">Loading...</p>
+                  <p className="text-xs text-green-600/70 mt-1">
+                    <Star className="h-3 w-3 inline mr-1" />
+                    4.8 avg rating
+                  </p>
+                </div>
+                <Store className="h-8 w-8 text-green-500" />
+              </div>
+            </CardContent>
           </Card>
 
-          {/* Florists Management */}
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <Link to="/admin/florists">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-lg font-medium">
-                  Florist Management
-                </CardTitle>
-                <Store className="h-6 w-6 text-purple-600" />
+          <Card className="border-0 shadow-sm bg-gradient-to-br from-purple-50 to-purple-100/50">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-purple-600">Customers</p>
+                  <p className="text-3xl font-bold text-purple-900">Loading...</p>
+                  <p className="text-xs text-purple-600/70 mt-1">
+                    <Calendar className="h-3 w-3 inline mr-1" />
+                    85% active this month
+                  </p>
+                </div>
+                <User className="h-8 w-8 text-purple-500" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-0 shadow-sm bg-gradient-to-br from-orange-50 to-orange-100/50">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-orange-600">Revenue</p>
+                  <p className="text-3xl font-bold text-orange-900">$12.4k</p>
+                  <p className="text-xs text-orange-600/70 mt-1">
+                    <TrendingUp className="h-3 w-3 inline mr-1" />
+                    +8.2% growth
+                  </p>
+                </div>
+                <BarChart3 className="h-8 w-8 text-orange-500" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Management Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          
+          {/* User Management */}
+          <Link to="/admin/users">
+            <Card className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-0 shadow-sm bg-white/80 backdrop-blur-sm hover:bg-white">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors">
+                      <Users className="h-6 w-6 text-blue-600" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-xl font-semibold text-gray-900">User Management</CardTitle>
+                      <p className="text-sm text-gray-500">Manage all accounts</p>
+                    </div>
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-gray-600 group-hover:translate-x-1 transition-all" />
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-gray-900 mb-2">Florists</div>
-                <p className="text-sm text-gray-600">
-                  Manage florist businesses, verify listings, and oversee business profiles.
+                <p className="text-gray-600 text-sm leading-relaxed mb-4">
+                  Comprehensive user account management including admins, customers, and florists with advanced filtering and bulk operations.
                 </p>
-                <Button className="w-full mt-4" variant="outline">
-                  Manage Florists
-                </Button>
+                <div className="flex items-center justify-between pt-3 border-t">
+                  <Badge variant="outline" className="text-xs">
+                    <Eye className="h-3 w-3 mr-1" />
+                    View All
+                  </Badge>
+                  <span className="text-xs text-gray-400">5 users online</span>
+                </div>
               </CardContent>
-            </Link>
-          </Card>
+            </Card>
+          </Link>
+
+          {/* Customer Management */}
+          <Link to="/admin/customers">
+            <Card className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-0 shadow-sm bg-white/80 backdrop-blur-sm hover:bg-white">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 bg-green-100 rounded-lg group-hover:bg-green-200 transition-colors">
+                      <User className="h-6 w-6 text-green-600" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-xl font-semibold text-gray-900">Customer Hub</CardTitle>
+                      <p className="text-sm text-gray-500">Customer relations</p>
+                    </div>
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-gray-600 group-hover:translate-x-1 transition-all" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 text-sm leading-relaxed mb-4">
+                  Manage customer accounts, track activity, handle support requests, and analyze customer behavior patterns.
+                </p>
+                <div className="flex items-center justify-between pt-3 border-t">
+                  <Badge variant="outline" className="text-xs">
+                    <Activity className="h-3 w-3 mr-1" />
+                    Active
+                  </Badge>
+                  <span className="text-xs text-gray-400">12 new this week</span>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          {/* Florist Management */}
+          <Link to="/admin/florists">
+            <Card className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-0 shadow-sm bg-white/80 backdrop-blur-sm hover:bg-white">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 bg-purple-100 rounded-lg group-hover:bg-purple-200 transition-colors">
+                      <Store className="h-6 w-6 text-purple-600" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-xl font-semibold text-gray-900">Business Center</CardTitle>
+                      <p className="text-sm text-gray-500">Florist operations</p>
+                    </div>
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-gray-600 group-hover:translate-x-1 transition-all" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 text-sm leading-relaxed mb-4">
+                  Oversee florist businesses, verify listings, manage profiles, and monitor business performance across the platform.
+                </p>
+                <div className="flex items-center justify-between pt-3 border-t">
+                  <Badge variant="outline" className="text-xs">
+                    <Star className="h-3 w-3 mr-1" />
+                    Featured
+                  </Badge>
+                  <span className="text-xs text-gray-400">52 businesses</span>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
 
           {/* Analytics */}
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-lg font-medium">
-                Analytics
-              </CardTitle>
-              <BarChart3 className="h-6 w-6 text-orange-600" />
+          <Card className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-0 shadow-sm bg-white/80 backdrop-blur-sm hover:bg-white">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-orange-100 rounded-lg group-hover:bg-orange-200 transition-colors">
+                    <BarChart3 className="h-6 w-6 text-orange-600" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-xl font-semibold text-gray-900">Analytics Suite</CardTitle>
+                    <p className="text-sm text-gray-500">Performance metrics</p>
+                  </div>
+                </div>
+                <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-gray-600 group-hover:translate-x-1 transition-all" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-gray-900 mb-2">Reports</div>
-              <p className="text-sm text-gray-600">
-                View platform statistics, user activity, and business performance metrics.
+              <p className="text-gray-600 text-sm leading-relaxed mb-4">
+                Comprehensive analytics dashboard with real-time insights, performance tracking, and detailed reporting capabilities.
               </p>
-              <Button className="w-full mt-4" variant="outline">
-                View Analytics
-              </Button>
+              <div className="flex items-center justify-between pt-3 border-t">
+                <Badge variant="outline" className="text-xs">
+                  <TrendingUp className="h-3 w-3 mr-1" />
+                  Growing
+                </Badge>
+                <span className="text-xs text-gray-400">Updated 2min ago</span>
+              </div>
             </CardContent>
           </Card>
 
           {/* Settings */}
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-lg font-medium">
-                Platform Settings
-              </CardTitle>
-              <Settings className="h-6 w-6 text-gray-600" />
+          <Card className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-0 shadow-sm bg-white/80 backdrop-blur-sm hover:bg-white">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-gray-100 rounded-lg group-hover:bg-gray-200 transition-colors">
+                    <Settings className="h-6 w-6 text-gray-600" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-xl font-semibold text-gray-900">System Settings</CardTitle>
+                    <p className="text-sm text-gray-500">Platform config</p>
+                  </div>
+                </div>
+                <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-gray-600 group-hover:translate-x-1 transition-all" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-gray-900 mb-2">Settings</div>
-              <p className="text-sm text-gray-600">
-                Configure platform settings, manage system preferences, and update configurations.
+              <p className="text-gray-600 text-sm leading-relaxed mb-4">
+                Configure platform settings, manage system preferences, security settings, and platform-wide configurations.
               </p>
-              <Button className="w-full mt-4" variant="outline">
-                Manage Settings
-              </Button>
+              <div className="flex items-center justify-between pt-3 border-t">
+                <Badge variant="outline" className="text-xs">
+                  <Shield className="h-3 w-3 mr-1" />
+                  Secure
+                </Badge>
+                <span className="text-xs text-gray-400">Last updated today</span>
+              </div>
             </CardContent>
           </Card>
 
-          {/* Quick Stats Card */}
-          <Card className="md:col-span-2 lg:col-span-1">
-            <CardHeader>
-              <CardTitle className="text-lg font-medium">Quick Stats</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Total Users</span>
-                  <span className="font-bold text-lg">Loading...</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Active Florists</span>
-                  <span className="font-bold text-lg">Loading...</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Customers</span>
-                  <span className="font-bold text-lg">Loading...</span>
-                </div>
+          {/* Quick Actions */}
+          <Card className="border-2 border-dashed border-gray-200 bg-gray-50/50">
+            <CardContent className="p-8 text-center">
+              <div className="mx-auto w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                <Calendar className="h-6 w-6 text-gray-400" />
               </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Quick Actions</h3>
+              <p className="text-gray-500 text-sm mb-4">
+                Coming soon - shortcuts to common admin tasks
+              </p>
+              <Button variant="outline" size="sm" className="text-gray-600">
+                Request Feature
+              </Button>
             </CardContent>
           </Card>
         </div>
