@@ -566,11 +566,24 @@ export class CorrectedDatabaseStorage implements IStorage {
       console.log('getAllUsers: Starting query...');
       console.log('Database URL:', process.env.DATABASE_URL ? 'configured' : 'missing');
       
-      const result = await db.execute(sql`
+      // Test with direct pool query first to debug
+      const { Pool } = require('pg');
+      const testPool = new Pool({
+        connectionString: "postgresql://postgres:RwDPqwPPtxhBNDzKDGiJlrHDtdTBZBYx@yamanote.proxy.rlwy.net:18615/floristdb",
+        ssl: false
+      });
+      
+      const directResult = await testPool.query(`
         SELECT id, email, first_name, last_name, role, created_at 
         FROM users 
         ORDER BY created_at DESC
       `);
+      
+      await testPool.end();
+      
+      console.log('getAllUsers: Direct pool query result:', directResult.rows.length, 'users');
+      
+      const result = directResult;
       
       console.log('getAllUsers: Raw result:', result);
       console.log('getAllUsers: Rows count:', result.rows?.length || 0);
