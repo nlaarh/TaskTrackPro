@@ -130,6 +130,7 @@ export default function AdminDashboard() {
       }
       
       console.log('Making request with token:', token.substring(0, 20) + '...');
+      console.log('Full token available:', !!token);
       
       const response = await fetch('/api/admin/users', {
         headers: {
