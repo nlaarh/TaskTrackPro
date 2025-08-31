@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { correctedStorage } from "./storage-corrected";
+import { pool } from './db';
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { db } from "./db";
 import { sql } from "drizzle-orm";
@@ -663,30 +664,69 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Admin routes - using existing correctedStorage approach
+  // Test endpoint to verify database connection exactly like SQL tool
+  app.get('/api/admin/test-db', authenticateCustomer, checkAdminRole, async (req, res) => {
+    try {
+      console.log('TEST DATABASE: Creating new connection...');
+      const { Client } = require('pg');
+      const client = new Client({
+        connectionString: "postgresql://postgres:RwDPqwPPtxhBNDzKDGiJlrHDtdTBZBYx@yamanote.proxy.rlwy.net:18615/floristdb",
+        ssl: false
+      });
+      
+      await client.connect();
+      console.log('TEST DATABASE: Connected successfully');
+      
+      const result = await client.query('SELECT id, email, first_name, last_name, role FROM users ORDER BY created_at DESC');
+      console.log('TEST DATABASE: Query returned', result.rows.length, 'users');
+      
+      await client.end();
+      
+      res.json({
+        success: true,
+        count: result.rows.length,
+        users: result.rows
+      });
+    } catch (error) {
+      console.error('TEST DATABASE: Error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Admin routes - fixed users endpoint
   app.get('/api/admin/users', authenticateCustomer, checkAdminRole, async (req, res) => {
     try {
-      console.log('Fetching users using correctedStorage...');
+      console.log('ADMIN USERS: Using pg Client like test endpoint...');
+      const { Client } = require('pg');
+      const client = new Client({
+        connectionString: "postgresql://postgres:RwDPqwPPtxhBNDzKDGiJlrHDtdTBZBYx@yamanote.proxy.rlwy.net:18615/floristdb",
+        ssl: false
+      });
       
-      // Get users data directly using the same approach as working florists API
-      const realUsers = await correctedStorage.getAllUsers();
-      console.log('Retrieved users:', realUsers.length, 'users');
+      await client.connect();
+      const result = await client.query(`
+        SELECT id, email, first_name, last_name, role, created_at 
+        FROM users 
+        ORDER BY created_at DESC
+      `);
+      await client.end();
       
-      const users = realUsers.map((user: any) => ({
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName || user.first_name,
-        lastName: user.lastName || user.last_name,
-        role: user.role,
-        roles: [user.role],
+      console.log('ADMIN USERS: Retrieved', result.rows.length, 'users');
+      
+      const users = result.rows.map((row: any) => ({
+        id: row.id,
+        email: row.email,
+        firstName: row.first_name || '',
+        lastName: row.last_name || '',
+        role: row.role,
+        roles: [row.role],
         isVerified: true,
-        createdAt: user.createdAt || user.created_at
+        createdAt: row.created_at
       }));
       
-      console.log('Returning formatted users:', users);
       res.json(users);
     } catch (error) {
-      console.error('Error fetching users:', error);
+      console.error('ADMIN USERS: Error:', error);
       res.status(500).json({ message: 'Failed to fetch users', error: error.message });
     }
   });
