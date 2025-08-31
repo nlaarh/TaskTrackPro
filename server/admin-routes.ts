@@ -91,7 +91,7 @@ export function setupAdminRoutes(app: Express) {
       const result = await pool.query(`
         SELECT id, business_name, email, first_name, last_name, city, state, phone, 
                website, specialties, profile_summary, years_of_experience, 
-               is_verified, created_at
+               is_verified, created_at, profile_image_url
         FROM florist_auth 
         WHERE business_name IS NOT NULL
         ORDER BY created_at DESC
@@ -114,7 +114,8 @@ export function setupAdminRoutes(app: Express) {
         reviewCount: 0, // Default review count
         createdAt: row.created_at,
         isVerified: row.is_verified || false,
-        isActive: true
+        isActive: true,
+        profileImage: row.profile_image_url || null
       }));
       
       res.json(florists);
