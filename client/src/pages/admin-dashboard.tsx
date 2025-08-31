@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+// Tabs component removed - using custom tab implementation
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -87,14 +87,23 @@ export default function AdminDashboard() {
   const [sortField, setSortField] = useState("");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
-  // Handle tab changes - simplified approach
+  // Handle tab changes with forced state persistence
   const handleTabChange = (newTab: string) => {
-    console.log(`🔄 TAB CHANGE: From ${activeTab} to ${newTab}`);
-    console.log(`🔄 Data available: Users=${users.length}, Florists=${florists.length}`);
+    console.log(`🔄 TAB CHANGE REQUESTED: ${activeTab} -> ${newTab}`);
+    console.log(`🔄 Before change - activeTab: ${activeTab}`);
+    
+    // Force tab change immediately
     setActiveTab(newTab);
+    
+    // Clear filters
     setSearchTerm(""); 
     setSortField(""); 
     setSortDirection("asc");
+    
+    // Log after state change
+    setTimeout(() => {
+      console.log(`🔄 After change - activeTab should be: ${newTab}`);
+    }, 10);
   };
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [selectedFlorist, setSelectedFlorist] = useState<Florist | null>(null);
@@ -431,33 +440,47 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-8" key={`${users.length}-${florists.length}`}>
-          <TabsList className="grid w-full grid-cols-3 bg-white border shadow-sm rounded-lg p-1">
-            <TabsTrigger 
-              value="users" 
-              className="flex items-center gap-2 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700 data-[state=active]:shadow-sm rounded-md"
+        <div className="space-y-8">
+          {/* Custom Tab Navigation */}
+          <div className="grid w-full grid-cols-3 bg-white border shadow-sm rounded-lg p-1">
+            <button 
+              onClick={() => handleTabChange("users")}
+              className={`flex items-center justify-center gap-2 px-4 py-2 rounded-md transition-colors ${
+                activeTab === "users" 
+                  ? "bg-blue-50 text-blue-700 shadow-sm font-medium" 
+                  : "text-gray-600 hover:bg-gray-50"
+              }`}
             >
               <Users className="h-4 w-4" />
               All Users
-            </TabsTrigger>
-            <TabsTrigger 
-              value="customers" 
-              className="flex items-center gap-2 data-[state=active]:bg-green-50 data-[state=active]:text-green-700 data-[state=active]:shadow-sm rounded-md"
+            </button>
+            <button 
+              onClick={() => handleTabChange("customers")}
+              className={`flex items-center justify-center gap-2 px-4 py-2 rounded-md transition-colors ${
+                activeTab === "customers" 
+                  ? "bg-green-50 text-green-700 shadow-sm font-medium" 
+                  : "text-gray-600 hover:bg-gray-50"
+              }`}
             >
               <User className="h-4 w-4" />
               Customers
-            </TabsTrigger>
-            <TabsTrigger 
-              value="florists" 
-              className="flex items-center gap-2 data-[state=active]:bg-purple-50 data-[state=active]:text-purple-700 data-[state=active]:shadow-sm rounded-md"
+            </button>
+            <button 
+              onClick={() => handleTabChange("florists")}
+              className={`flex items-center justify-center gap-2 px-4 py-2 rounded-md transition-colors ${
+                activeTab === "florists" 
+                  ? "bg-purple-50 text-purple-700 shadow-sm font-medium" 
+                  : "text-gray-600 hover:bg-gray-50"
+              }`}
             >
               <Store className="h-4 w-4" />
               Florists
-            </TabsTrigger>
-          </TabsList>
+            </button>
+          </div>
 
           {/* All Users Tab */}
-          <TabsContent value="users" className="space-y-6">
+          {activeTab === "users" && (
+          <div className="space-y-6">
             <Card className="shadow-lg border-0 bg-white">
               <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b">
                 <CardTitle className="flex items-center justify-between">
@@ -780,10 +803,12 @@ export default function AdminDashboard() {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
+          </div>
+          )}
 
           {/* Customer Management Tab */}
-          <TabsContent value="customers" className="space-y-6">
+          {activeTab === "customers" && (
+          <div className="space-y-6">
             {/* Debug info */}
             <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg mb-4">
               <p className="text-sm text-yellow-800">
@@ -958,10 +983,12 @@ export default function AdminDashboard() {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
+          </div>
+          )}
 
           {/* Florists Tab */}
-          <TabsContent value="florists" className="space-y-6">
+          {activeTab === "florists" && (
+          <div className="space-y-6">
             <Card className="shadow-lg border-0 bg-white">
               <CardHeader className="bg-gradient-to-r from-purple-50 to-violet-50 border-b">
                 <CardTitle className="flex items-center justify-between">
@@ -1120,8 +1147,9 @@ export default function AdminDashboard() {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
-        </Tabs>
+          </div>
+          )}
+        </div>
       </div>
     </div>
   );
