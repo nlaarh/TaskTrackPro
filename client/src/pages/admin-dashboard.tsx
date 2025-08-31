@@ -440,53 +440,56 @@ export default function AdminDashboard() {
         </div>
 
         <div className="space-y-8">
-          {/* Custom Tab Navigation */}
-          <div className="grid w-full grid-cols-3 bg-white border shadow-sm rounded-lg p-1">
-            <Button 
-              variant="ghost"
-              onClick={() => {
+          {/* Custom Tab Navigation - Simple and Working */}
+          <div className="grid w-full grid-cols-3 bg-white border shadow-sm rounded-lg p-1 gap-1">
+            <button 
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
                 console.log("🔥 Users tab clicked!");
                 handleTabChange("users");
               }}
-              className={`flex items-center justify-center gap-2 px-4 py-2 rounded-md transition-colors ${
+              className={`flex items-center justify-center gap-2 px-4 py-3 rounded-md transition-all duration-200 cursor-pointer ${
                 activeTab === "users" 
-                  ? "bg-blue-50 text-blue-700 shadow-sm font-medium" 
-                  : "text-gray-600 hover:bg-gray-50"
+                  ? "bg-blue-100 text-blue-700 font-medium shadow-sm" 
+                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-800"
               }`}
             >
               <Users className="h-4 w-4" />
               All Users
-            </Button>
-            <Button 
-              variant="ghost"
-              onClick={() => {
+            </button>
+            <button 
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
                 console.log("🔥 Customers tab clicked!");
                 handleTabChange("customers");
               }}
-              className={`flex items-center justify-center gap-2 px-4 py-2 rounded-md transition-colors ${
+              className={`flex items-center justify-center gap-2 px-4 py-3 rounded-md transition-all duration-200 cursor-pointer ${
                 activeTab === "customers" 
-                  ? "bg-green-50 text-green-700 shadow-sm font-medium" 
-                  : "text-gray-600 hover:bg-gray-50"
+                  ? "bg-green-100 text-green-700 font-medium shadow-sm" 
+                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-800"
               }`}
             >
               <User className="h-4 w-4" />
               Customers
-            </Button>
-            <Button 
-              variant="ghost"
-              onClick={() => {
+            </button>
+            <button 
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
                 console.log("🔥 Florists tab clicked!");
                 handleTabChange("florists");
               }}
-              className={`flex items-center justify-center gap-2 px-4 py-2 rounded-md transition-colors ${
+              className={`flex items-center justify-center gap-2 px-4 py-3 rounded-md transition-all duration-200 cursor-pointer ${
                 activeTab === "florists" 
-                  ? "bg-purple-50 text-purple-700 shadow-sm font-medium" 
-                  : "text-gray-600 hover:bg-gray-50"
+                  ? "bg-purple-100 text-purple-700 font-medium shadow-sm" 
+                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-800"
               }`}
             >
               <Store className="h-4 w-4" />
               Florists
-            </Button>
+            </button>
           </div>
 
           {/* All Users Tab */}
@@ -721,7 +724,7 @@ export default function AdminDashboard() {
                           </TableCell>
                         </TableRow>
                       ) : (
-                        filteredUsers.map((user: User, index) => (
+                        filteredUsers.map((user: User, index: number) => (
                           <TableRow key={user.id} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
                             <TableCell className="font-medium py-4 px-6">
                               <div className="flex items-center gap-3">
@@ -929,7 +932,7 @@ export default function AdminDashboard() {
                           </TableCell>
                         </TableRow>
                       ) : (
-                        filteredCustomers.map((customer: User, index) => (
+                        filteredCustomers.map((customer: User, index: number) => (
                           <TableRow key={customer.id} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
                             <TableCell className="py-4 px-6">
                               <div className="flex items-center gap-3">
