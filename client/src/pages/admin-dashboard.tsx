@@ -95,6 +95,30 @@ export default function AdminDashboard() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Check authentication on component mount
+  useEffect(() => {
+    const token = localStorage.getItem('customerToken');
+    const user = localStorage.getItem('customerUser');
+    console.log('Admin Dashboard Mount - Token exists:', !!token);
+    console.log('Admin Dashboard Mount - User exists:', !!user);
+    
+    if (!token) {
+      console.log('No token found, redirecting to auth');
+      window.location.href = '/auth';
+      return;
+    }
+    
+    if (user) {
+      const userData = JSON.parse(user);
+      console.log('User data:', userData);
+      if (userData.role !== 'admin') {
+        console.log('Not admin user, redirecting to home');
+        window.location.href = '/';
+        return;
+      }
+    }
+  }, []);
+
   // Forms
   const userForm = useForm<UserForm>({
     resolver: zodResolver(userSchema),

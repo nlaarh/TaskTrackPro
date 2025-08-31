@@ -88,23 +88,27 @@ export default function CustomerAuth() {
       localStorage.setItem('customerToken', data.token);
       localStorage.setItem('customerUser', JSON.stringify(data.user));
       
-      // Verify storage
+      // Verify storage immediately
       const storedToken = localStorage.getItem('customerToken');
-      console.log('🔐 LOGIN MUTATION: Token stored in localStorage:', !!storedToken);
+      const storedUser = localStorage.getItem('customerUser');
+      console.log('🔐 LOGIN MUTATION: Token stored:', !!storedToken);
+      console.log('🔐 LOGIN MUTATION: User stored:', !!storedUser);
       
       toast({
         title: "Welcome back!",
         description: `Hello ${data.user.firstName}, you're now logged in.`,
       });
       
-      // Redirect admin users to admin dashboard
-      if (data.user.role === 'admin') {
-        console.log('🔐 LOGIN MUTATION: Redirecting to /admin');
-        setLocation('/admin');
-      } else {
-        console.log('🔐 LOGIN MUTATION: Redirecting to /');
-        setLocation('/');
-      }
+      // Force a small delay before redirect to ensure localStorage is written
+      setTimeout(() => {
+        if (data.user.role === 'admin') {
+          console.log('🔐 LOGIN MUTATION: Redirecting to /admin');
+          window.location.href = '/admin'; // Use window.location for hard redirect
+        } else {
+          console.log('🔐 LOGIN MUTATION: Redirecting to /');
+          setLocation('/');
+        }
+      }, 100);
     },
     onError: (error: Error) => {
       console.error('🔐 LOGIN MUTATION: onError -', error.message);
