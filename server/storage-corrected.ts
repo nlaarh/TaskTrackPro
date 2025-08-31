@@ -563,13 +563,24 @@ export class CorrectedDatabaseStorage implements IStorage {
   // Admin operations
   async getAllUsers(): Promise<User[]> {
     try {
+      console.log('getAllUsers: Starting query...');
+      console.log('Database URL:', process.env.DATABASE_URL ? 'configured' : 'missing');
+      
       const result = await db.execute(sql`
         SELECT id, email, first_name, last_name, role, created_at 
         FROM users 
         ORDER BY created_at DESC
       `);
       
-      return result.rows.map((row: any) => ({
+      console.log('getAllUsers: Raw result:', result);
+      console.log('getAllUsers: Rows count:', result.rows?.length || 0);
+      
+      if (!result.rows || result.rows.length === 0) {
+        console.warn('getAllUsers: No rows returned from database');
+        return [];
+      }
+      
+      const users = result.rows.map((row: any) => ({
         id: row.id,
         email: row.email,
         passwordHash: '',
@@ -584,8 +595,12 @@ export class CorrectedDatabaseStorage implements IStorage {
         createdAt: row.created_at,
         updatedAt: null,
       }));
+      
+      console.log('getAllUsers: Returning', users.length, 'users');
+      return users;
+      
     } catch (error) {
-      console.error('Error getting all users:', error);
+      console.error('getAllUsers: Error occurred:', error);
       throw error;
     }
   }

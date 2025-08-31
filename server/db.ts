@@ -18,3 +18,13 @@ export const pool = new Pool({
 });
 
 export const db = drizzle(pool, { schema });
+
+// Test database connection and verify we're using the correct database
+pool.query('SELECT current_database()').then(result => {
+  console.log('✅ Connected to database:', result.rows[0].current_database);
+  if (result.rows[0].current_database !== 'floristdb') {
+    console.error('❌ WARNING: Connected to wrong database! Expected floristdb but got:', result.rows[0].current_database);
+  }
+}).catch(err => {
+  console.error('❌ Database connection test failed:', err);
+});
