@@ -126,7 +126,8 @@ export default function AdminDashboard() {
       const token = localStorage.getItem('customerToken');
       if (!token) {
         console.error('No authentication token found in localStorage');
-        throw new Error('No authentication token when going to admin');
+        console.log('Available localStorage keys:', Object.keys(localStorage));
+        throw new Error('Please log in to access the admin dashboard');
       }
       
       console.log('Making request with token:', token.substring(0, 20) + '...');
@@ -149,7 +150,8 @@ export default function AdminDashboard() {
       console.log('Users data received:', data);
       return data;
     },
-    retry: false,
+    retry: 1, // Allow one retry
+    retryDelay: 1000, // Wait 1 second before retry
   });
 
   const { data: florists = [], isLoading: floristsLoading, error: floristsError } = useQuery({

@@ -85,11 +85,15 @@ export function setupAdminRoutes(app: Express) {
     }
   });
 
-  // Get all florists
+  // Get all florists from florist_auth table where business data is stored
   app.get('/api/admin-clean/florists', adminAuth, async (req, res) => {
     try {
       const result = await pool.query(`
-        SELECT * FROM florists 
+        SELECT id, business_name, email, first_name, last_name, city, state, phone, 
+               website, specialties, profile_summary, years_of_experience, 
+               is_verified, created_at
+        FROM florist_auth 
+        WHERE business_name IS NOT NULL
         ORDER BY created_at DESC
       `);
       
@@ -97,17 +101,19 @@ export function setupAdminRoutes(app: Express) {
         id: row.id,
         businessName: row.business_name,
         email: row.email,
+        firstName: row.first_name,
+        lastName: row.last_name,
         phone: row.phone,
-        address: row.address,
         city: row.city,
         state: row.state,
-        zipCode: row.zip_code,
         website: row.website,
         specialties: row.specialties,
-        rating: row.rating || 4.5,
-        reviewCount: row.review_count || 0,
+        profileSummary: row.profile_summary,
+        yearsOfExperience: row.years_of_experience || 0,
+        rating: 4.5, // Default rating
+        reviewCount: 0, // Default review count
         createdAt: row.created_at,
-        isVerified: true,
+        isVerified: row.is_verified || false,
         isActive: true
       }));
       

@@ -2,15 +2,14 @@ import { Pool } from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from "@shared/schema";
 
-// Use the external PostgreSQL database as specified in replit.md
-// This overrides any environment DATABASE_URL to ensure we use the correct external database
-const EXTERNAL_DATABASE_URL = "postgresql://postgres:RwDPqwPPtxhBNDzKDGiJlrHDtdTBZBYx@yamanote.proxy.rlwy.net:18615/floristdb";
+// Use ONLY the Railway PostgreSQL database - no local Neon database
+const RAILWAY_DATABASE_URL = "postgresql://postgres:RwDPqwPPtxhBNDzKDGiJlrHDtdTBZBYx@yamanote.proxy.rlwy.net:18615/floristdb";
 
-console.log('Using external PostgreSQL database:', EXTERNAL_DATABASE_URL);
+console.log('Using Railway PostgreSQL database ONLY:', RAILWAY_DATABASE_URL);
 
-// Create connection pool
+// Create connection pool for Railway database only
 export const pool = new Pool({ 
-  connectionString: EXTERNAL_DATABASE_URL,
+  connectionString: RAILWAY_DATABASE_URL,
   ssl: false,
   max: 10,
   idleTimeoutMillis: 30000,
