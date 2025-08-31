@@ -86,6 +86,14 @@ export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState("");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+
+  // Handle tab changes and reset search/sort when switching tabs
+  const handleTabChange = (newTab: string) => {
+    setActiveTab(newTab);
+    setSearchTerm(""); // Reset search when switching tabs
+    setSortField(""); // Reset sort when switching tabs
+    setSortDirection("asc");
+  };
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [selectedFlorist, setSelectedFlorist] = useState<Florist | null>(null);
   const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
@@ -266,7 +274,12 @@ export default function AdminDashboard() {
     });
 
   const filteredCustomers = users
-    .filter((user: User) => user.role === 'customer' || (user.roles && user.roles.includes('customer')))
+    .filter((user: User) => {
+      // Only show users with customer role
+      const isCustomer = user.role === 'customer' || (user.roles && user.roles.includes('customer'));
+      console.log(`User ${user.email}: role=${user.role}, roles=${JSON.stringify(user.roles)}, isCustomer=${isCustomer}`);
+      return isCustomer;
+    })
     .filter((user: User) => 
       user.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -280,6 +293,8 @@ export default function AdminDashboard() {
         ? String(aValue).localeCompare(String(bValue))
         : String(bValue).localeCompare(String(aValue));
     });
+
+  console.log(`Active tab: ${activeTab}, Users total: ${users.length}, Customers filtered: ${filteredCustomers.length}, Florists: ${florists.length}`);
 
   const filteredFlorists = florists
     .filter((florist: Florist) => 
@@ -409,7 +424,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-8">
           <TabsList className="grid w-full grid-cols-3 bg-white border shadow-sm rounded-lg p-1">
             <TabsTrigger 
               value="users" 
