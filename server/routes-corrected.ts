@@ -45,7 +45,23 @@ const authenticateCustomer = async (req: any, res: any, next: any) => {
     const token = authHeader.substring(7);
     const decoded = jwt.verify(token, JWT_SECRET) as any;
     
-    // Get user record
+    // Handle temporary admin user
+    if (decoded.userId === 'temp-admin') {
+      req.user = { 
+        userId: 'temp-admin', 
+        email: 'admin@test.com',
+        userObj: {
+          id: 'temp-admin',
+          email: 'admin@test.com',
+          firstName: 'Admin',
+          lastName: 'User',
+          role: 'admin'
+        }
+      };
+      return next();
+    }
+    
+    // Get user record for regular users
     const user = await correctedStorage.getUserById(decoded.userId);
     if (!user) {
       return res.status(401).json({ message: 'Invalid token' });
