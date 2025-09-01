@@ -57,6 +57,23 @@ PostgreSQL is the primary database, accessed via Drizzle ORM for type-safe opera
 
 ## Recent Changes
 
+**Website Contact Information Management System (September 1, 2025)**
+- Created complete website contact information management system
+- Built admin interface at `/admin/website-info` with tabbed form for all contact details
+- Added professional Admin dropdown menu in navigation with organized options:
+  - Manage Users, Manage Florists, Website Info, Dashboard
+- Created public contact page at `/contact` displaying complete contact information
+- Fixed navigation Contact link to properly route to contact page
+
+**Messaging System Implementation (September 1, 2025)**
+- Created complete messaging system with Gmail-inspired interface
+- Built messages table with admin-florist communication capability
+- Added `/api/messages` and `/api/messages/florists` endpoints
+- Implemented compose message dialog with florist search functionality
+- Added message search and filtering capabilities
+- Created sample messages for testing system functionality
+- Note: Requires admin authentication to access messaging features
+
 **Image Storage System (September 1, 2025)**
 - Implemented complete image storage system storing base64 data directly in database
 - Added profile_image_data column to florist_auth table

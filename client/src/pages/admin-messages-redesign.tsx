@@ -64,18 +64,43 @@ export default function AdminMessagesRedesign() {
   }, []);
 
   // Fetch messages
-  const { data: messages = [], isLoading: messagesLoading } = useQuery({
+  const { data: messages = [], isLoading: messagesLoading, error: messagesError } = useQuery({
     queryKey: ['/api/messages'],
     queryFn: async () => {
       const token = localStorage.getItem('customerToken') || localStorage.getItem('floristToken');
+      
+      if (!token) {
+        console.log('No authentication token found');
+        throw new Error('Authentication required');
+      }
+      
+      console.log('Fetching messages with token:', token ? 'Present' : 'Missing');
+      
       const response = await fetch('/api/messages', {
         headers: {
           'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
       });
-      if (!response.ok) throw new Error('Failed to fetch messages');
-      return response.json();
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Messages fetch failed:', response.status, errorText);
+        throw new Error(`Failed to fetch messages: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log('Messages fetched successfully:', data.length, 'messages');
+      return data;
     },
+    retry: (failureCount, error) => {
+      // Don't retry auth errors
+      if (error.message.includes('401') || error.message.includes('Authentication')) {
+        return false;
+      }
+      return failureCount < 2;
+    },
+    enabled: true, // Always try to fetch when component mounts
   });
 
   // Fetch florists for compose dialog
@@ -249,10 +274,22 @@ export default function AdminMessagesRedesign() {
             {/* Messages */}
             <ScrollArea className="flex-1">
               <div className="divide-y">
-                {filteredMessages.length === 0 ? (
+                {messagesLoading ? (
+                  <div className="p-8 text-center">
+                    <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-gray-400" />
+                    <p className="text-sm text-gray-500">Loading messages...</p>
+                  </div>
+                ) : messagesError ? (
+                  <div className="p-8 text-center text-red-500">
+                    <Mail className="h-12 w-12 mx-auto mb-4 text-red-300" />
+                    <p className="text-sm">Failed to load messages</p>
+                    <p className="text-xs text-gray-500 mt-2">{messagesError.message}</p>
+                  </div>
+                ) : filteredMessages.length === 0 ? (
                   <div className="p-8 text-center text-gray-500">
                     <Mail className="h-12 w-12 mx-auto mb-4 text-gray-300" />
                     <p>No messages found</p>
+                    {searchQuery && <p className="text-xs mt-2">Try adjusting your search terms</p>}
                   </div>
                 ) : (
                   filteredMessages.map((message: Message) => (
