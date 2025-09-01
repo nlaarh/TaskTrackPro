@@ -54,6 +54,11 @@ export default function AdminList() {
   const [passwordForm, setPasswordForm] = useState({ newPassword: '', confirmPassword: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  
+  // Florist states
+  const [viewFlorist, setViewFlorist] = useState<any>(null);
+  const [editFlorist, setEditFlorist] = useState<any>(null);
+  const [deleteFlorist, setDeleteFlorist] = useState<any>(null);
   const [newUser, setNewUser] = useState({
     firstName: '',
     lastName: '',
@@ -238,10 +243,8 @@ export default function AdminList() {
   // Handler functions for view, edit, delete actions
   const handleView = (type: string, item: any) => {
     console.log(`View ${type}:`, item);
-    console.log('Setting viewUser state to:', item);
     if (type === 'florist') {
-      // For now, just show an alert - can be enhanced later
-      alert(`Viewing florist: ${item.businessName}\nEmail: ${item.email}\nLocation: ${item.city}, ${item.state}`);
+      setViewFlorist(item);
     } else if (type === 'user') {
       setViewUser(item);
     }
@@ -249,10 +252,8 @@ export default function AdminList() {
 
   const handleEdit = (type: string, item: any) => {
     console.log(`Edit ${type}:`, item);
-    console.log('Setting editUser state to:', item);
     if (type === 'florist') {
-      // For now, just show an alert - can be enhanced later  
-      alert(`Edit functionality for florist "${item.businessName}" will be implemented in future update.`);
+      setEditFlorist({ ...item });
     } else if (type === 'user') {
       // Create a proper copy with empty password field
       setEditUser({
@@ -264,13 +265,8 @@ export default function AdminList() {
 
   const handleDelete = (type: string, item: any) => {
     console.log(`Delete ${type}:`, item);
-    console.log('Setting deleteUser state to:', item);
     if (type === 'florist') {
-      // For now, just show an alert - can be enhanced later
-      const confirmed = confirm(`Are you sure you want to remove florist "${item.businessName}"? This action cannot be undone.`);
-      if (confirmed) {
-        alert('Delete functionality for florists will be implemented in future update.');
-      }
+      setDeleteFlorist(item);
     } else if (type === 'user') {
       setDeleteUser(item);
     }
@@ -397,12 +393,8 @@ export default function AdminList() {
     }
   }, [users, florists, toast]);
 
-  // Filter and sort data - Debug customer filtering
-  const customers = users.filter((user: any) => {
-    console.log('Filtering user:', user.id, 'Role:', user.role, 'Type:', typeof user.role);
-    return user.role === 'customer';
-  });
-  console.log('Total users:', users.length, 'Filtered customers:', customers.length);
+  // Filter and sort data
+  const customers = users.filter((user: any) => user.role === 'customer');
 
   const filteredAndSortedUsers = useMemo(() => {
     const filtered = users.filter((user: any) =>
@@ -1250,6 +1242,329 @@ export default function AdminList() {
                 </Button>
               </div>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* View Florist Dialog */}
+        <Dialog open={!!viewFlorist} onOpenChange={() => setViewFlorist(null)}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FaEye className="h-5 w-5 text-blue-600" />
+                Florist Business Profile
+              </DialogTitle>
+            </DialogHeader>
+            {viewFlorist && (
+              <div className="space-y-6">
+                {/* Profile Image */}
+                {viewFlorist.profileImageUrl && (
+                  <div className="flex justify-center">
+                    <img 
+                      src={viewFlorist.profileImageUrl} 
+                      alt="Business Profile"
+                      className="w-32 h-32 rounded-full object-cover border-4 border-gray-200"
+                    />
+                  </div>
+                )}
+                
+                {/* Basic Information */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-700">Business Name</Label>
+                    <p className="text-lg font-medium">{viewFlorist.businessName}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-700">Contact Person</Label>
+                    <p>{viewFlorist.firstName} {viewFlorist.lastName}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-700">Email</Label>
+                    <p>{viewFlorist.email}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-700">Phone</Label>
+                    <p>{viewFlorist.phone || 'N/A'}</p>
+                  </div>
+                </div>
+
+                {/* Location */}
+                <div>
+                  <Label className="text-sm font-semibold text-gray-700">Address</Label>
+                  <p>{viewFlorist.address}</p>
+                  <p>{viewFlorist.city}, {viewFlorist.state} {viewFlorist.zipCode}</p>
+                </div>
+
+                {/* Business Details */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-700">Website</Label>
+                    <p>{viewFlorist.website || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-700">Years of Experience</Label>
+                    <p>{viewFlorist.yearsOfExperience || 0} years</p>
+                  </div>
+                </div>
+
+                {/* Profile Summary */}
+                {viewFlorist.profileSummary && (
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-700">Profile Summary</Label>
+                    <p className="text-gray-600 leading-relaxed">{viewFlorist.profileSummary}</p>
+                  </div>
+                )}
+
+                {/* Specialties */}
+                {viewFlorist.specialties && viewFlorist.specialties.length > 0 && (
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-700">Specialties</Label>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {viewFlorist.specialties.map((specialty: string, index: number) => (
+                        <Badge key={index} variant="outline">{specialty}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Services */}
+                {viewFlorist.services && viewFlorist.services.length > 0 && (
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-700">Services Offered</Label>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {viewFlorist.services.map((service: string, index: number) => (
+                        <Badge key={index} variant="secondary">{service}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Status */}
+                <div>
+                  <Label className="text-sm font-semibold text-gray-700">Status</Label>
+                  <div className="mt-1">
+                    <Badge variant={viewFlorist.isFeatured ? 'default' : 'secondary'}>
+                      {viewFlorist.isFeatured ? 'Verified' : 'Pending'}
+                    </Badge>
+                  </div>
+                </div>
+
+                {/* Dates */}
+                <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-700">Joined</Label>
+                    <p>{new Date(viewFlorist.createdAt).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-700">Last Updated</Label>
+                    <p>{new Date(viewFlorist.updatedAt).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Florist Dialog */}
+        <Dialog open={!!editFlorist} onOpenChange={() => setEditFlorist(null)}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FaEdit className="h-5 w-5 text-emerald-600" />
+                Edit Florist Profile
+              </DialogTitle>
+            </DialogHeader>
+            {editFlorist && (
+              <div className="space-y-4">
+                {/* Profile Image Display */}
+                {editFlorist.profileImageUrl && (
+                  <div className="flex justify-center mb-4">
+                    <img 
+                      src={editFlorist.profileImageUrl} 
+                      alt="Current Profile"
+                      className="w-24 h-24 rounded-full object-cover border-2 border-gray-200"
+                    />
+                  </div>
+                )}
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="editBusinessName">Business Name</Label>
+                    <Input
+                      id="editBusinessName"
+                      value={editFlorist.businessName}
+                      onChange={(e) => setEditFlorist({...editFlorist, businessName: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="editContactName">Contact Person</Label>
+                    <Input
+                      id="editContactName"
+                      value={`${editFlorist.firstName} ${editFlorist.lastName}`}
+                      onChange={(e) => {
+                        const [firstName, ...lastName] = e.target.value.split(' ');
+                        setEditFlorist({
+                          ...editFlorist, 
+                          firstName, 
+                          lastName: lastName.join(' ')
+                        });
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="editEmail">Email</Label>
+                    <Input
+                      id="editEmail"
+                      type="email"
+                      value={editFlorist.email}
+                      onChange={(e) => setEditFlorist({...editFlorist, email: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="editPhone">Phone</Label>
+                    <Input
+                      id="editPhone"
+                      value={editFlorist.phone || ''}
+                      onChange={(e) => setEditFlorist({...editFlorist, phone: e.target.value})}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="editAddress">Address</Label>
+                  <Input
+                    id="editAddress"
+                    value={editFlorist.address || ''}
+                    onChange={(e) => setEditFlorist({...editFlorist, address: e.target.value})}
+                  />
+                </div>
+
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="editCity">City</Label>
+                    <Input
+                      id="editCity"
+                      value={editFlorist.city || ''}
+                      onChange={(e) => setEditFlorist({...editFlorist, city: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="editState">State</Label>
+                    <Input
+                      id="editState"
+                      value={editFlorist.state || ''}
+                      onChange={(e) => setEditFlorist({...editFlorist, state: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="editZipCode">Zip Code</Label>
+                    <Input
+                      id="editZipCode"
+                      value={editFlorist.zipCode || ''}
+                      onChange={(e) => setEditFlorist({...editFlorist, zipCode: e.target.value})}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="editWebsite">Website</Label>
+                    <Input
+                      id="editWebsite"
+                      value={editFlorist.website || ''}
+                      onChange={(e) => setEditFlorist({...editFlorist, website: e.target.value})}
+                      placeholder="https://..."
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="editExperience">Years of Experience</Label>
+                    <Input
+                      id="editExperience"
+                      type="number"
+                      value={editFlorist.yearsOfExperience || 0}
+                      onChange={(e) => setEditFlorist({...editFlorist, yearsOfExperience: parseInt(e.target.value)})}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="editSummary">Profile Summary</Label>
+                  <textarea
+                    id="editSummary"
+                    className="w-full min-h-[100px] p-3 border rounded-md resize-none"
+                    value={editFlorist.profileSummary || ''}
+                    onChange={(e) => setEditFlorist({...editFlorist, profileSummary: e.target.value})}
+                    placeholder="Brief description of the florist business..."
+                  />
+                </div>
+
+                <div className="flex gap-2 pt-4">
+                  <Button 
+                    onClick={() => {
+                      // TODO: Implement save functionality
+                      toast({ title: "Info", description: "Edit florist functionality will be implemented", variant: "default" });
+                      setEditFlorist(null);
+                    }}
+                    className="flex-1"
+                  >
+                    <FaSave className="h-4 w-4 mr-2" />
+                    Save Changes
+                  </Button>
+                  <Button variant="outline" onClick={() => setEditFlorist(null)}>
+                    <FaTimes className="h-4 w-4 mr-2" />
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Florist Dialog */}
+        <Dialog open={!!deleteFlorist} onOpenChange={() => setDeleteFlorist(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FaTrash className="h-5 w-5 text-red-600" />
+                Delete Florist
+              </DialogTitle>
+            </DialogHeader>
+            {deleteFlorist && (
+              <div className="space-y-4">
+                <p className="text-sm text-gray-600">
+                  Are you sure you want to delete <strong>{deleteFlorist.businessName}</strong>?
+                </p>
+                <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                  <p className="text-sm text-red-800">
+                    <strong>Warning:</strong> This action cannot be undone. The florist business profile will be permanently removed from the system.
+                  </p>
+                </div>
+                <div className="flex gap-2 pt-4">
+                  <Button 
+                    variant="destructive"
+                    onClick={() => {
+                      // TODO: Implement delete functionality
+                      toast({ title: "Info", description: "Delete florist functionality will be implemented", variant: "default" });
+                      setDeleteFlorist(null);
+                    }}
+                    className="flex-1"
+                  >
+                    <FaTrash className="h-4 w-4 mr-2" />
+                    Delete Florist
+                  </Button>
+                  <Button variant="outline" onClick={() => setDeleteFlorist(null)}>
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
           </DialogContent>
         </Dialog>
       </div>
