@@ -1257,12 +1257,16 @@ export default function AdminList() {
             {viewFlorist && (
               <div className="space-y-6">
                 {/* Profile Image */}
-                {viewFlorist.profileImageUrl && (
+                {viewFlorist.profileImageUrl && viewFlorist.profileImageUrl.trim() !== '' && (
                   <div className="flex justify-center">
                     <img 
                       src={viewFlorist.profileImageUrl} 
                       alt="Business Profile"
                       className="w-32 h-32 rounded-full object-cover border-4 border-gray-200"
+                      onError={(e) => {
+                        console.log('Image load error, hiding image');
+                        (e.target as HTMLElement).style.display = 'none';
+                      }}
                     />
                   </div>
                 )}
@@ -1384,12 +1388,16 @@ export default function AdminList() {
             {editFlorist && (
               <div className="space-y-4">
                 {/* Profile Image Display */}
-                {editFlorist.profileImageUrl && (
+                {editFlorist.profileImageUrl && editFlorist.profileImageUrl.trim() !== '' && (
                   <div className="flex justify-center mb-4">
                     <img 
                       src={editFlorist.profileImageUrl} 
                       alt="Current Profile"
                       className="w-24 h-24 rounded-full object-cover border-2 border-gray-200"
+                      onError={(e) => {
+                        console.log('Image load error in edit dialog, hiding image');
+                        (e.target as HTMLElement).style.display = 'none';
+                      }}
                     />
                   </div>
                 )}
