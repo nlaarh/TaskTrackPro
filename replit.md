@@ -54,3 +54,13 @@ PostgreSQL is the primary database, accessed via Drizzle ORM for type-safe opera
 - **ESBuild**: Server-side bundling.
 - **PostCSS**: CSS processing.
 - **XLSX**: For Excel import/export in the admin dashboard.
+
+## Recent Changes
+
+**Image Storage System (September 1, 2025)**
+- Implemented complete image storage system storing base64 data directly in database
+- Added profile_image_data column to florist_auth table
+- Created professional flower arrangement images for all 52 florists
+- Fixed image upload functionality in admin interface
+- All florists now have appropriate floral-themed profile pictures instead of random images
+- System successfully tested with working upload and display functionality
