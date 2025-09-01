@@ -929,8 +929,24 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
   app.get("/api/admin-clean/users", async (req, res) => {
     try {
       console.log('Admin-clean users endpoint called');
-      const { simpleStorage } = await import('./storage-simple');
-      const users = await simpleStorage.getAllUsers();
+      
+      // Direct database query to bypass Drizzle cache issues
+      console.log('Using connection string:', process.env.DATABASE_URL?.substring(0, 50) + '...');
+      const directResult = await pool.query('SELECT * FROM users ORDER BY created_at DESC');
+      console.log('Direct SQL query found', directResult.rows.length, 'users');
+      console.log('Sample users found:', directResult.rows.map(r => ({ id: r.id, email: r.email, role: r.role })));
+      
+      const users = directResult.rows.map(row => ({
+        id: row.id,
+        email: row.email,
+        firstName: row.first_name,
+        lastName: row.last_name,
+        role: row.role,
+        isVerified: row.is_verified,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+      }));
+      
       console.log('Admin-clean users retrieved:', users.length);
       console.log('User roles debug:', users.map((u: any) => ({ id: u.id, email: u.email, role: u.role })));
       res.json(users);

@@ -11,6 +11,7 @@ export class SimpleStorage {
     try {
       const result = await db.select().from(users).orderBy(desc(users.createdAt));
       console.log('SimpleStorage: getAllUsers found', result.length, 'users');
+      console.log('SimpleStorage: User roles found:', result.map(u => ({ id: u.id, email: u.email, role: u.role })));
       return result;
     } catch (error) {
       console.error('SimpleStorage: getAllUsers error:', error);
