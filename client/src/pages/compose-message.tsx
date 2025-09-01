@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Loader2, Send } from "lucide-react";
+import { Loader2, Send, ChevronDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
@@ -35,9 +35,11 @@ export default function ComposeMessage({ isOpen, onClose, florists, preSelectedF
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Filter florists based on search - include business name, email, phone, and contact name
+  // Filter florists based on search - show all if no search term, filter if search term exists
   const filteredFlorists = florists?.filter((florist: Florist) => {
-    if (!searchTerm || searchTerm.length < 1) return false;
+    // If no search term, show all florists when dropdown is open
+    if (!searchTerm || searchTerm.length < 1) return showResults;
+    
     const term = searchTerm.toLowerCase();
     const businessName = florist.businessName?.toLowerCase() || "";
     const name = florist.name?.toLowerCase() || "";
@@ -118,13 +120,21 @@ export default function ComposeMessage({ isOpen, onClose, florists, preSelectedF
     setSelectedFlorist(florist);
     setSearchTerm("");
     setShowResults(false);
+    setSubject(`Message for ${florist.businessName || florist.name}`);
   };
 
   const handleSearchChange = (value: string) => {
     setSearchTerm(value);
-    setShowResults(value.length > 0);
+    setShowResults(true); // Always show results when typing
     if (!value) {
       setSelectedFlorist(null);
+    }
+  };
+
+  const toggleDropdown = () => {
+    setShowResults(!showResults);
+    if (!showResults) {
+      setSearchTerm(""); // Clear search when opening dropdown
     }
   };
 
@@ -155,17 +165,28 @@ export default function ComposeMessage({ isOpen, onClose, florists, preSelectedF
             
             {!selectedFlorist && (
               <div className="relative">
-                <Input
-                  value={searchTerm}
-                  onChange={(e) => handleSearchChange(e.target.value)}
-                  placeholder="Search by business name, email, phone, or contact name..."
-                  className="w-full"
-                  autoFocus
-                />
+                <div className="relative">
+                  <Input
+                    value={searchTerm}
+                    onChange={(e) => handleSearchChange(e.target.value)}
+                    placeholder="Search by business name, email, phone, or contact name..."
+                    className="w-full pr-10"
+                    autoFocus
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={toggleDropdown}
+                    className="absolute right-0 top-0 h-full px-3 hover:bg-gray-100"
+                  >
+                    <ChevronDown className={`h-4 w-4 transition-transform ${showResults ? 'rotate-180' : ''}`} />
+                  </Button>
+                </div>
                 
                 {showResults && filteredFlorists.length > 0 && (
                   <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto">
-                    {filteredFlorists.slice(0, 10).map((florist: Florist) => (
+                    {filteredFlorists.slice(0, searchTerm ? 10 : 20).map((florist: Florist) => (
                       <div
                         key={florist.id}
                         onClick={() => handleFloristSelect(florist)}
@@ -196,6 +217,15 @@ export default function ComposeMessage({ isOpen, onClose, florists, preSelectedF
                         </div>
                       </div>
                     ))}
+                  </div>
+                )}
+                
+                {showResults && searchTerm && filteredFlorists.length === 0 && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg p-4">
+                    <div className="text-center text-gray-500">
+                      <p>No florists found for "{searchTerm}"</p>
+                      <p className="text-xs mt-1">Try searching by business name, email, or phone number</p>
+                    </div>
                   </div>
                 )}
                 
