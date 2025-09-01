@@ -18,7 +18,8 @@ import {
   Star,
   ChevronRight,
   Calendar,
-  Eye
+  Eye,
+  Globe
 } from "lucide-react";
 
 export default function AdminDashboard() {
@@ -284,6 +285,38 @@ export default function AdminDashboard() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Website Information */}
+          <Link to="/admin/website-info">
+            <Card className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-0 shadow-sm bg-white/80 backdrop-blur-sm hover:bg-white">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 bg-cyan-100 rounded-lg group-hover:bg-cyan-200 transition-colors">
+                      <Globe className="h-6 w-6 text-cyan-600" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-xl font-semibold text-gray-900">Website Info</CardTitle>
+                      <p className="text-sm text-gray-500">Contact & settings</p>
+                    </div>
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-gray-600 group-hover:translate-x-1 transition-all" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 text-sm leading-relaxed mb-4">
+                  Manage website contact information, social media links, business hours, and public contact details.
+                </p>
+                <div className="flex items-center justify-between pt-3 border-t">
+                  <Badge variant="outline" className="text-xs">
+                    <Settings className="h-3 w-3 mr-1" />
+                    Configure
+                  </Badge>
+                  <span className="text-xs text-gray-400">Public info</span>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
 
           {/* Settings */}
           <Card className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-0 shadow-sm bg-white/80 backdrop-blur-sm hover:bg-white">

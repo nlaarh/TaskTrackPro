@@ -776,6 +776,90 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Website info endpoints
+  app.get('/api/website-info', async (req, res) => {
+    try {
+      const query = `SELECT * FROM website_info ORDER BY id DESC LIMIT 1`;
+      const result = await pool.query(query);
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ message: 'Website info not found' });
+      }
+      
+      res.json(result.rows[0]);
+    } catch (error) {
+      console.error('Error getting website info:', error);
+      res.status(500).json({ message: 'Failed to get website info' });
+    }
+  });
+
+  app.put('/api/website-info', authenticateCustomer, checkAdminRole, async (req, res) => {
+    try {
+      const user = req.user;
+      const adminUserId = user.userId;
+      
+      const {
+        siteName,
+        ownerName,
+        email,
+        phone,
+        address,
+        city,
+        state,
+        zipCode,
+        website,
+        description,
+        socialMedia,
+        businessHours
+      } = req.body;
+
+      const query = `
+        UPDATE website_info SET 
+          site_name = $1,
+          owner_name = $2,
+          email = $3,
+          phone = $4,
+          address = $5,
+          city = $6,
+          state = $7,
+          zip_code = $8,
+          website = $9,
+          description = $10,
+          social_media = $11,
+          business_hours = $12,
+          updated_at = NOW(),
+          updated_by = $13
+        WHERE id = 1
+        RETURNING *
+      `;
+      
+      const result = await pool.query(query, [
+        siteName,
+        ownerName,
+        email,
+        phone,
+        address,
+        city,
+        state,
+        zipCode,
+        website,
+        description,
+        JSON.stringify(socialMedia),
+        JSON.stringify(businessHours),
+        adminUserId
+      ]);
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ message: 'Website info not found' });
+      }
+      
+      res.json(result.rows[0]);
+    } catch (error) {
+      console.error('Error updating website info:', error);
+      res.status(500).json({ message: 'Failed to update website info' });
+    }
+  });
+
   // Get unread message count
   app.get('/api/messages/unread-count', authenticateCustomer, async (req, res) => {
     try {

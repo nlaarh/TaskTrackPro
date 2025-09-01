@@ -50,6 +50,40 @@ export const userRoles = pgTable("user_roles", {
   { unique: [table.userEmail, table.role] }
 ]);
 
+// Website contact information table
+export const websiteInfo = pgTable("website_info", {
+  id: serial("id").primaryKey(),
+  siteName: varchar("site_name").default("FloriHub"),
+  ownerName: varchar("owner_name").notNull(),
+  email: varchar("email").notNull(),
+  phone: varchar("phone"),
+  address: text("address"),
+  city: varchar("city"),
+  state: varchar("state"),
+  zipCode: varchar("zip_code"),
+  website: varchar("website"),
+  description: text("description"),
+  socialMedia: jsonb("social_media").$type<{
+    facebook?: string;
+    instagram?: string;
+    twitter?: string;
+    linkedin?: string;
+    youtube?: string;
+    tiktok?: string;
+  }>(),
+  businessHours: jsonb("business_hours").$type<{
+    monday?: { open: string; close: string; closed?: boolean };
+    tuesday?: { open: string; close: string; closed?: boolean };
+    wednesday?: { open: string; close: string; closed?: boolean };
+    thursday?: { open: string; close: string; closed?: boolean };
+    friday?: { open: string; close: string; closed?: boolean };
+    saturday?: { open: string; close: string; closed?: boolean };
+    sunday?: { open: string; close: string; closed?: boolean };
+  }>(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  updatedBy: varchar("updated_by"), // Admin user who made the update
+});
+
 // Florist authentication AND business data - EXACT MATCH TO RAILWAY DATABASE
 export const floristAuth = pgTable("florist_auth", {
   id: serial("id").primaryKey(),
@@ -201,3 +235,12 @@ export type FloristWithDetails = Florist & {
 
 export type SpecialtyReference = typeof specialtiesReference.$inferSelect;
 export type ServiceReference = typeof servicesReference.$inferSelect;
+
+// Website info schemas
+export const insertWebsiteInfoSchema = createInsertSchema(websiteInfo).omit({
+  id: true,
+  updatedAt: true,
+});
+
+export type WebsiteInfo = typeof websiteInfo.$inferSelect;
+export type InsertWebsiteInfo = z.infer<typeof insertWebsiteInfoSchema>;

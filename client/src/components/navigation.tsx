@@ -62,9 +62,9 @@ export default function Navigation() {
   const navItems = [
     { href: "/", label: "Home" },
     { href: "/search", label: "Search Members" },
+    { href: "/contact", label: "Contact" },
     { href: "#", label: "Local Events" },
     { href: "#", label: "Local Deals" },
-    { href: "#", label: "Blog" },
   ];
 
   const categories = [
