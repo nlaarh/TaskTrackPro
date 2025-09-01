@@ -932,6 +932,7 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
       const { simpleStorage } = await import('./storage-simple');
       const users = await simpleStorage.getAllUsers();
       console.log('Admin-clean users retrieved:', users.length);
+      console.log('User roles debug:', users.map((u: any) => ({ id: u.id, email: u.email, role: u.role })));
       res.json(users);
     } catch (error) {
       console.error("Admin-clean users error:", error);

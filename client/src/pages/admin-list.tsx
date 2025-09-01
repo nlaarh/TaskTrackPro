@@ -397,8 +397,12 @@ export default function AdminList() {
     }
   }, [users, florists, toast]);
 
-  // Filter and sort data
-  const customers = users.filter((user: any) => user.role === 'customer');
+  // Filter and sort data - Debug customer filtering
+  const customers = users.filter((user: any) => {
+    console.log('Filtering user:', user.id, 'Role:', user.role, 'Type:', typeof user.role);
+    return user.role === 'customer';
+  });
+  console.log('Total users:', users.length, 'Filtered customers:', customers.length);
 
   const filteredAndSortedUsers = useMemo(() => {
     const filtered = users.filter((user: any) =>
