@@ -20,6 +20,7 @@ import AdminUsers from "@/pages/admin-users";
 import AdminCustomers from "@/pages/admin-customers";
 import AdminFlorists from "@/pages/admin-florists";
 import AdminClean from "@/pages/admin-clean";
+import AdminList from "@/pages/admin-list";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -53,14 +54,15 @@ function Router() {
         return <AdminDashboard />;
       }} />
       <Route path="/admin" component={() => {
-        // Redirect /admin to /admin-clean
-        window.location.href = '/admin-clean';
+        // Redirect /admin to /admin-list
+        window.location.href = '/admin-list';
         return <div>Redirecting...</div>;
       }} />
       <Route path="/admin/users" component={AdminUsers} />
       <Route path="/admin/customers" component={AdminCustomers} />
       <Route path="/admin/florists" component={AdminFlorists} />
       <Route path="/admin-clean" component={AdminClean} />
+      <Route path="/admin-list" component={AdminList} />
       <Route path="/florist-login" component={FloristLogin} />
       <Route path="/florist-register" component={FloristRegister} />
       <Route path="/florist-dashboard" component={FloristDashboard} />

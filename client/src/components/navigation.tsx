@@ -177,7 +177,7 @@ export default function Navigation() {
                     <div className="w-48 p-2">
                       <NavigationMenuLink asChild>
                         <Link
-                          href="/admin-clean"
+                          href="/admin-list"
                           className="flex items-center px-3 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors duration-200"
                         >
                           <Shield className="h-4 w-4 mr-2" />
