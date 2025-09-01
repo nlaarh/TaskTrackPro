@@ -33,10 +33,36 @@ export default function FloristCard({ florist, viewMode }: FloristCardProps) {
   const { toast } = useToast();
   const [isSaved, setIsSaved] = useState(false);
 
-  const primaryImage = florist.profileImageUrl ? { url: florist.profileImageUrl, alt: florist.businessName } : null;
+  // Priority 1: Use stored base64 image data, Priority 2: Use URL, Priority 3: Default from images array
+  const getFloristImage = () => {
+    // Priority 1: Use stored base64 image data 
+    if (florist.profileImageData && florist.profileImageData.trim() !== '') {
+      return { url: florist.profileImageData, alt: florist.businessName };
+    }
+    
+    // Priority 2: Use profileImageUrl
+    if (florist.profileImageUrl && florist.profileImageUrl.trim() !== '') {
+      return { url: florist.profileImageUrl, alt: florist.businessName };
+    }
+    
+    // Priority 3: Use first image from images array
+    if (florist.images && florist.images.length > 0) {
+      return { url: florist.images[0].url, alt: florist.businessName };
+    }
+    
+    return null;
+  };
+  
+  const primaryImage = getFloristImage();
   
   // Debug: log the image data to see what we're getting
-  console.log('Florist:', florist.businessName, 'Primary image URL length:', primaryImage?.url?.length, 'URL start:', primaryImage?.url?.substring(0, 50));
+  console.log('🖼️ Florist:', florist.businessName);
+  console.log('  - Has profileImageData:', !!florist.profileImageData);
+  console.log('  - Has profileImageUrl:', !!florist.profileImageUrl);
+  console.log('  - Primary image source:', primaryImage ? 'found' : 'none');
+  if (primaryImage?.url) {
+    console.log('  - Image starts with:', primaryImage.url.substring(0, 50));
+  }
   const stars = generateStars(parseFloat(florist.averageRating || '0'));
 
   const saveFloristMutation = useMutation({
