@@ -1476,34 +1476,24 @@ export default function AdminList() {
                   <div className="text-center">
                     <div className="flex justify-center mb-4">
                       <div className="relative">
-                        {editFlorist.profileImageUrl && editFlorist.profileImageUrl.trim() !== '' ? (
-                          <img 
-                            src={editFlorist.profileImageUrl.startsWith('http') ? 
+                        <img 
+                          src={editFlorist.profileImageUrl && editFlorist.profileImageUrl.trim() !== '' ? 
+                            (editFlorist.profileImageUrl.startsWith('http') ? 
                               editFlorist.profileImageUrl : 
                               editFlorist.profileImageUrl.startsWith('/objects/') ? 
                               editFlorist.profileImageUrl : 
-                              `/objects/${editFlorist.profileImageUrl.replace(/^\//, '')}`
-                            } 
-                            alt="Current Profile"
-                            className="w-32 h-32 rounded-lg object-cover border-2 border-gray-200"
-                            onLoad={() => console.log('Image loaded successfully:', editFlorist.profileImageUrl)}
-                            onError={(e) => {
-                              console.log('Image load error:', editFlorist.profileImageUrl);
-                              const target = e.target as HTMLImageElement;
-                              target.style.display = 'none';
-                              // Show fallback
-                              const fallback = target.parentNode?.querySelector('.fallback-image') as HTMLElement;
-                              if (fallback) fallback.style.display = 'flex';
-                            }}
-                          />
-                        ) : null}
-                        <div 
-                          className={`w-32 h-32 rounded-lg bg-gray-200 flex items-center justify-center border-2 border-gray-200 fallback-image ${
-                            editFlorist.profileImageUrl && editFlorist.profileImageUrl.trim() !== '' ? 'hidden' : 'flex'
-                          }`}
-                        >
-                          <FaImage className="h-12 w-12 text-gray-400" />
-                        </div>
+                              `/objects/${editFlorist.profileImageUrl.replace(/^\//, '')}`) :
+                            'https://via.placeholder.com/128x128.png?text=No+Image'
+                          } 
+                          alt="Profile"
+                          className="w-32 h-32 rounded-lg object-cover border-2 border-gray-200"
+                          onLoad={() => console.log('Image loaded:', editFlorist.profileImageUrl || 'placeholder')}
+                          onError={(e) => {
+                            console.log('Image failed to load, using fallback');
+                            const target = e.target as HTMLImageElement;
+                            target.src = 'https://via.placeholder.com/128x128.png?text=Error';
+                          }}
+                        />
                       </div>
                     </div>
                     
