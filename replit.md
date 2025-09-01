@@ -16,11 +16,51 @@ Change approval required: Do not change design or database configuration without
 ### Frontend
 The frontend is built with React 18 and TypeScript, using Vite for development and Wouter for routing. State management is handled by TanStack Query, and UI components are styled with Tailwind CSS and shadcn/ui. Form handling uses React Hook Form with Zod validation.
 
+**Key Frontend Pages:**
+- `/auth` - Customer/Florist login and registration  
+- `/admin/login` - Admin authentication portal
+- `/messages` - Gmail-inspired admin messaging interface (`admin-messages-redesign.tsx`)
+- `/compose-message` - Message composition dialog with florist search
+- `/admin/website-info` - Website contact information management
+- `/contact` - Public contact information display
+
+**Authentication System:**
+- JWT-based authentication with localStorage token storage
+- Role-based access control (customer, florist, admin)
+- Token expiration handling with automatic redirect to login
+- Admin access required for messaging system
+
 ### Backend
-The backend utilizes Express.js with TypeScript, following a RESTful API design. It features file-based routing, integrates with Replit Auth for authentication, and manages sessions using Express session with PostgreSQL storage. The system supports role-based access control (customer, florist, admin).
+The backend utilizes Express.js with TypeScript, following a RESTful API design. Multiple authentication systems are implemented:
+
+1. **Replit Auth** (`server/replitAuth.ts`) - OAuth integration for user authentication
+2. **JWT Auth** (`server/routes.ts`) - Token-based auth for florists and customers  
+3. **Admin Auth** (`server/admin-routes.ts`) - Admin role verification middleware
+
+**API Endpoints:**
+- `/api/auth/*` - Authentication (login, register, user profile)
+- `/api/messages` - Messaging system CRUD operations
+- `/api/messages/florists` - Florist directory for compose dialog
+- `/api/messages/unread-count` - Message notification counts
+- `/api/website-info` - Website contact information management
+- `/admin/*` - Protected admin routes
 
 ### Database
-PostgreSQL is the primary database, accessed via Drizzle ORM for type-safe operations. It uses a normalized schema with proper relationships and indexing, hosted on Neon Database for serverless PostgreSQL. The system includes robust authentication, search, business listing, review, and inquiry management features.
+PostgreSQL is the primary database (Railway: `yamanote.proxy.rlwy.net:18615/floristdb`). 
+
+**Key Tables:**
+- `users` - Admin/customer accounts with role-based access
+- `florist_auth` - Florist authentication and business profiles  
+- `messages` - Admin-florist communication with read status
+- `website_info` - Site contact information and business details
+- `inquiries` - Customer-florist inquiry system
+- `reviews` - Rating and review system
+
+**Database Features:**
+- Base64 image storage in `profile_image_data` column
+- JSONB for complex data (business hours, social media)
+- Array columns for specialties and services
+- Proper indexing for messaging performance
 
 ### Core Features
 - **Authentication System**: Replit OAuth integration, session-based authentication, role-based access control, and user profile management.
