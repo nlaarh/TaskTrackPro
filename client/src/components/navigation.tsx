@@ -41,13 +41,15 @@ export default function Navigation() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl flex items-center justify-center shadow-sm">
-              <Heart className="h-7 w-7 text-white" />
-            </div>
+            <img 
+              src="/attached_assets/image_1756685957746.png" 
+              alt="FloriHub Logo" 
+              className="w-12 h-12 object-contain"
+            />
             <div className="flex flex-col">
               <span className="text-2xl font-bold text-gray-900">FloriHub</span>
               <span className="text-xs text-gray-600 hidden sm:block font-medium">
-                Celebrate with Flowers
+                Connecting Your Special Moments
               </span>
             </div>
           </Link>
@@ -189,7 +191,11 @@ export default function Navigation() {
               <SheetContent side="right">
                 <SheetHeader>
                   <SheetTitle className="flex items-center gap-2">
-                    <Heart className="h-5 w-5 text-primary" />
+                    <img 
+                      src="/attached_assets/image_1756685957746.png" 
+                      alt="FloriHub" 
+                      className="h-8 w-8 object-contain"
+                    />
                     FloriHub
                   </SheetTitle>
                 </SheetHeader>
