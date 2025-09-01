@@ -73,9 +73,9 @@ export interface IStorage {
   
   // Admin operations
   getAllUsers(): Promise<User[]>;
+  updateUser(id: string, userData: Partial<User>): Promise<User | undefined>;
+  deleteUser(id: string): Promise<boolean>;
   getAllFlorists(): Promise<Florist[]>;
-  updateUser(id: string, userData: Partial<User>): Promise<User>;
-  deleteUser(id: string): Promise<void>;
 }
 
 export class CorrectedDatabaseStorage implements IStorage {
@@ -692,9 +692,23 @@ export class CorrectedDatabaseStorage implements IStorage {
     }
   }
 
-  async deleteUser(id: string): Promise<void> {
+  async deleteUser(id: string): Promise<boolean> {
     try {
-      await db.execute(sql`DELETE FROM users WHERE id = ${id}`);
+      // Use direct pool connection for deletion
+      const testPool = new Pool({
+        connectionString: "postgresql://postgres:RwDPqwPPtxhBNDzKDGiJlrHDtdTBZBYx@yamanote.proxy.rlwy.net:18615/floristdb",
+        ssl: false
+      });
+      
+      // First delete from user_roles table
+      await testPool.query('DELETE FROM user_roles WHERE user_email IN (SELECT email FROM users WHERE id = $1)', [id]);
+      
+      // Then delete from users table
+      const result = await testPool.query('DELETE FROM users WHERE id = $1', [id]);
+      
+      await testPool.end();
+      
+      return result.rowCount !== null && result.rowCount > 0;
     } catch (error) {
       console.error('Error deleting user:', error);
       throw error;

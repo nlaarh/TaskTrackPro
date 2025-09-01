@@ -1,6 +1,6 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerCorrectedRoutes } from "./routes-corrected";
-import { setupAdminRoutes } from "./admin-routes";
+import adminRoutes from "./admin-routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
@@ -41,7 +41,7 @@ app.use((req, res, next) => {
   const server = await registerCorrectedRoutes(app);
   
   // Setup clean admin routes
-  setupAdminRoutes(app);
+  app.use('/api/admin', adminRoutes);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;

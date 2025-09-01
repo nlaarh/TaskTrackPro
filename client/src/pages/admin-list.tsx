@@ -1,29 +1,35 @@
 import { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Navigation from "@/components/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Users, 
   Store, 
   User, 
   Search, 
-  Edit3, 
-  Trash2, 
-  Eye,
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
   UserPlus,
-  Building,
-  AlertCircle,
-  Settings,
-  FileText,
-  UserMinus
+  Building
 } from "lucide-react";
+import { 
+  FaEye, 
+  FaEdit, 
+  FaTrash, 
+  FaUserPlus, 
+  FaStore,
+  FaSave,
+  FaTimes
+} from "react-icons/fa";
 
 type SortConfig = {
   key: string;
@@ -33,46 +39,116 @@ type SortConfig = {
 export default function AdminList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: '', direction: 'asc' });
+  const [viewUser, setViewUser] = useState<any>(null);
+  const [editUser, setEditUser] = useState<any>(null);
+  const [deleteUser, setDeleteUser] = useState<any>(null);
+  const [showCreateUser, setShowCreateUser] = useState(false);
+  const [newUser, setNewUser] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    role: 'customer' as 'customer' | 'florist' | 'admin'
+  });
 
-  // CRUD handlers
-  const handleView = (type: 'user' | 'florist', record: any) => {
-    const details = type === 'user' 
-      ? `Name: ${record.firstName} ${record.lastName}\nEmail: ${record.email}\nRole: ${record.role}\nVerified: ${record.isVerified ? 'Yes' : 'No'}\nJoined: ${new Date(record.createdAt).toLocaleDateString()}`
-      : `Business: ${record.businessName}\nEmail: ${record.email}\nLocation: ${record.city}, ${record.state}\nPhone: ${record.phone || 'N/A'}\nJoined: ${new Date(record.createdAt).toLocaleDateString()}`;
-    
-    alert(`${type.toUpperCase()} DETAILS:\n\n${details}`);
-  };
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  const handleEdit = (type: 'user' | 'florist', record: any) => {
-    const name = type === 'user' ? `${record.firstName} ${record.lastName}` : record.businessName;
-    const confirmed = window.confirm(`Open edit form for ${name}?\n\nThis will navigate to the edit page.`);
-    if (confirmed) {
-      console.log(`Edit ${type}:`, record);
-      // TODO: Navigate to edit form
-      alert(`Edit form for ${name} would open here`);
+  // Create user mutation
+  const createUserMutation = useMutation({
+    mutationFn: async (userData: any) => {
+      const token = localStorage.getItem('customerToken');
+      const response = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+      if (!response.ok) throw new Error('Failed to create user');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin-clean/users'] });
+      toast({ title: "Success", description: "User created successfully" });
+      setShowCreateUser(false);
+      setNewUser({ firstName: '', lastName: '', email: '', role: 'customer' });
+    },
+    onError: (error: any) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     }
-  };
+  });
 
-  const handleDelete = (type: 'user' | 'florist', record: any) => {
-    const name = type === 'user' ? `${record.firstName} ${record.lastName}` : record.businessName;
-    const confirmed = window.confirm(`⚠️ DELETE WARNING ⚠️\n\nYou are about to permanently delete:\n${name}\n\nThis action CANNOT be undone!\n\nAre you absolutely sure?`);
-    
-    if (confirmed) {
-      const doubleConfirm = window.confirm(`FINAL CONFIRMATION\n\nType "DELETE" in the next dialog to confirm deletion of ${name}`);
-      if (doubleConfirm) {
-        console.log(`Delete ${type}:`, record);
-        alert(`${name} has been scheduled for deletion.\n\nAPI call would be made here.`);
-        // TODO: Call delete API
-      }
+  // Update user mutation
+  const updateUserMutation = useMutation({
+    mutationFn: async (userData: any) => {
+      const token = localStorage.getItem('customerToken');
+      const response = await fetch(`/api/admin/users/${userData.id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+      if (!response.ok) throw new Error('Failed to update user');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin-clean/users'] });
+      toast({ title: "Success", description: "User updated successfully" });
+      setEditUser(null);
+    },
+    onError: (error: any) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     }
+  });
+
+  // Delete user mutation
+  const deleteUserMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const token = localStorage.getItem('customerToken');
+      const response = await fetch(`/api/admin/users/${userId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) throw new Error('Failed to delete user');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin-clean/users'] });
+      toast({ title: "Success", description: "User deleted successfully" });
+      setDeleteUser(null);
+    },
+    onError: (error: any) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
+  });
+
+  // Handle create user
+  const handleCreateUser = () => {
+    if (!newUser.firstName || !newUser.lastName || !newUser.email) {
+      toast({ title: "Error", description: "Please fill in all fields", variant: "destructive" });
+      return;
+    }
+    createUserMutation.mutate(newUser);
   };
 
-  const handleCreate = (type: 'user' | 'florist') => {
-    const confirmed = window.confirm(`Create a new ${type}?\n\nThis will open the creation form.`);
-    if (confirmed) {
-      console.log(`Create new ${type}`);
-      alert(`${type === 'user' ? 'User' : 'Florist'} creation form would open here`);
-      // TODO: Navigate to create form
+  // Handle update user
+  const handleUpdateUser = () => {
+    if (!editUser.firstName || !editUser.lastName || !editUser.email) {
+      toast({ title: "Error", description: "Please fill in all fields", variant: "destructive" });
+      return;
+    }
+    updateUserMutation.mutate(editUser);
+  };
+
+  // Handle delete user
+  const handleDeleteUser = () => {
+    if (deleteUser) {
+      deleteUserMutation.mutate(deleteUser.id);
     }
   };
 
@@ -215,17 +291,16 @@ export default function AdminList() {
                 </Button>
               )}
               <Button
-                onClick={() => handleCreate('user')}
+                onClick={() => setShowCreateUser(true)}
                 className="bg-blue-600 hover:bg-blue-700 text-white"
               >
-                <UserPlus className="h-4 w-4 mr-2" />
+                <FaUserPlus className="h-4 w-4 mr-2" />
                 Add User
               </Button>
               <Button
-                onClick={() => handleCreate('florist')}
                 className="bg-green-600 hover:bg-green-700 text-white"
               >
-                <Building className="h-4 w-4 mr-2" />
+                <FaStore className="h-4 w-4 mr-2" />
                 Add Florist
               </Button>
             </div>
@@ -358,29 +433,29 @@ export default function AdminList() {
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              className="h-10 w-10 p-0 hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100 hover:text-blue-700 transition-all duration-300 rounded-lg border border-transparent hover:border-blue-300 hover:shadow-md group"
+                              className="h-10 w-10 p-0 hover:bg-blue-50 hover:text-blue-700 transition-all duration-200 rounded-lg hover:shadow-md"
                               title="View User Details"
-                              onClick={() => handleView('user', user)}
+                              onClick={() => setViewUser(user)}
                             >
-                              <FileText className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
+                              <FaEye className="h-4 w-4" />
                             </Button>
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              className="h-10 w-10 p-0 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-emerald-100 hover:text-emerald-700 transition-all duration-300 rounded-lg border border-transparent hover:border-emerald-300 hover:shadow-md group"
-                              title="Edit User Settings"
-                              onClick={() => handleEdit('user', user)}
+                              className="h-10 w-10 p-0 hover:bg-green-50 hover:text-green-700 transition-all duration-200 rounded-lg hover:shadow-md"
+                              title="Edit User"
+                              onClick={() => setEditUser({...user})}
                             >
-                              <Settings className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
+                              <FaEdit className="h-4 w-4" />
                             </Button>
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              className="h-10 w-10 p-0 hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100 hover:text-red-700 transition-all duration-300 rounded-lg border border-transparent hover:border-red-300 hover:shadow-md group"
+                              className="h-10 w-10 p-0 hover:bg-red-50 hover:text-red-700 transition-all duration-200 rounded-lg hover:shadow-md"
                               title="Delete User"
-                              onClick={() => handleDelete('user', user)}
+                              onClick={() => setDeleteUser(user)}
                             >
-                              <UserMinus className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
+                              <FaTrash className="h-4 w-4" />
                             </Button>
                           </div>
                         </TableCell>
@@ -643,6 +718,223 @@ export default function AdminList() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* View User Dialog */}
+        <Dialog open={!!viewUser} onOpenChange={() => setViewUser(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FaEye className="h-5 w-5 text-blue-600" />
+                User Details
+              </DialogTitle>
+            </DialogHeader>
+            {viewUser && (
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-sm font-semibold text-gray-700">Name</Label>
+                  <p className="text-lg">{viewUser.firstName} {viewUser.lastName}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-semibold text-gray-700">Email</Label>
+                  <p>{viewUser.email}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-semibold text-gray-700">Role</Label>
+                  <Badge variant={viewUser.role === 'admin' ? 'destructive' : viewUser.role === 'florist' ? 'default' : 'secondary'}>
+                    {viewUser.role}
+                  </Badge>
+                </div>
+                <div>
+                  <Label className="text-sm font-semibold text-gray-700">Status</Label>
+                  <Badge variant={viewUser.isVerified ? 'default' : 'secondary'}>
+                    {viewUser.isVerified ? 'Verified' : 'Pending'}
+                  </Badge>
+                </div>
+                <div>
+                  <Label className="text-sm font-semibold text-gray-700">Joined</Label>
+                  <p>{new Date(viewUser.createdAt).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}</p>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit User Dialog */}
+        <Dialog open={!!editUser} onOpenChange={() => setEditUser(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FaEdit className="h-5 w-5 text-green-600" />
+                Edit User
+              </DialogTitle>
+            </DialogHeader>
+            {editUser && (
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="firstName">First Name</Label>
+                  <Input
+                    id="firstName"
+                    value={editUser.firstName}
+                    onChange={(e) => setEditUser({...editUser, firstName: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="lastName">Last Name</Label>
+                  <Input
+                    id="lastName"
+                    value={editUser.lastName}
+                    onChange={(e) => setEditUser({...editUser, lastName: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={editUser.email}
+                    onChange={(e) => setEditUser({...editUser, email: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="role">Role</Label>
+                  <Select value={editUser.role} onValueChange={(value) => setEditUser({...editUser, role: value})}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="customer">Customer</SelectItem>
+                      <SelectItem value="florist">Florist</SelectItem>
+                      <SelectItem value="admin">Admin</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex gap-2 pt-4">
+                  <Button 
+                    onClick={handleUpdateUser}
+                    disabled={updateUserMutation.isPending}
+                    className="flex-1"
+                  >
+                    <FaSave className="h-4 w-4 mr-2" />
+                    {updateUserMutation.isPending ? 'Saving...' : 'Save Changes'}
+                  </Button>
+                  <Button variant="outline" onClick={() => setEditUser(null)}>
+                    <FaTimes className="h-4 w-4 mr-2" />
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete User Dialog */}
+        <Dialog open={!!deleteUser} onOpenChange={() => setDeleteUser(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FaTrash className="h-5 w-5 text-red-600" />
+                Delete User
+              </DialogTitle>
+            </DialogHeader>
+            {deleteUser && (
+              <div className="space-y-4">
+                <p className="text-sm text-gray-600">
+                  Are you sure you want to delete <strong>{deleteUser.firstName} {deleteUser.lastName}</strong>?
+                </p>
+                <p className="text-sm text-red-600 bg-red-50 p-3 rounded">
+                  This action cannot be undone. The user will be permanently removed from the system.
+                </p>
+                <div className="flex gap-2 pt-4">
+                  <Button 
+                    variant="destructive"
+                    onClick={handleDeleteUser}
+                    disabled={deleteUserMutation.isPending}
+                    className="flex-1"
+                  >
+                    <FaTrash className="h-4 w-4 mr-2" />
+                    {deleteUserMutation.isPending ? 'Deleting...' : 'Delete User'}
+                  </Button>
+                  <Button variant="outline" onClick={() => setDeleteUser(null)}>
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Create User Dialog */}
+        <Dialog open={showCreateUser} onOpenChange={setShowCreateUser}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FaUserPlus className="h-5 w-5 text-blue-600" />
+                Create New User
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="newFirstName">First Name</Label>
+                <Input
+                  id="newFirstName"
+                  value={newUser.firstName}
+                  onChange={(e) => setNewUser({...newUser, firstName: e.target.value})}
+                  placeholder="Enter first name"
+                />
+              </div>
+              <div>
+                <Label htmlFor="newLastName">Last Name</Label>
+                <Input
+                  id="newLastName"
+                  value={newUser.lastName}
+                  onChange={(e) => setNewUser({...newUser, lastName: e.target.value})}
+                  placeholder="Enter last name"
+                />
+              </div>
+              <div>
+                <Label htmlFor="newEmail">Email</Label>
+                <Input
+                  id="newEmail"
+                  type="email"
+                  value={newUser.email}
+                  onChange={(e) => setNewUser({...newUser, email: e.target.value})}
+                  placeholder="Enter email address"
+                />
+              </div>
+              <div>
+                <Label htmlFor="newRole">Role</Label>
+                <Select value={newUser.role} onValueChange={(value: any) => setNewUser({...newUser, role: value})}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="customer">Customer</SelectItem>
+                    <SelectItem value="florist">Florist</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button 
+                  onClick={handleCreateUser}
+                  disabled={createUserMutation.isPending}
+                  className="flex-1"
+                >
+                  <FaUserPlus className="h-4 w-4 mr-2" />
+                  {createUserMutation.isPending ? 'Creating...' : 'Create User'}
+                </Button>
+                <Button variant="outline" onClick={() => setShowCreateUser(false)}>
+                  <FaTimes className="h-4 w-4 mr-2" />
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
