@@ -838,6 +838,37 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       const { firstName, lastName, email, role, password } = req.body;
       
+      // Check if this is a password-only change
+      if (password && !firstName && !lastName && !email && !role) {
+        // Password-only update - get current user data first
+        const currentUserResult = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
+        if (currentUserResult.rows.length === 0) {
+          return res.status(404).json({ message: 'User not found' });
+        }
+        
+        const currentUser = currentUserResult.rows[0];
+        const passwordHash = await bcrypt.hash(password, 10);
+        
+        const result = await pool.query(`
+          UPDATE users 
+          SET password_hash = $1, updated_at = NOW()
+          WHERE id = $2
+          RETURNING id, email, first_name, last_name, role, is_verified, created_at
+        `, [passwordHash, id]);
+        
+        const user = result.rows[0];
+        return res.json({
+          id: user.id,
+          email: user.email,
+          firstName: user.first_name,
+          lastName: user.last_name,
+          role: user.role,
+          isVerified: user.is_verified,
+          createdAt: user.created_at
+        });
+      }
+      
+      // Regular user update with all fields
       let query, values;
       
       if (password && password.trim() !== '') {
