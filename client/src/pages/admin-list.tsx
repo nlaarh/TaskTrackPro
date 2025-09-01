@@ -1479,19 +1479,32 @@ export default function AdminList() {
                         <img 
                           src={(() => {
                             console.log('DEBUG: editFlorist.profileImageUrl =', editFlorist.profileImageUrl);
-                            const hasImage = editFlorist.profileImageUrl && editFlorist.profileImageUrl.trim() !== '';
-                            console.log('DEBUG: hasImage =', hasImage);
+                            const imageUrl = editFlorist.profileImageUrl;
                             
-                            if (hasImage) {
-                              const imageSrc = editFlorist.profileImageUrl.startsWith('/objects/') ? 
-                                editFlorist.profileImageUrl : 
-                                `/objects/${editFlorist.profileImageUrl.replace(/^\//, '')}`;
-                              console.log('DEBUG: Using image src =', imageSrc);
-                              return imageSrc;
-                            } else {
-                              console.log('DEBUG: Using placeholder');
+                            if (!imageUrl || imageUrl.trim() === '') {
+                              console.log('DEBUG: No image URL, using placeholder');
                               return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCIgdmlld0JveD0iMCAwIDEyOCAxMjgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMjgiIGhlaWdodD0iMTI4IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik00MCA2MEg4OFY5Nkg0MFY2MFoiIGZpbGw9IiM5Q0EzQUYiLz4KPHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAzMiAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHA+CjwvZz4KPHN2Zz4K';
                             }
+                            
+                            // Handle different URL types
+                            if (imageUrl.startsWith('data:')) {
+                              console.log('DEBUG: Using base64/data URL directly');
+                              return imageUrl; // Base64 data URLs work directly
+                            }
+                            
+                            if (imageUrl.startsWith('http')) {
+                              console.log('DEBUG: Using external URL directly');
+                              return imageUrl; // External URLs work directly
+                            }
+                            
+                            if (imageUrl.startsWith('/objects/')) {
+                              console.log('DEBUG: Using object storage path directly');
+                              return imageUrl; // Object storage paths work directly
+                            }
+                            
+                            // Assume it's an object storage file path without /objects/ prefix
+                            console.log('DEBUG: Adding /objects/ prefix to path');
+                            return `/objects/${imageUrl.replace(/^\//, '')}`;
                           })()} 
                           alt="Profile"
                           className="w-32 h-32 rounded-lg object-cover border-2 border-gray-200"
@@ -1499,7 +1512,7 @@ export default function AdminList() {
                           onError={(e) => {
                             console.log('✗ Image load failed, using final fallback');
                             const target = e.target as HTMLImageElement;
-                            target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCIgdmlld0JveD0iMCAwIDEyOCAxMjgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMjgiIGhlaWdodD0iMTI4IiBmaWxsPSIjRjNGNEY2Ii8+CjxjaXJjbGUgY3g9IjY0IiBjeT0iNjQiIHI9IjE2IiBmaWxsPSIjOUNBM0FGIi8+CjwvZW5kbD5K';
+                            target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCIgdmlld0JveD0iMCAwIDEyOCAxMjgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMjgiIGhlaWdodD0iMTI4IiBmaWxsPSIjRjNGNEY2Ii8+CjxjaXJjbGUgY3g9IjY0IiBjeT0iNjQiIHI9IjE2IiBmaWxsPSIjOUNBM0FGIi8+PC9zdmc+';
                           }}
                         />
                       </div>
