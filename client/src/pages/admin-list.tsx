@@ -21,7 +21,7 @@ export default function AdminList() {
 
   // Fetch users data
   const { data: users = [], isLoading: usersLoading } = useQuery({
-    queryKey: ['/api/admin-clean/users', Date.now()],
+    queryKey: ['/api/admin-clean/users'],
     queryFn: async () => {
       const token = localStorage.getItem('customerToken');
       const response = await fetch('/api/admin-clean/users', {
@@ -38,7 +38,7 @@ export default function AdminList() {
 
   // Fetch florists data
   const { data: florists = [], isLoading: floristsLoading } = useQuery({
-    queryKey: ['/api/admin-clean/florists', Date.now()],
+    queryKey: ['/api/admin-clean/florists'],
     queryFn: async () => {
       const token = localStorage.getItem('customerToken');
       const response = await fetch('/api/admin-clean/florists', {
