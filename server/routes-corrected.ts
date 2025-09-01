@@ -776,6 +776,40 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get florists for compose message dropdown
+  app.get('/api/messages/florists', authenticateCustomer, async (req, res) => {
+    try {
+      const user = req.user;
+      
+      // Only admin can access florist list for messaging
+      if (!user.userObj || user.userObj.role !== 'admin') {
+        return res.status(403).json({ message: 'Admin access required' });
+      }
+
+      console.log('📋 Getting florists for compose dialog');
+
+      const query = `
+        SELECT 
+          fa.id,
+          fa.business_name as "businessName",
+          CONCAT(fa.first_name, ' ', fa.last_name) as name,
+          fa.email,
+          fa.phone
+        FROM florist_auth fa
+        WHERE fa.is_approved = true
+        ORDER BY fa.business_name ASC
+      `;
+      
+      const result = await pool.query(query);
+      console.log(`📋 Found ${result.rows.length} approved florists for messaging`);
+      
+      res.json(result.rows);
+    } catch (error) {
+      console.error('Error fetching florists for messaging:', error);
+      res.status(500).json({ message: 'Failed to fetch florists' });
+    }
+  });
+
   // Website info endpoints
   app.get('/api/website-info', async (req, res) => {
     try {

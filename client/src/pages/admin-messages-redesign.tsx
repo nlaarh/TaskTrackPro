@@ -79,7 +79,7 @@ export default function AdminMessagesRedesign() {
   });
 
   // Fetch florists for compose dialog
-  const { data: florists = [] } = useQuery({
+  const { data: florists = [], isLoading: floristsLoading, error: floristsError } = useQuery({
     queryKey: ['/api/messages/florists'],
     queryFn: async () => {
       const token = localStorage.getItem('customerToken') || localStorage.getItem('floristToken');
@@ -88,9 +88,19 @@ export default function AdminMessagesRedesign() {
           'Authorization': `Bearer ${token}`,
         },
       });
-      if (!response.ok) throw new Error('Failed to fetch florists');
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('Authentication required');
+        }
+        if (response.status === 403) {
+          throw new Error('Admin access required');
+        }
+        throw new Error('Failed to fetch florists');
+      }
       return response.json();
     },
+    retry: 1,
+    enabled: true, // Always try to fetch when component mounts
   });
 
   // Send message mutation
@@ -375,6 +385,8 @@ export default function AdminMessagesRedesign() {
         onClose={() => setIsComposeOpen(false)}
         florists={florists}
         preSelectedFloristId={preSelectedFloristId}
+        isLoading={floristsLoading}
+        error={floristsError}
       />
     </div>
   );

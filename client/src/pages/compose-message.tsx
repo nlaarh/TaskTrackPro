@@ -23,9 +23,11 @@ interface ComposeMessageProps {
   onClose: () => void;
   florists: Florist[];
   preSelectedFloristId?: string;
+  isLoading?: boolean;
+  error?: Error | null;
 }
 
-export default function ComposeMessage({ isOpen, onClose, florists, preSelectedFloristId }: ComposeMessageProps) {
+export default function ComposeMessage({ isOpen, onClose, florists, preSelectedFloristId, isLoading = false, error = null }: ComposeMessageProps) {
   const [selectedFlorist, setSelectedFlorist] = useState<Florist | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [showResults, setShowResults] = useState(false);
@@ -36,21 +38,27 @@ export default function ComposeMessage({ isOpen, onClose, florists, preSelectedF
   const queryClient = useQueryClient();
 
   // Filter florists based on search - show all if no search term, filter if search term exists
-  const filteredFlorists = florists?.filter((florist: Florist) => {
+  const filteredFlorists = React.useMemo(() => {
+    if (!florists || florists.length === 0) return [];
+    
     // If no search term, show all florists when dropdown is open
-    if (!searchTerm || searchTerm.length < 1) return showResults;
+    if (!searchTerm || searchTerm.length < 1) {
+      return showResults ? florists : [];
+    }
     
     const term = searchTerm.toLowerCase();
-    const businessName = florist.businessName?.toLowerCase() || "";
-    const name = florist.name?.toLowerCase() || "";
-    const email = florist.email?.toLowerCase() || "";
-    const phone = florist.phone?.toLowerCase() || "";
-    
-    return businessName.includes(term) || 
-           name.includes(term) || 
-           email.includes(term) || 
-           phone.includes(term);
-  }) || [];
+    return florists.filter((florist: Florist) => {
+      const businessName = florist.businessName?.toLowerCase() || "";
+      const name = florist.name?.toLowerCase() || "";
+      const email = florist.email?.toLowerCase() || "";
+      const phone = florist.phone?.toLowerCase() || "";
+      
+      return businessName.includes(term) || 
+             name.includes(term) || 
+             email.includes(term) || 
+             phone.includes(term);
+    });
+  }, [florists, searchTerm, showResults]);
 
   // Pre-select florist if coming from admin list
   useEffect(() => {
@@ -220,7 +228,29 @@ export default function ComposeMessage({ isOpen, onClose, florists, preSelectedF
                   </div>
                 )}
                 
-                {showResults && searchTerm && filteredFlorists.length === 0 && (
+                {/* Error state */}
+                {error && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-red-200 rounded-md shadow-lg p-4">
+                    <div className="text-sm text-red-600">
+                      {error.message === 'Admin access required' 
+                        ? 'You need admin access to send messages to florists.' 
+                        : 'Failed to load florists. Please try refreshing the page.'}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Loading state */}
+                {isLoading && showResults && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg p-4">
+                    <div className="flex items-center gap-3 text-sm text-gray-500">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Loading florists...
+                    </div>
+                  </div>
+                )}
+                
+                {/* No results found */}
+                {showResults && searchTerm && filteredFlorists.length === 0 && !isLoading && !error && (
                   <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg p-4">
                     <div className="text-center text-gray-500">
                       <p>No florists found for "{searchTerm}"</p>
