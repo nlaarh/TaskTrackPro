@@ -260,7 +260,9 @@ export default function AdminList() {
 
   const handleEdit = (type: string, item: any) => {
     console.log(`Edit ${type}:`, item);
+    console.log('🚨 EDIT DEBUG - Full item data:', JSON.stringify(item, null, 2));
     if (type === 'florist') {
+      console.log('🚨 EDIT DEBUG - profileImageUrl specifically:', item.profileImageUrl);
       setEditFlorist({ ...item });
     } else if (type === 'user') {
       // Create a proper copy with empty password field
@@ -1478,7 +1480,9 @@ export default function AdminList() {
                       <div className="relative">
                         <img 
                           src={(() => {
+                            console.log('🔍 EDIT MODAL: editFlorist full object =', editFlorist);
                             console.log('🔍 EDIT MODAL: editFlorist.profileImageUrl =', editFlorist.profileImageUrl);
+                            console.log('🔍 EDIT MODAL: editFlorist keys =', Object.keys(editFlorist));
                             const imageUrl = editFlorist.profileImageUrl;
                             
                             if (!imageUrl || imageUrl.trim() === '') {
