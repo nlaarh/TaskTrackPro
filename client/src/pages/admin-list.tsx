@@ -1477,29 +1477,40 @@ export default function AdminList() {
                     <div className="flex justify-center mb-4">
                       {editFlorist.profileImageUrl && editFlorist.profileImageUrl.trim() !== '' ? (
                         <img 
-                          src={editFlorist.profileImageUrl} 
+                          src={editFlorist.profileImageUrl.startsWith('http') ? 
+                            editFlorist.profileImageUrl : 
+                            `/public-objects/${editFlorist.profileImageUrl.replace(/^\//, '')}`
+                          } 
                           alt="Current Profile"
-                          className="w-24 h-24 rounded-full object-cover border-2 border-gray-200"
+                          className="w-32 h-32 rounded-lg object-cover border-2 border-gray-200"
                           onError={(e) => {
-                            console.log('Image load error in edit dialog, hiding image');
-                            (e.target as HTMLElement).style.display = 'none';
+                            console.log('Image load error in edit dialog');
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                            // Show fallback
+                            const fallback = target.nextElementSibling as HTMLElement;
+                            if (fallback) fallback.style.display = 'flex';
                           }}
                         />
-                      ) : (
-                        <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center border-2 border-gray-200">
-                          <FaImage className="h-8 w-8 text-gray-400" />
-                        </div>
-                      )}
+                      ) : null}
+                      <div 
+                        className="w-32 h-32 rounded-lg bg-gray-200 flex items-center justify-center border-2 border-gray-200"
+                        style={{ display: editFlorist.profileImageUrl ? 'none' : 'flex' }}
+                      >
+                        <FaImage className="h-12 w-12 text-gray-400" />
+                      </div>
                     </div>
                     
                     <div className="space-y-2">
                       <Label className="text-sm font-medium text-gray-700">Profile Photo</Label>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={async (e) => {
-                          const file = e.target.files?.[0];
-                          if (!file) return;
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          id={`florist-image-${editFlorist.id}`}
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
                           
                           try {
                             setUploadingImage(true);
@@ -1533,6 +1544,10 @@ export default function AdminList() {
                               throw new Error('Failed to upload image');
                             }
                             
+                            // Get the clean image URL (without query parameters)
+                            const cleanImageURL = uploadURL.split('?')[0];
+                            console.log('Clean image URL:', cleanImageURL);
+                            
                             // Update florist image in database
                             const updateResponse = await fetch(`/api/florists/${editFlorist.id}/image`, {
                               method: 'PUT',
@@ -1540,24 +1555,28 @@ export default function AdminList() {
                                 'Content-Type': 'application/json',
                                 'Authorization': `Bearer ${token}`
                               },
-                              body: JSON.stringify({ imageURL: uploadURL.split('?')[0] })
+                              body: JSON.stringify({ imageURL: cleanImageURL })
                             });
                             
-                            if (updateResponse.ok) {
-                              // Update the editFlorist state with new image URL
-                              const imageURL = uploadURL.split('?')[0];
-                              setEditFlorist({...editFlorist, profileImageUrl: imageURL});
-                              
-                              toast({
-                                title: "Success",
-                                description: "Profile photo updated successfully!",
-                              });
-                              
-                              // Refresh florists list
-                              queryClient.invalidateQueries({ queryKey: ['/api/admin-clean/florists'] });
-                            } else {
-                              throw new Error('Failed to update florist image');
+                            if (!updateResponse.ok) {
+                              const errorText = await updateResponse.text();
+                              console.error('Update response error:', errorText);
+                              throw new Error('Failed to update florist image in database');
                             }
+                            
+                            const updateResult = await updateResponse.json();
+                            console.log('Update result:', updateResult);
+                            
+                            // Update the editFlorist state with new image URL
+                            setEditFlorist({...editFlorist, profileImageUrl: cleanImageURL});
+                            
+                            toast({
+                              title: "Success",
+                              description: "Profile photo updated successfully!",
+                            });
+                            
+                            // Refresh florists list
+                            queryClient.invalidateQueries({ queryKey: ['/api/admin-clean/florists'] });
                           } catch (error) {
                             console.error('Error updating image:', error);
                             toast({
@@ -1569,11 +1588,32 @@ export default function AdminList() {
                             setUploadingImage(false);
                           }
                         }}
-                        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                        disabled={uploadingImage}
-                      />
+                          className="hidden"
+                          disabled={uploadingImage}
+                        />
+                        <Button
+                          type="button"
+                          onClick={() => document.getElementById(`florist-image-${editFlorist.id}`)?.click()}
+                          disabled={uploadingImage}
+                          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-sm"
+                        >
+                          {uploadingImage ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                              Uploading...
+                            </>
+                          ) : (
+                            <>
+                              <FaCamera className="mr-2 h-4 w-4" />
+                              Choose Photo
+                            </>
+                          )}
+                        </Button>
+                      </div>
                       {uploadingImage && (
-                        <div className="text-sm text-blue-600 mt-2">Uploading...</div>
+                        <div className="text-sm text-blue-600 mt-2 text-center">
+                          Please wait while the image uploads...
+                        </div>
                       )}
                     </div>
                   </div>
