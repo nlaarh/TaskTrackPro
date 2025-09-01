@@ -279,7 +279,11 @@ export default function AdminMessagesRedesign() {
               <Button type="button" variant="outline" onClick={() => setIsComposeOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={sendMessageMutation.isPending} className="min-w-[100px]">
+              <Button 
+                type="submit" 
+                disabled={sendMessageMutation.isPending} 
+                className="min-w-[100px] bg-blue-500 hover:bg-blue-600 text-white rounded-full px-6 py-2 font-medium"
+              >
                 {sendMessageMutation.isPending ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
@@ -324,7 +328,10 @@ export default function AdminMessagesRedesign() {
               <p className="text-sm text-gray-500">Communicate with florists on your platform</p>
             </div>
           </div>
-          <Button onClick={() => setIsComposeOpen(true)} className="bg-blue-600 hover:bg-blue-700">
+          <Button 
+            onClick={() => setIsComposeOpen(true)} 
+            className="bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 shadow-sm rounded-full px-6 py-2 font-medium"
+          >
             <Plus className="h-4 w-4 mr-2" />
             Compose
           </Button>
@@ -456,7 +463,11 @@ export default function AdminMessagesRedesign() {
 
                 {/* Reply Section */}
                 <div className="border-t p-4">
-                  <Button variant="outline" className="w-full" onClick={() => setIsComposeOpen(true)}>
+                  <Button 
+                    variant="outline" 
+                    className="w-full bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 rounded-full font-medium" 
+                    onClick={() => setIsComposeOpen(true)}
+                  >
                     <Reply className="h-4 w-4 mr-2" />
                     Reply
                   </Button>
