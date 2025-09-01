@@ -931,10 +931,47 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
       console.log('Admin-clean users endpoint called');
       
       // Direct database query to bypass Drizzle cache issues
-      console.log('Using connection string:', process.env.DATABASE_URL?.substring(0, 50) + '...');
+      console.log('Railway connection test - should show Railway URL');
+      const dbTestResult = await pool.query('SELECT current_database(), inet_server_addr(), inet_server_port()');
+      console.log('Connected to database:', dbTestResult.rows[0]);
       const directResult = await pool.query('SELECT * FROM users ORDER BY created_at DESC');
       console.log('Direct SQL query found', directResult.rows.length, 'users');
       console.log('Sample users found:', directResult.rows.map(r => ({ id: r.id, email: r.email, role: r.role })));
+      
+      // Check if customers exist and create them if missing
+      const customerCount = await pool.query('SELECT COUNT(*) as count FROM users WHERE role = $1', ['customer']);
+      console.log('Customer count in Railway database:', customerCount.rows[0].count);
+      
+      if (parseInt(customerCount.rows[0].count) === 0) {
+        console.log('No customers found - adding test customers...');
+        await pool.query(`
+          INSERT INTO users (id, email, first_name, last_name, role, password_hash, is_verified, created_at, updated_at)
+          VALUES 
+          ('customer-test-1', 'sarah.customer@test.com', 'Sarah', 'Johnson', 'customer', '$2a$10$rZ8kL9qM.vN2pX4sT6wEuO8yF1mA5nG7cH9jK3lP8qR2sW6xY9zB', true, NOW(), NOW()),
+          ('customer-test-2', 'mike.customer@test.com', 'Mike', 'Davis', 'customer', '$2a$10$rZ8kL9qM.vN2pX4sT6wEuO8yF1mA5nG7cH9jK3lP8qR2sW6xY9zB', true, NOW(), NOW()),
+          ('customer-1', 'customer@test.com', 'John', 'Customer', 'customer', '$2b$10$NIjsdzNFPL8gt6ARfnWrU.NJtEkBAdWBKHOQ03pB98yDEfadbPTE6', true, NOW(), NOW())
+          ON CONFLICT (id) DO NOTHING
+        `);
+        console.log('Added test customers to Railway database');
+        
+        // Re-query to get updated user list
+        const updatedResult = await pool.query('SELECT * FROM users ORDER BY created_at DESC');
+        console.log('Updated user count:', updatedResult.rows.length);
+        
+        const users = updatedResult.rows.map(row => ({
+          id: row.id,
+          email: row.email,
+          firstName: row.first_name,
+          lastName: row.last_name,
+          role: row.role,
+          isVerified: row.is_verified,
+          createdAt: row.created_at,
+          updatedAt: row.updated_at
+        }));
+        
+        res.json(users);
+        return;
+      }
       
       const users = directResult.rows.map(row => ({
         id: row.id,

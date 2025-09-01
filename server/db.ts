@@ -5,7 +5,9 @@ import * as schema from "@shared/schema";
 // Use ONLY the Railway PostgreSQL database - no local Neon database
 const RAILWAY_DATABASE_URL = "postgresql://postgres:RwDPqwPPtxhBNDzKDGiJlrHDtdTBZBYx@yamanote.proxy.rlwy.net:18615/floristdb";
 
+// FORCE Railway database - ignore any environment DATABASE_URL
 console.log('Using Railway PostgreSQL database ONLY:', RAILWAY_DATABASE_URL);
+console.log('Ignoring environment DATABASE_URL:', process.env.DATABASE_URL ? 'Present' : 'Not set');
 
 // Create connection pool for Railway database only
 export const pool = new Pool({ 
