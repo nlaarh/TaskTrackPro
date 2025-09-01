@@ -282,8 +282,14 @@ export default function AdminMessagesRedesign() {
                 ) : messagesError ? (
                   <div className="p-8 text-center text-red-500">
                     <Mail className="h-12 w-12 mx-auto mb-4 text-red-300" />
-                    <p className="text-sm">Failed to load messages</p>
-                    <p className="text-xs text-gray-500 mt-2">{messagesError.message}</p>
+                    <p className="text-sm">Authentication Required</p>
+                    <p className="text-xs text-gray-500 mt-2">Please log in as admin to access messages</p>
+                    <Button 
+                      onClick={() => window.location.href = '/admin/login'} 
+                      className="mt-3 bg-blue-600 text-white hover:bg-blue-700"
+                    >
+                      Go to Admin Login
+                    </Button>
                   </div>
                 ) : filteredMessages.length === 0 ? (
                   <div className="p-8 text-center text-gray-500">
