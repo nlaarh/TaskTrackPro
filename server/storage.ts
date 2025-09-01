@@ -201,93 +201,67 @@ export class DatabaseStorage implements IStorage {
     console.log('Profile data received:', JSON.stringify(profileData, null, 2));
     
     try {
-      // Get the florist auth record to get the email
-      const authResult = await pool.query('SELECT email FROM florist_auth WHERE id = $1', [floristAuthId]);
-      if (authResult.rows.length === 0) {
-        throw new Error('Florist auth record not found');
-      }
-      const email = authResult.rows[0].email;
-
-      // Handle profile image - store binary data as base64 string
+      // Handle profile image - store binary data as base64 string or URL
       let profileImageData = null;
       if (profileData.profileImageUrl) {
-        // If it's already a data URL (base64), store it directly
-        if (profileData.profileImageUrl.startsWith('data:image/')) {
-          profileImageData = profileData.profileImageUrl;
-        } else {
-          profileImageData = profileData.profileImageUrl;
-        }
+        profileImageData = profileData.profileImageUrl;
       }
 
-
-
-      // Use UPSERT to avoid duplicates - PostgreSQL ON CONFLICT
-      const insertFields = ['email'];
-      const insertValues = [email];
-      const updateAssignments = [];
+      // Update the florist_auth table directly - this is the correct table that exists
+      const updateFields = [];
+      const updateValues = [];
+      let paramIndex = 1;
+      
+      // Map frontend field names to database field names and build dynamic update
+      const fieldMappings = {
+        'businessName': 'business_name',
+        'zipCode': 'zip_code', 
+        'profileImageUrl': 'profile_image_url',
+        'profileSummary': 'profile_summary',
+        'yearsOfExperience': 'years_of_experience',
+        'specialties': 'specialties',
+        'services': 'services_offered',
+        'address': 'address',
+        'city': 'city',
+        'state': 'state',
+        'phone': 'phone',
+        'website': 'website'
+      };
       
       Object.keys(profileData).forEach(key => {
-        if (profileData[key] !== undefined) {
-          let dbField, dbValue;
-          switch(key) {
-            case 'businessName':
-              dbField = 'business_name';
-              dbValue = profileData[key];
-              break;
-            case 'zipCode':
-              dbField = 'zip_code';
-              dbValue = profileData[key];
-              break;
-            case 'profileImageUrl':
-              dbField = 'profile_image_url';
-              dbValue = profileImageData;
-              break;
-            case 'profileSummary':
-              dbField = 'profile_summary';
-              dbValue = profileData[key];
-              break;
-            case 'yearsOfExperience':
-              dbField = 'years_of_experience';
-              dbValue = profileData[key];
-              break;
-            case 'specialties':
-              dbField = 'specialties';
-              dbValue = profileData[key]; // PostgreSQL array
-              break;
-            case 'services':
-              dbField = 'services';
-              dbValue = profileData[key]; // PostgreSQL array
-              break;
-            default:
-              if (['address', 'city', 'state', 'phone', 'website'].includes(key)) {
-                dbField = key;
-                dbValue = profileData[key];
-              }
-          }
+        const dbField = fieldMappings[key];
+        if (dbField && profileData[key] !== undefined) {
+          updateFields.push(`${dbField} = $${paramIndex + 1}`);
           
-          if (dbField) {
-            insertFields.push(dbField);
-            insertValues.push(dbValue);
-            updateAssignments.push(`${dbField} = EXCLUDED.${dbField}`);
+          // Handle special case for profile image
+          if (key === 'profileImageUrl') {
+            updateValues.push(profileImageData);
+          } else {
+            updateValues.push(profileData[key]);
           }
+          paramIndex++;
         }
       });
       
-      // Add updated_at to both insert and update
-      insertFields.push('updated_at');
-      insertValues.push(new Date());
-      updateAssignments.push('updated_at = EXCLUDED.updated_at');
+      // Always update the timestamp
+      updateFields.push(`updated_at = CURRENT_TIMESTAMP`);
       
-      const placeholders = insertValues.map((_, index) => `$${index + 1}`).join(', ');
+      if (updateFields.length === 1) { // Only timestamp, no actual data to update
+        throw new Error('No valid fields to update');
+      }
+      
       const query = `
-        INSERT INTO florists (${insertFields.join(', ')})
-        VALUES (${placeholders})
-        ON CONFLICT (email) 
-        DO UPDATE SET ${updateAssignments.join(', ')}
+        UPDATE florist_auth 
+        SET ${updateFields.join(', ')}
+        WHERE id = $1
         RETURNING *
       `;
       
-      const result = await pool.query(query, insertValues);
+      const result = await pool.query(query, [floristAuthId, ...updateValues]);
+      
+      if (result.rows.length === 0) {
+        throw new Error('Florist not found');
+      }
       
       return result.rows[0];
     } catch (error) {
