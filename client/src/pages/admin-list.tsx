@@ -506,29 +506,29 @@ export default function AdminList() {
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              className="h-10 w-10 p-0 hover:bg-blue-50 hover:text-blue-700 transition-all duration-200 rounded-lg hover:shadow-md"
+                              className="h-10 w-10 p-0 hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100 hover:text-blue-700 transition-all duration-300 rounded-lg border border-transparent hover:border-blue-300 hover:shadow-md group"
                               title="View User Details"
-                              onClick={() => setViewUser(user)}
+                              onClick={() => handleView('user', user)}
                             >
-                              <FaEye className="h-4 w-4" />
+                              <FaEye className="h-4 w-4 text-blue-600 group-hover:scale-110 transition-transform duration-200" />
                             </Button>
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              className="h-10 w-10 p-0 hover:bg-green-50 hover:text-green-700 transition-all duration-200 rounded-lg hover:shadow-md"
+                              className="h-10 w-10 p-0 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-emerald-100 hover:text-emerald-700 transition-all duration-300 rounded-lg border border-transparent hover:border-emerald-300 hover:shadow-md group"
                               title="Edit User"
-                              onClick={() => setEditUser({...user})}
+                              onClick={() => handleEdit('user', user)}
                             >
-                              <FaEdit className="h-4 w-4" />
+                              <FaEdit className="h-4 w-4 text-emerald-600 group-hover:scale-110 transition-transform duration-200" />
                             </Button>
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              className="h-10 w-10 p-0 hover:bg-red-50 hover:text-red-700 transition-all duration-200 rounded-lg hover:shadow-md"
+                              className="h-10 w-10 p-0 hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100 hover:text-red-700 transition-all duration-300 rounded-lg border border-transparent hover:border-red-300 hover:shadow-md group"
                               title="Delete User"
-                              onClick={() => setDeleteUser(user)}
+                              onClick={() => handleDelete('user', user)}
                             >
-                              <FaTrash className="h-4 w-4" />
+                              <FaTrash className="h-4 w-4 text-red-600 group-hover:scale-110 transition-transform duration-200" />
                             </Button>
                           </div>
                         </TableCell>
@@ -627,7 +627,7 @@ export default function AdminList() {
                               title="View Customer Profile"
                               onClick={() => handleView('user', customer)}
                             >
-                              <FaFile className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
+                              <FaEye className="h-4 w-4 text-blue-600 group-hover:scale-110 transition-transform duration-200" />
                             </Button>
                             <Button 
                               variant="ghost" 
@@ -636,7 +636,7 @@ export default function AdminList() {
                               title="Edit Customer Account"
                               onClick={() => handleEdit('user', customer)}
                             >
-                              <Settings className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
+                              <FaEdit className="h-4 w-4 text-emerald-600 group-hover:scale-110 transition-transform duration-200" />
                             </Button>
                             <Button 
                               variant="ghost" 
@@ -645,7 +645,7 @@ export default function AdminList() {
                               title="Remove Customer"
                               onClick={() => handleDelete('user', customer)}
                             >
-                              <UserMinus className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
+                              <FaTrash className="h-4 w-4 text-red-600 group-hover:scale-110 transition-transform duration-200" />
                             </Button>
                           </div>
                         </TableCell>
@@ -761,7 +761,7 @@ export default function AdminList() {
                               title="View Business Profile"
                               onClick={() => handleView('florist', florist)}
                             >
-                              <Building className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
+                              <FaEye className="h-4 w-4 text-blue-600 group-hover:scale-110 transition-transform duration-200" />
                             </Button>
                             <Button 
                               variant="ghost" 
@@ -770,7 +770,7 @@ export default function AdminList() {
                               title="Edit Business Settings"
                               onClick={() => handleEdit('florist', florist)}
                             >
-                              <Settings className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
+                              <FaEdit className="h-4 w-4 text-emerald-600 group-hover:scale-110 transition-transform duration-200" />
                             </Button>
                             <Button 
                               variant="ghost" 
@@ -779,7 +779,7 @@ export default function AdminList() {
                               title="Remove Florist"
                               onClick={() => handleDelete('florist', florist)}
                             >
-                              <Store className="h-5 w-5 group-hover:scale-110 transition-transform duration-200 line-through" />
+                              <FaTrash className="h-4 w-4 text-red-600 group-hover:scale-110 transition-transform duration-200" />
                             </Button>
                           </div>
                         </TableCell>
