@@ -1478,33 +1478,41 @@ export default function AdminList() {
                       <div className="relative">
                         <img 
                           src={(() => {
-                            console.log('DEBUG: editFlorist.profileImageUrl =', editFlorist.profileImageUrl);
+                            console.log('🔍 EDIT MODAL: editFlorist.profileImageUrl =', editFlorist.profileImageUrl);
                             const imageUrl = editFlorist.profileImageUrl;
                             
                             if (!imageUrl || imageUrl.trim() === '') {
-                              console.log('DEBUG: No image URL, using placeholder');
-                              return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCIgdmlld0JveD0iMCAwIDEyOCAxMjgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMjgiIGhlaWdodD0iMTI4IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik00MCA2MEg4OFY5Nkg0MFY2MFoiIGZpbGw9IiM5Q0EzQUYiLz4KPHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAzMiAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHA+CjwvZz4KPHN2Zz4K';
+                              console.log('📷 No image URL, using placeholder');
+                              return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCIgdmlld0JveD0iMCAwIDEyOCAxMjgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMjgiIGhlaWdodD0iMTI4IiBmaWxsPSIjRjNGNEY2Ii8+PGNpcmNsZSBjeD0iNjQiIGN5PSI0OCIgcj0iMTYiIGZpbGw9IiM5Q0EzQUYiLz4KPHBhdGggZD0ibTQ4IDcyIDggOCA4LTggOCA4IDgtOFoiIGZpbGw9IiM5Q0EzQUYiLz48L3N2Zz4=';
+                            }
+                            
+                            // For Google Cloud Storage URLs (object storage), use directly
+                            if (imageUrl.includes('storage.googleapis.com')) {
+                              console.log('📷 Using Google Cloud Storage URL directly:', imageUrl.substring(0, 60) + '...');
+                              return imageUrl;
                             }
                             
                             // Handle different URL types
                             if (imageUrl.startsWith('data:')) {
-                              console.log('DEBUG: Using base64/data URL directly');
-                              return imageUrl; // Base64 data URLs work directly
+                              console.log('📷 Using base64/data URL directly');
+                              return imageUrl;
                             }
                             
                             if (imageUrl.startsWith('http')) {
-                              console.log('DEBUG: Using external URL directly');
-                              return imageUrl; // External URLs work directly
+                              console.log('📷 Using external URL directly:', imageUrl.substring(0, 60) + '...');
+                              return imageUrl;
                             }
                             
+                            // For object storage paths that need /objects/ prefix
                             if (imageUrl.startsWith('/objects/')) {
-                              console.log('DEBUG: Using object storage path directly');
-                              return imageUrl; // Object storage paths work directly
+                              console.log('📷 Using object storage path directly');
+                              return imageUrl;
                             }
                             
-                            // Assume it's an object storage file path without /objects/ prefix
-                            console.log('DEBUG: Adding /objects/ prefix to path');
-                            return `/objects/${imageUrl.replace(/^\//, '')}`;
+                            // Add /objects/ prefix for relative paths
+                            const finalUrl = `/objects/${imageUrl.replace(/^\//, '')}`;
+                            console.log('📷 Adding /objects/ prefix:', finalUrl);
+                            return finalUrl;
                           })()} 
                           alt="Profile"
                           className="w-32 h-32 rounded-lg object-cover border-2 border-gray-200"
