@@ -159,9 +159,19 @@ export default function AdminMessages() {
         if (florist) {
           setRecipientId(preSelectedFloristId);
           setSubject(`Message for ${florist.businessName || florist.name}`);
+          console.log('Auto-selected florist:', florist);
         }
       }
     }, [preSelectedFloristId, florists]);
+
+    // Reset form when dialog closes
+    React.useEffect(() => {
+      if (!isComposeOpen) {
+        setRecipientId("");
+        setSubject("");
+        setMessageBody("");
+      }
+    }, [isComposeOpen]);
 
     const handleSubmit = (e: React.FormEvent) => {
       e.preventDefault();

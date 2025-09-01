@@ -159,6 +159,31 @@ export default function Navigation() {
               <Link href="#">Blog</Link>
             </Button>
             
+            {/* Messages Link - Only for Admin/Florist */}
+            {isAdminOrFlorist() && (
+              <Button 
+                asChild
+                variant="ghost" 
+                className={cn(
+                  "text-gray-700 hover:text-gray-900 hover:bg-gray-50 font-medium px-4 py-2 relative",
+                  location.startsWith("/admin-messages") && "text-gray-900 bg-gray-50"
+                )}
+              >
+                <Link href="/admin-messages">
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  Messages
+                  {unreadCount?.unreadCount > 0 && (
+                    <Badge 
+                      variant="destructive" 
+                      className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+                    >
+                      {unreadCount.unreadCount > 9 ? '9+' : unreadCount.unreadCount}
+                    </Badge>
+                  )}
+                </Link>
+              </Button>
+            )}
+
             <Button 
               asChild
               variant="ghost" 
