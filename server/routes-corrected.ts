@@ -801,8 +801,16 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
 
       console.log(`Returning ${paginatedFlorists.length} florists (page ${Math.floor(startIndex/pageSize) + 1})`);
 
+      // PERFORMANCE OPTIMIZATION: Remove large base64 images from search results
+      // Replace with image URLs that can be loaded separately
+      const optimizedFlorists = paginatedFlorists.map(florist => ({
+        ...florist,
+        profileImageData: undefined, // Remove large base64 data
+        profileImageUrl: florist.profileImageData ? `/api/florists/${florist.id}/image` : florist.profileImageUrl
+      }));
+
       res.json({
-        florists: paginatedFlorists,
+        florists: optimizedFlorists,
         total: filteredFlorists.length,
         offset: startIndex,
         limit: pageSize,
@@ -811,6 +819,46 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Florist search error:', error);
       res.status(500).json({ message: 'Failed to search florists' });
+    }
+  });
+
+  // Separate endpoint for florist images (optimized for performance)
+  app.get('/api/florists/:id/image', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const floristId = parseInt(id);
+      
+      if (isNaN(floristId)) {
+        return res.status(400).json({ message: "Invalid florist ID" });
+      }
+      
+      // Get only the image data for this florist
+      const result = await pool.query(
+        'SELECT profile_image_data FROM florist_auth WHERE id = $1',
+        [floristId]
+      );
+      
+      if (result.rows.length === 0 || !result.rows[0].profile_image_data) {
+        return res.status(404).json({ message: "Image not found" });
+      }
+      
+      const imageData = result.rows[0].profile_image_data;
+      
+      // Set appropriate headers for image response
+      res.setHeader('Content-Type', 'image/png');
+      res.setHeader('Cache-Control', 'public, max-age=86400'); // Cache for 24 hours
+      
+      // Convert base64 to buffer and send
+      if (imageData.startsWith('data:image/')) {
+        const base64Data = imageData.split(',')[1];
+        const imageBuffer = Buffer.from(base64Data, 'base64');
+        res.send(imageBuffer);
+      } else {
+        res.status(400).json({ message: "Invalid image format" });
+      }
+    } catch (error) {
+      console.error("Error fetching florist image:", error);
+      res.status(500).json({ message: "Failed to fetch image" });
     }
   });
 
