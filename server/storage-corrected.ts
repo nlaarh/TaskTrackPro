@@ -9,7 +9,7 @@ import {
   type FloristAuth,
   type Florist
 } from "@shared/schema";
-import { db } from "./db";
+import { db, pool } from "./db";
 import { eq, and, or, ilike, desc, sql } from "drizzle-orm";
 import { Pool } from 'pg';
 
@@ -620,9 +620,9 @@ export class CorrectedDatabaseStorage implements IStorage {
 
   async getAllFlorists(): Promise<Florist[]> {
     try {
-      console.log('getAllFlorists: Starting query using direct pool connection...');
+      console.log('getAllFlorists: Querying florist_auth table (contains all 52 florist business records)...');
       
-      // Use direct pool query to avoid Drizzle ORM issues
+      // Query florist_auth table - this contains all florist business data
       const result = await pool.query(`
         SELECT 
           id,
@@ -639,26 +639,27 @@ export class CorrectedDatabaseStorage implements IStorage {
           profile_summary,
           years_of_experience,
           specialties,
-          services,
+          services_offered,
           profile_image_url,
-          created_at
+          business_hours,
+          is_verified,
+          created_at,
+          updated_at
         FROM florist_auth
-        WHERE role = 'florist'
         ORDER BY created_at DESC
       `);
       
-      console.log('getAllFlorists: Direct pool query result count:', result.rows?.length || 0);
-      console.log('getAllFlorists: Sample row:', result.rows?.[0]);
+      console.log('getAllFlorists: Found', result.rows?.length || 0, 'florist records');
       
       if (!result.rows || result.rows.length === 0) {
-        console.warn('getAllFlorists: No florists found in database');
+        console.warn('getAllFlorists: No florists found in florist_auth table');
         return [];
       }
 
       // Transform the raw database rows to match Florist interface
       const florists = result.rows.map((row: any) => ({
         id: row.id,
-        businessName: row.business_name || null,
+        businessName: row.business_name || 'Unnamed Florist',
         address: row.address || null,
         city: row.city || null,
         state: row.state || null,
@@ -667,25 +668,25 @@ export class CorrectedDatabaseStorage implements IStorage {
         website: row.website || null,
         profileSummary: row.profile_summary || null,
         yearsOfExperience: row.years_of_experience || 0,
-        specialties: row.specialties || [],
-        services: row.services || [],
+        specialties: Array.isArray(row.specialties) ? row.specialties : [],
+        services: Array.isArray(row.services_offered) ? row.services_offered : [],
         profileImageUrl: row.profile_image_url || null,
+        businessHours: row.business_hours || null,
         createdAt: row.created_at,
+        updatedAt: row.updated_at,
         email: row.email,
         firstName: row.first_name,
         lastName: row.last_name,
-        // Default values for missing Florist interface properties
-        updatedAt: null,
-        userId: row.id, // Use the same ID
+        userId: row.id,
         latitude: null,
         longitude: null,
-        isFeatured: false,
-        businessHours: null,
+        isFeatured: row.is_verified || false,
         averageRating: null,
         totalReviews: 0
       }));
       
       console.log('getAllFlorists: Returning', florists.length, 'florists');
+      console.log('getAllFlorists: Sample businesses:', florists.slice(0, 3).map(f => f.businessName));
       return florists;
       
     } catch (error) {
