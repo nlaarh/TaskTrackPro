@@ -17,8 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import Navigation from "@/components/navigation";
 import { cn } from "@/lib/utils";
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+import ComposeMessage from './compose-message';
 
 interface Message {
   id: number;
@@ -45,7 +44,7 @@ export default function AdminMessagesRedesign() {
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [isComposeOpen, setIsComposeOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [recipientSearchQuery, setRecipientSearchQuery] = useState("");
+
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -181,203 +180,7 @@ export default function AdminMessagesRedesign() {
     }
   };
 
-  const ComposeDialog = () => {
-    const [recipientId, setRecipientId] = useState("");
-    const [subject, setSubject] = useState("");
-    const [messageBody, setMessageBody] = useState("");
 
-    // Auto-select florist if coming from admin list
-    React.useEffect(() => {
-      if (preSelectedFloristId && florists && florists.length > 0) {
-        const florist = florists.find((f: Florist) => f.id.toString() === preSelectedFloristId);
-        if (florist) {
-          setRecipientId(preSelectedFloristId);
-          setSubject(`Message for ${florist.businessName || florist.name}`);
-        }
-      }
-    }, [preSelectedFloristId, florists]);
-
-    // Reset form when dialog closes
-    React.useEffect(() => {
-      if (!isComposeOpen) {
-        setRecipientId("");
-        setRecipientSearchQuery("");
-        setSubject("");
-        setMessageBody("");
-      }
-    }, [isComposeOpen]);
-
-    const handleSubmit = (e: React.FormEvent) => {
-      e.preventDefault();
-      if (!recipientId || !subject || !messageBody) {
-        toast({
-          title: "Missing fields",
-          description: "Please fill in all fields",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      sendMessageMutation.mutate({
-        recipientId,
-        recipientType: 'florist',
-        subject,
-        messageBody,
-      });
-    };
-
-    return (
-      <Dialog open={isComposeOpen} onOpenChange={setIsComposeOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-semibold">Compose Message</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="recipient" className="text-sm font-medium">To</Label>
-              <div className="space-y-2">
-                <Input
-                  placeholder="Search for a business to message..."
-                  value={recipientSearchQuery}
-                  onChange={(e) => setRecipientSearchQuery(e.target.value)}
-                  className="w-full"
-                />
-                {recipientSearchQuery && (
-                  <div className="max-h-48 overflow-y-auto border rounded-md">
-                    {florists
-                      ?.filter((florist: Florist) => {
-                        const search = recipientSearchQuery.toLowerCase();
-                        const businessName = (florist.businessName || `${florist.name}'s Florist`).toLowerCase();
-                        const email = florist.email.toLowerCase();
-                        const name = florist.name.toLowerCase();
-                        return businessName.includes(search) || email.includes(search) || name.includes(search);
-                      })
-                      .map((florist: Florist) => (
-                        <div
-                          key={florist.id}
-                          onClick={() => {
-                            setRecipientId(florist.id.toString());
-                            setRecipientSearchQuery(florist.businessName || `${florist.name}'s Florist`);
-                          }}
-                          className="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer border-b last:border-b-0"
-                        >
-                          <Avatar className="h-10 w-10">
-                            <AvatarFallback className="text-sm bg-blue-100 text-blue-700">
-                              {(florist.businessName?.charAt(0) || florist.name?.charAt(0) || 'F').toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1">
-                            <div className="text-sm font-medium text-gray-900">
-                              {florist.businessName || `${florist.name}'s Florist`}
-                            </div>
-                            <div className="text-xs text-gray-500">
-                              {florist.email}
-                            </div>
-                            {florist.name && florist.businessName && (
-                              <div className="text-xs text-gray-400">
-                                Contact: {florist.name}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    {florists?.filter((florist: Florist) => {
-                      const search = recipientSearchQuery.toLowerCase();
-                      const businessName = (florist.businessName || `${florist.name}'s Florist`).toLowerCase();
-                      const email = florist.email.toLowerCase();
-                      const name = florist.name.toLowerCase();
-                      return businessName.includes(search) || email.includes(search) || name.includes(search);
-                    }).length === 0 && (
-                      <div className="p-3 text-sm text-gray-500 text-center">
-                        No businesses found matching "{recipientSearchQuery}"
-                      </div>
-                    )}
-                  </div>
-                )}
-                {recipientId && (
-                  <div className="p-3 bg-blue-50 border border-blue-200 rounded-md flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback className="text-sm bg-blue-600 text-white">
-                          {recipientSearchQuery?.charAt(0)?.toUpperCase() || 'F'}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="text-sm font-medium text-blue-900">
-                        Selected: {recipientSearchQuery}
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setRecipientId("");
-                        setRecipientSearchQuery("");
-                      }}
-                      className="text-blue-600 hover:text-blue-800"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="subject" className="text-sm font-medium">Subject</Label>
-              <Input
-                id="subject"
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                placeholder="Enter subject..."
-                className="w-full"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="message" className="text-sm font-medium">Message</Label>
-              <div className="min-h-[200px]">
-                <ReactQuill
-                  value={messageBody}
-                  onChange={setMessageBody}
-                  placeholder="Write your message..."
-                  modules={{
-                    toolbar: [
-                      [{ 'header': [1, 2, 3, false] }],
-                      ['bold', 'italic', 'underline'],
-                      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                      ['link'],
-                      ['clean']
-                    ]
-                  }}
-                  formats={[
-                    'header', 'bold', 'italic', 'underline',
-                    'list', 'bullet', 'link'
-                  ]}
-                  className="bg-white"
-                />
-              </div>
-            </div>
-            <div className="flex justify-between items-center pt-4">
-              <Button type="button" variant="outline" onClick={() => setIsComposeOpen(false)}>
-                Cancel
-              </Button>
-              <Button 
-                type="submit" 
-                disabled={sendMessageMutation.isPending} 
-                className="min-w-[100px] bg-blue-500 hover:bg-blue-600 text-white rounded-full px-6 py-2 font-medium"
-              >
-                {sendMessageMutation.isPending ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <>
-                    <Send className="h-4 w-4 mr-2" />
-                    Send
-                  </>
-                )}
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
-    );
-  };
 
   if (messagesLoading) {
     return (
@@ -566,7 +369,12 @@ export default function AdminMessagesRedesign() {
         </div>
       </div>
 
-      <ComposeDialog />
+      <ComposeMessage
+        isOpen={isComposeOpen}
+        onClose={() => setIsComposeOpen(false)}
+        florists={florists}
+        preSelectedFloristId={preSelectedFloristId}
+      />
     </div>
   );
 }
