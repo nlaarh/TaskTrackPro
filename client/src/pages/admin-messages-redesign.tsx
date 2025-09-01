@@ -235,62 +235,90 @@ export default function AdminMessagesRedesign() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="recipient" className="text-sm font-medium">To</Label>
-              <Select 
-                value={recipientId} 
-                onValueChange={(value) => {
-                  setRecipientId(value);
-                  // Clear search when selecting
-                  setRecipientSearchQuery("");
-                }}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select a business to message..." />
-                </SelectTrigger>
-                <SelectContent className="max-h-60">
-                  <div className="p-2 border-b">
-                    <Input
-                      placeholder="Search businesses..."
-                      value={recipientSearchQuery}
-                      onChange={(e) => setRecipientSearchQuery(e.target.value)}
-                      className="h-8"
-                    />
-                  </div>
-                  {florists
-                    ?.filter((florist: Florist) => {
-                      if (!recipientSearchQuery) return true;
-                      const search = recipientSearchQuery.toLowerCase();
-                      return (
-                        florist.businessName?.toLowerCase().includes(search) ||
-                        florist.name?.toLowerCase().includes(search) ||
-                        florist.email?.toLowerCase().includes(search)
-                      );
-                    })
-                    .map((florist: Florist) => (
-                      <SelectItem key={florist.id} value={florist.id.toString()}>
-                        <div className="flex items-center gap-3 py-1">
-                          <Avatar className="h-8 w-8">
+              <div className="space-y-2">
+                <Input
+                  placeholder="Search for a business to message..."
+                  value={recipientSearchQuery}
+                  onChange={(e) => setRecipientSearchQuery(e.target.value)}
+                  className="w-full"
+                />
+                {recipientSearchQuery && (
+                  <div className="max-h-48 overflow-y-auto border rounded-md">
+                    {florists
+                      ?.filter((florist: Florist) => {
+                        const search = recipientSearchQuery.toLowerCase();
+                        const businessName = (florist.businessName || `${florist.name}'s Florist`).toLowerCase();
+                        const email = florist.email.toLowerCase();
+                        const name = florist.name.toLowerCase();
+                        return businessName.includes(search) || email.includes(search) || name.includes(search);
+                      })
+                      .map((florist: Florist) => (
+                        <div
+                          key={florist.id}
+                          onClick={() => {
+                            setRecipientId(florist.id.toString());
+                            setRecipientSearchQuery(florist.businessName || `${florist.name}'s Florist`);
+                          }}
+                          className="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer border-b last:border-b-0"
+                        >
+                          <Avatar className="h-10 w-10">
                             <AvatarFallback className="text-sm bg-blue-100 text-blue-700">
                               {(florist.businessName?.charAt(0) || florist.name?.charAt(0) || 'F').toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
-                          <div className="flex flex-col">
-                            <span className="text-sm font-medium">
-                              {florist.businessName || `${florist.name}'s Florist` || 'Florist Business'}
-                            </span>
-                            <span className="text-xs text-gray-500">
+                          <div className="flex-1">
+                            <div className="text-sm font-medium text-gray-900">
+                              {florist.businessName || `${florist.name}'s Florist`}
+                            </div>
+                            <div className="text-xs text-gray-500">
                               {florist.email}
-                            </span>
+                            </div>
                             {florist.name && florist.businessName && (
-                              <span className="text-xs text-gray-400">
+                              <div className="text-xs text-gray-400">
                                 Contact: {florist.name}
-                              </span>
+                              </div>
                             )}
                           </div>
                         </div>
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
+                      ))}
+                    {florists?.filter((florist: Florist) => {
+                      const search = recipientSearchQuery.toLowerCase();
+                      const businessName = (florist.businessName || `${florist.name}'s Florist`).toLowerCase();
+                      const email = florist.email.toLowerCase();
+                      const name = florist.name.toLowerCase();
+                      return businessName.includes(search) || email.includes(search) || name.includes(search);
+                    }).length === 0 && (
+                      <div className="p-3 text-sm text-gray-500 text-center">
+                        No businesses found matching "{recipientSearchQuery}"
+                      </div>
+                    )}
+                  </div>
+                )}
+                {recipientId && (
+                  <div className="p-3 bg-blue-50 border border-blue-200 rounded-md flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback className="text-sm bg-blue-600 text-white">
+                          {recipientSearchQuery?.charAt(0)?.toUpperCase() || 'F'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-sm font-medium text-blue-900">
+                        Selected: {recipientSearchQuery}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setRecipientId("");
+                        setRecipientSearchQuery("");
+                      }}
+                      className="text-blue-600 hover:text-blue-800"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="subject" className="text-sm font-medium">Subject</Label>
