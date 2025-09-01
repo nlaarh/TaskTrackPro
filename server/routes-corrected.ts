@@ -868,6 +868,31 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin-clean routes - direct database access without auth for debugging
+  app.get("/api/admin-clean/users", async (req, res) => {
+    try {
+      console.log('Admin-clean users endpoint called');
+      const users = await correctedStorage.getAllUsers();
+      console.log('Admin-clean users retrieved:', users.length);
+      res.json(users);
+    } catch (error) {
+      console.error("Admin-clean users error:", error);
+      res.status(500).json({ error: "Failed to get users" });
+    }
+  });
+
+  app.get("/api/admin-clean/florists", async (req, res) => {
+    try {
+      console.log('Admin-clean florists endpoint called');
+      const florists = await correctedStorage.getAllFlorists();
+      console.log('Admin-clean florists retrieved:', florists.length);
+      res.json(florists);
+    } catch (error) {
+      console.error("Admin-clean florists error:", error);
+      res.status(500).json({ error: "Failed to get florists" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Navigation from "@/components/navigation";
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,9 @@ import {
   ArrowUp,
   ArrowDown,
   UserPlus,
-  Building
+  Building,
+  Settings,
+  UserMinus
 } from "lucide-react";
 import { 
   FaEye, 
@@ -28,7 +30,8 @@ import {
   FaUserPlus, 
   FaStore,
   FaSave,
-  FaTimes
+  FaTimes,
+  FaFile
 } from "react-icons/fa";
 
 type SortConfig = {
@@ -153,37 +156,54 @@ export default function AdminList() {
   };
 
   // Fetch users data
-  const { data: users = [], isLoading: usersLoading } = useQuery({
+  const { data: users = [], isLoading: usersLoading, error: usersError } = useQuery({
     queryKey: ['/api/admin-clean/users'],
     queryFn: async () => {
+      console.log('Fetching users...');
       const token = localStorage.getItem('customerToken');
+      console.log('Token:', token ? 'Present' : 'Missing');
+      
       const response = await fetch('/api/admin-clean/users', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
-      if (!response.ok) throw new Error('Failed to fetch users');
-      return response.json();
+      
+      console.log('Response status:', response.status);
+      const data = await response.json();
+      console.log('Response data:', data);
+      
+      if (!response.ok) throw new Error(`Failed to fetch users: ${response.status}`);
+      return data;
     },
     retry: false,
+    refetchOnWindowFocus: false,
   });
 
   // Fetch florists data
-  const { data: florists = [], isLoading: floristsLoading } = useQuery({
+  const { data: florists = [], isLoading: floristsLoading, error: floristsError } = useQuery({
     queryKey: ['/api/admin-clean/florists'],
     queryFn: async () => {
+      console.log('Fetching florists...');
       const token = localStorage.getItem('customerToken');
+      
       const response = await fetch('/api/admin-clean/florists', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
-      if (!response.ok) throw new Error('Failed to fetch florists');
-      return response.json();
+      
+      console.log('Florists response status:', response.status);
+      const data = await response.json();
+      console.log('Florists data:', data);
+      
+      if (!response.ok) throw new Error(`Failed to fetch florists: ${response.status}`);
+      return data;
     },
     retry: false,
+    refetchOnWindowFocus: false,
   });
 
   // Sorting function
@@ -220,6 +240,24 @@ export default function AdminList() {
       }
     });
   };
+
+  // Debug logging after queries are defined
+  console.log('Admin List - Users:', users);
+  console.log('Admin List - Florists:', florists);
+  console.log('Admin List - Users Loading:', usersLoading);
+  console.log('Admin List - Florists Loading:', floristsLoading);
+
+  // Display debugging info in UI temporarily
+  React.useEffect(() => {
+    if (users && users.length > 0) {
+      console.log('✓ Found users:', users.length);
+      toast({ title: "Debug", description: `Found ${users.length} users in database`, variant: "default" });
+    }
+    if (florists && florists.length > 0) {
+      console.log('✓ Found florists:', florists.length);
+      toast({ title: "Debug", description: `Found ${florists.length} florists in database`, variant: "default" });
+    }
+  }, [users, florists, toast]);
 
   // Filter and sort data
   const customers = users.filter((user: any) => user.role === 'customer');
@@ -554,7 +592,7 @@ export default function AdminList() {
                               title="View Customer Profile"
                               onClick={() => handleView('user', customer)}
                             >
-                              <FileText className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
+                              <FaFile className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
                             </Button>
                             <Button 
                               variant="ghost" 
