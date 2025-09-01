@@ -156,9 +156,10 @@ export default function AdminList() {
     }
   };
 
-  // Missing handler functions for florists
+  // Handler functions for view, edit, delete actions
   const handleView = (type: string, item: any) => {
     console.log(`View ${type}:`, item);
+    console.log('Setting viewUser state to:', item);
     if (type === 'florist') {
       // For now, just show an alert - can be enhanced later
       alert(`Viewing florist: ${item.businessName}\nEmail: ${item.email}\nLocation: ${item.city}, ${item.state}`);
@@ -169,16 +170,18 @@ export default function AdminList() {
 
   const handleEdit = (type: string, item: any) => {
     console.log(`Edit ${type}:`, item);
+    console.log('Setting editUser state to:', item);
     if (type === 'florist') {
       // For now, just show an alert - can be enhanced later  
       alert(`Edit functionality for florist "${item.businessName}" will be implemented in future update.`);
     } else if (type === 'user') {
-      setEditUser(item);
+      setEditUser({...item}); // Create a proper copy
     }
   };
 
   const handleDelete = (type: string, item: any) => {
     console.log(`Delete ${type}:`, item);
+    console.log('Setting deleteUser state to:', item);
     if (type === 'florist') {
       // For now, just show an alert - can be enhanced later
       const confirmed = confirm(`Are you sure you want to remove florist "${item.businessName}"? This action cannot be undone.`);
