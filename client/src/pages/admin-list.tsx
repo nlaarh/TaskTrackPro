@@ -1507,6 +1507,13 @@ export default function AdminList() {
                                 console.log('📷 Using Google Cloud Storage URL');
                                 return imageUrl;
                               }
+                              
+                              // Handle our optimized image endpoint URLs
+                              if (imageUrl.startsWith('/api/florists/')) {
+                                console.log('📷 Using optimized image endpoint:', imageUrl);
+                                // Add timestamp to prevent caching issues
+                                return `${imageUrl}?t=${Date.now()}`;
+                              }
                             }
                             
                             // Priority 3: Default placeholder
@@ -1586,10 +1593,14 @@ export default function AdminList() {
                                 const updateResult = await updateResponse.json();
                                 console.log('Update result:', updateResult);
                                 
-                                // Update the editFlorist state with new image data
-                                const updatedFlorist = {...editFlorist, profileImageData: base64Data};
+                                // Update the editFlorist state with new image data AND fresh URL
+                                const updatedFlorist = {
+                                  ...editFlorist, 
+                                  profileImageData: base64Data,
+                                  profileImageUrl: `/api/florists/${editFlorist.id}/image?t=${Date.now()}` // Cache buster
+                                };
                                 setEditFlorist(updatedFlorist);
-                                console.log('✅ Updated florist state with new image');
+                                console.log('✅ Updated florist state with new image and fresh URL');
                                 
                                 toast({
                                   title: "Success",
@@ -1600,7 +1611,7 @@ export default function AdminList() {
                                 const fileInput = document.getElementById(`florist-image-${editFlorist.id}`) as HTMLInputElement;
                                 if (fileInput) fileInput.value = '';
                                 
-                                // Refresh florists list
+                                // Refresh florists list to show new images
                                 queryClient.invalidateQueries({ queryKey: ['/api/admin-clean/florists'] });
                                 
                               } catch (error) {
