@@ -699,8 +699,10 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
   // Object storage upload endpoint for florist images
   app.post('/api/objects/upload', authenticateCustomer, async (req, res) => {
     try {
+      console.log('Upload URL requested by user:', req.user);
       const objectStorageService = new ObjectStorageService();
       const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+      console.log('Generated upload URL:', uploadURL);
       res.json({ uploadURL });
     } catch (error) {
       console.error('Error getting upload URL:', error);
@@ -714,6 +716,8 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       const { imageURL } = req.body;
 
+      console.log(`Updating florist ${id} with image URL:`, imageURL);
+
       if (!imageURL) {
         return res.status(400).json({ message: 'Image URL is required' });
       }
@@ -723,21 +727,33 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: 'Invalid florist ID' });
       }
 
+      // Convert the full GCS URL to a relative path for consistency
+      let relativePath = imageURL;
+      if (imageURL.includes('storage.googleapis.com')) {
+        const urlParts = imageURL.split('/');
+        const bucketIndex = urlParts.findIndex(part => part.includes('repl-default-bucket'));
+        if (bucketIndex !== -1 && bucketIndex < urlParts.length - 1) {
+          relativePath = `/objects/${urlParts.slice(bucketIndex + 1).join('/')}`;
+        }
+      }
+
+      console.log(`Saving relative path:`, relativePath);
+
       // Update florist profile image in database
       const query = `
         UPDATE florist_auth 
         SET profile_image_url = $1, updated_at = NOW()
         WHERE id = $2
-        RETURNING *
+        RETURNING id, business_name, profile_image_url
       `;
       
-      const result = await pool.query(query, [imageURL, floristId]);
+      const result = await pool.query(query, [relativePath, floristId]);
       
       if (result.rows.length === 0) {
         return res.status(404).json({ message: 'Florist not found' });
       }
       
-      console.log(`Updated florist ${floristId} image to:`, imageURL);
+      console.log(`Successfully updated florist ${floristId}:`, result.rows[0]);
       res.json({ message: 'Image updated successfully', florist: result.rows[0] });
     } catch (error) {
       console.error('Error updating florist image:', error);
@@ -1085,6 +1101,26 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Admin-clean florists error:", error);
       res.status(500).json({ error: "Failed to get florists" });
+    }
+  });
+
+  // Serve uploaded images from object storage
+  app.get('/objects/:objectPath(*)', async (req, res) => {
+    try {
+      const objectPath = `/objects/${req.params.objectPath}`;
+      console.log('Serving object:', objectPath);
+      
+      const objectStorageService = new ObjectStorageService();
+      const objectFile = await objectStorageService.getObjectEntityFile(objectPath);
+      
+      // Download and serve the file
+      await objectStorageService.downloadObject(objectFile, res);
+    } catch (error) {
+      console.error('Error serving object:', error);
+      if (error.name === 'ObjectNotFoundError') {
+        return res.status(404).json({ error: 'File not found' });
+      }
+      return res.status(500).json({ error: 'Internal server error' });
     }
   });
 

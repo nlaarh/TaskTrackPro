@@ -1479,12 +1479,15 @@ export default function AdminList() {
                         <img 
                           src={editFlorist.profileImageUrl.startsWith('http') ? 
                             editFlorist.profileImageUrl : 
-                            `/public-objects/${editFlorist.profileImageUrl.replace(/^\//, '')}`
+                            editFlorist.profileImageUrl.startsWith('/objects/') ? 
+                            editFlorist.profileImageUrl : 
+                            `/objects/${editFlorist.profileImageUrl.replace(/^\//, '')}`
                           } 
                           alt="Current Profile"
                           className="w-32 h-32 rounded-lg object-cover border-2 border-gray-200"
+                          onLoad={() => console.log('Image loaded successfully:', editFlorist.profileImageUrl)}
                           onError={(e) => {
-                            console.log('Image load error in edit dialog');
+                            console.log('Image load error:', editFlorist.profileImageUrl);
                             const target = e.target as HTMLImageElement;
                             target.style.display = 'none';
                             // Show fallback
