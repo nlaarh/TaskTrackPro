@@ -16,7 +16,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Heart, Menu, Phone, User, LogOut, Store, Search, Shield, Users, ChevronDown, MessageSquare, Bell } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
-import logoImage from "@assets/image_1756685957746.png";
+// Logo removed - using text logo instead
 
 export default function Navigation() {
   const { user, isAuthenticated } = useAuth();
@@ -81,11 +81,9 @@ export default function Navigation() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3">
-            <img 
-              src={logoImage} 
-              alt="FloriHub Logo" 
-              className="h-10 w-auto object-contain"
-            />
+            <div className="h-10 w-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-lg">F</span>
+            </div>
             <div className="flex flex-col">
               <span className="text-xl font-bold text-gray-900">FloriHub</span>
               <span className="text-xs text-gray-500 hidden sm:block">
@@ -311,11 +309,9 @@ export default function Navigation() {
               <SheetContent side="right">
                 <SheetHeader>
                   <SheetTitle className="flex items-center gap-2">
-                    <img 
-                      src={logoImage} 
-                      alt="FloriHub" 
-                      className="h-8 w-auto object-contain"
-                    />
+                    <div className="h-8 w-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                      <span className="text-white font-bold text-sm">F</span>
+                    </div>
                     FloriHub
                   </SheetTitle>
                 </SheetHeader>
