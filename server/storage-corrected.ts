@@ -620,46 +620,34 @@ export class CorrectedDatabaseStorage implements IStorage {
 
   async getAllFlorists(): Promise<Florist[]> {
     try {
-      console.log('getAllFlorists: Starting query...');
+      console.log('getAllFlorists: Starting query using direct pool connection...');
       
-      // First check florists table
-      const floristResult = await db.execute(sql`
-        SELECT COUNT(*) as count FROM florists
-      `);
-      console.log('getAllFlorists: Florists table count:', floristResult.rows[0]);
-
-      // Check florist_auth table  
-      const authResult = await db.execute(sql`
-        SELECT COUNT(*) as count FROM florist_auth
-      `);
-      console.log('getAllFlorists: Florist_auth table count:', authResult.rows[0]);
-
-      // Query with detailed logging
-      const result = await db.execute(sql`
+      // Use direct pool query to avoid Drizzle ORM issues
+      const result = await pool.query(`
         SELECT 
-          f.id,
-          f.business_name,
-          f.address,
-          f.city, 
-          f.state,
-          f.zip_code,
-          f.phone,
-          f.website,
-          f.profile_summary,
-          f.years_of_experience,
-          f.specialties,
-          f.services,
-          f.profile_image_url,
-          f.created_at,
-          fa.email,
-          fa.first_name,
-          fa.last_name
-        FROM florists f
-        LEFT JOIN florist_auth fa ON f.user_id = fa.id
-        ORDER BY f.created_at DESC
+          id,
+          email,
+          first_name,
+          last_name,
+          business_name,
+          address,
+          city,
+          state,
+          zip_code,
+          phone,
+          website,
+          profile_summary,
+          years_of_experience,
+          specialties,
+          services,
+          profile_image_url,
+          created_at
+        FROM florist_auth
+        WHERE role = 'florist'
+        ORDER BY created_at DESC
       `);
       
-      console.log('getAllFlorists: Query result count:', result.rows?.length || 0);
+      console.log('getAllFlorists: Direct pool query result count:', result.rows?.length || 0);
       console.log('getAllFlorists: Sample row:', result.rows?.[0]);
       
       if (!result.rows || result.rows.length === 0) {
@@ -670,23 +658,31 @@ export class CorrectedDatabaseStorage implements IStorage {
       // Transform the raw database rows to match Florist interface
       const florists = result.rows.map((row: any) => ({
         id: row.id,
-        businessName: row.business_name,
-        address: row.address,
-        city: row.city,
-        state: row.state,
-        zipCode: row.zip_code,
-        phone: row.phone,
-        website: row.website,
-        profileSummary: row.profile_summary,
-        yearsOfExperience: row.years_of_experience,
-        specialties: row.specialties,
-        services: row.services,
-        profileImageUrl: row.profile_image_url,
+        businessName: row.business_name || null,
+        address: row.address || null,
+        city: row.city || null,
+        state: row.state || null,
+        zipCode: row.zip_code || null,
+        phone: row.phone || null,
+        website: row.website || null,
+        profileSummary: row.profile_summary || null,
+        yearsOfExperience: row.years_of_experience || 0,
+        specialties: row.specialties || [],
+        services: row.services || [],
+        profileImageUrl: row.profile_image_url || null,
         createdAt: row.created_at,
         email: row.email,
         firstName: row.first_name,
         lastName: row.last_name,
-        userId: row.user_id
+        // Default values for missing Florist interface properties
+        updatedAt: null,
+        userId: row.id, // Use the same ID
+        latitude: null,
+        longitude: null,
+        isFeatured: false,
+        businessHours: null,
+        averageRating: null,
+        totalReviews: 0
       }));
       
       console.log('getAllFlorists: Returning', florists.length, 'florists');
