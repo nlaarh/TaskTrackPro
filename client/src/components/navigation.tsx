@@ -41,15 +41,9 @@ export default function Navigation() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3">
-            <img 
-              src="/attached_assets/image_1756685957746.png" 
-              alt="FloriHub Logo" 
-              className="w-12 h-12 object-contain"
-              onError={(e) => {
-                console.log('Logo failed to load, using fallback');
-                (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjQiIGN5PSIyNCIgcj0iMjAiIGZpbGw9IiNmMTc2OGEiLz4KPHR1eHQgeD0iMjQiIHk9IjMwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ3aGl0ZSIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjAiIGZvbnQtd2VpZ2h0PSJib2xkIj5GPC90ZXh0Pgo8L3N2Zz4K';
-              }}
-            />
+            <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-purple-600 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-lg">F</span>
+            </div>
             <div className="flex flex-col">
               <span className="text-2xl font-bold text-gray-900">FloriHub</span>
               <span className="text-xs text-gray-600 hidden sm:block font-medium">
@@ -63,8 +57,8 @@ export default function Navigation() {
             <Link 
               href="/" 
               className={cn(
-                "text-muted-foreground hover:text-primary transition-colors duration-200 font-medium",
-                location === "/" && "text-primary"
+                "text-gray-700 hover:text-gray-900 transition-colors duration-200 font-medium",
+                location === "/" && "text-gray-900 font-semibold"
               )}
             >
               Home
@@ -73,8 +67,8 @@ export default function Navigation() {
             <Link 
               href="/search" 
               className={cn(
-                "text-muted-foreground hover:text-primary transition-colors duration-200 font-medium",
-                location.startsWith("/search") && "text-primary"
+                "text-gray-700 hover:text-gray-900 transition-colors duration-200 font-medium",
+                location.startsWith("/search") && "text-gray-900 font-semibold"
               )}
             >
               Search Members
@@ -83,7 +77,7 @@ export default function Navigation() {
             <NavigationMenu>
               <NavigationMenuList>
                 <NavigationMenuItem>
-                  <NavigationMenuTrigger className="text-muted-foreground hover:text-primary transition-colors duration-200 font-medium">
+                  <NavigationMenuTrigger className="text-gray-700 hover:text-gray-900 transition-colors duration-200 font-medium">
                     Categories
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
@@ -92,7 +86,7 @@ export default function Navigation() {
                         <NavigationMenuLink key={category.href} asChild>
                           <Link
                             href={category.href}
-                            className="block px-3 py-2 text-sm text-muted-foreground hover:text-primary hover:bg-muted rounded-md transition-colors duration-200"
+                            className="block px-3 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors duration-200"
                           >
                             {category.label}
                           </Link>
@@ -106,14 +100,14 @@ export default function Navigation() {
             
             <Link 
               href="#community" 
-              className="text-muted-foreground hover:text-primary transition-colors duration-200 font-medium"
+              className="text-gray-700 hover:text-gray-900 transition-colors duration-200 font-medium"
             >
               Community
             </Link>
             
             <Link 
               href="#" 
-              className="text-muted-foreground hover:text-primary transition-colors duration-200 font-medium"
+              className="text-gray-700 hover:text-gray-900 transition-colors duration-200 font-medium"
             >
               Blog
             </Link>
@@ -139,7 +133,7 @@ export default function Navigation() {
                   onClick={() => window.location.href = "/api/logout"}
                   variant="ghost" 
                   size="sm"
-                  className="flex items-center gap-2 text-muted-foreground hover:text-primary"
+                  className="flex items-center gap-2 text-gray-700 hover:text-gray-900"
                 >
                   <LogOut className="h-4 w-4" />
                   <span className="hidden sm:inline">Logout</span>
@@ -195,11 +189,9 @@ export default function Navigation() {
               <SheetContent side="right">
                 <SheetHeader>
                   <SheetTitle className="flex items-center gap-2">
-                    <img 
-                      src="/attached_assets/image_1756685957746.png" 
-                      alt="FloriHub" 
-                      className="h-8 w-8 object-contain"
-                    />
+                    <div className="w-8 h-8 bg-gradient-to-br from-pink-500 to-purple-600 rounded-lg flex items-center justify-center">
+                      <span className="text-white font-bold text-sm">F</span>
+                    </div>
                     FloriHub
                   </SheetTitle>
                 </SheetHeader>
@@ -209,7 +201,7 @@ export default function Navigation() {
                     <Link
                       key={item.href}
                       href={item.href}
-                      className="block py-2 text-muted-foreground hover:text-primary font-medium"
+                      className="block py-2 text-gray-700 hover:text-gray-900 font-medium"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       {item.label}
@@ -222,7 +214,7 @@ export default function Navigation() {
                       <Link
                         key={category.href}
                         href={category.href}
-                        className="block py-2 text-sm text-muted-foreground hover:text-primary"
+                        className="block py-2 text-sm text-gray-700 hover:text-gray-900"
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         {category.label}
