@@ -388,6 +388,7 @@ export default function AdminList() {
   React.useEffect(() => {
     if (users && users.length > 0) {
       console.log('✓ Found users:', users.length);
+      console.log('User roles:', users.map((u: any) => ({ id: u.id, email: u.email, role: u.role })));
       toast({ title: "Debug", description: `Found ${users.length} users in database`, variant: "default" });
     }
     if (florists && florists.length > 0) {
