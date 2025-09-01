@@ -2,7 +2,6 @@ import {
   users,
   userRoles,
   floristAuth,
-  florists,
   reviews,
   type User,
   type UpsertUser,

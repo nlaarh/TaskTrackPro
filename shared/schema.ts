@@ -50,47 +50,30 @@ export const userRoles = pgTable("user_roles", {
   { unique: [table.userEmail, table.role] }
 ]);
 
-// Florist authentication table - ACTUAL database structure
+// Florist authentication AND business data - EXACT MATCH TO RAILWAY DATABASE
 export const floristAuth = pgTable("florist_auth", {
   id: serial("id").primaryKey(),
   email: varchar("email").notNull(),
-  passwordHash: varchar("password_hash"),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
-  isVerified: boolean("is_verified").default(false),
-  verificationToken: varchar("verification_token"),
-  resetToken: varchar("reset_token"),
-  resetTokenExpires: timestamp("reset_token_expires"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
-
-// Florists business listing table - ACTUAL database structure
-export const florists = pgTable("florists", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id"),
-  email: varchar("email"),
-  phone: varchar("phone"),
   businessName: varchar("business_name"),
-  address: varchar("address"),
+  address: text("address"),
   city: varchar("city"),
   state: varchar("state"),
   zipCode: varchar("zip_code"),
-  latitude: text("latitude"),
-  longitude: text("longitude"),
-  website: varchar("website"),
+  phone: varchar("phone"),
+  profileImageUrl: varchar("profile_image_url"),
   profileSummary: text("profile_summary"),
   yearsOfExperience: integer("years_of_experience"),
-  specialties: varchar("specialties").array(),
-  services: varchar("services").array(),
-  isFeatured: boolean("is_featured").default(false),
-  isActive: boolean("is_active").default(true),
-  profileImageUrl: varchar("profile_image_url"),
-  hours: jsonb("hours"),
-  averageRating: text("average_rating"),
-  totalReviews: integer("total_reviews"),
+  specialties: text("specialties").array(),
+  businessHours: jsonb("business_hours"),
+  website: varchar("website"),
+  socialMedia: jsonb("social_media"),
+  isVerified: boolean("is_verified").default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+  passwordHash: varchar("password_hash"),
+  servicesOffered: text("services_offered").array(),
 });
 
 // Florist catalog/portfolio images
@@ -175,11 +158,12 @@ export const insertFloristAuthSchema = createInsertSchema(floristAuth).omit({
   updatedAt: true,
 });
 
-export const insertFloristSchema = createInsertSchema(florists).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
+// No separate florist table - all data in floristAuth
+// export const insertFloristSchema = createInsertSchema(florists).omit({
+//   id: true,
+//   createdAt: true,
+//   updatedAt: true,
+// });
 
 // Types
 export type User = typeof users.$inferSelect;
@@ -200,8 +184,9 @@ export type InsertUser = z.infer<typeof insertUserSchema>;
 export type UserRole = typeof userRoles.$inferSelect;
 export type InsertFloristAuth = z.infer<typeof insertFloristAuthSchema>;
 export type FloristAuth = typeof floristAuth.$inferSelect;
-export type InsertFlorist = z.infer<typeof insertFloristSchema>;
-export type Florist = typeof florists.$inferSelect;
+// Updated types - floristAuth contains all data
+export type InsertFlorist = z.infer<typeof insertFloristAuthSchema>;
+export type Florist = typeof floristAuth.$inferSelect;
 export type FloristCatalogImage = typeof floristCatalog.$inferSelect;
 export type Review = typeof reviews.$inferSelect;
 export type Inquiry = typeof inquiries.$inferSelect;

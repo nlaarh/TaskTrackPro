@@ -872,7 +872,8 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
   app.get("/api/admin-clean/users", async (req, res) => {
     try {
       console.log('Admin-clean users endpoint called');
-      const users = await correctedStorage.getAllUsers();
+      const { simpleStorage } = await import('./storage-simple');
+      const users = await simpleStorage.getAllUsers();
       console.log('Admin-clean users retrieved:', users.length);
       res.json(users);
     } catch (error) {
@@ -883,71 +884,11 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
 
   app.get("/api/admin-clean/florists", async (req, res) => {
     try {
-      console.log('Admin-clean florists endpoint called - using DIRECT database fix');
-      
-      // Direct database query to fix the florist data retrieval
-      const { Pool } = require('pg');
-      const directPool = new Pool({
-        connectionString: "postgresql://postgres:RwDPqwPPtxhBNDzKDGiJlrHDtdTBZBYx@yamanote.proxy.rlwy.net:18615/floristdb",
-        ssl: false
-      });
-      
-      const result = await directPool.query(`
-        SELECT 
-          id,
-          email,
-          first_name,
-          last_name,
-          business_name,
-          address,
-          city,
-          state,
-          zip_code,
-          phone,
-          website,
-          profile_summary,
-          years_of_experience,
-          specialties,
-          services_offered,
-          profile_image_url,
-          business_hours,
-          is_verified,
-          created_at,
-          updated_at
-        FROM florist_auth
-        ORDER BY created_at DESC
-      `);
-      
-      console.log('DIRECT QUERY: Found', result.rows?.length || 0, 'florist records');
-      
-      const florists = result.rows.map((row: any) => ({
-        id: row.id,
-        businessName: row.business_name || 'Unnamed Business',
-        email: row.email,
-        firstName: row.first_name,
-        lastName: row.last_name,
-        address: row.address,
-        city: row.city,
-        state: row.state,
-        zipCode: row.zip_code,
-        phone: row.phone,
-        website: row.website,
-        profileSummary: row.profile_summary,
-        yearsOfExperience: row.years_of_experience || 0,
-        specialties: Array.isArray(row.specialties) ? row.specialties : [],
-        services: Array.isArray(row.services_offered) ? row.services_offered : [],
-        profileImageUrl: row.profile_image_url,
-        businessHours: row.business_hours,
-        isFeatured: row.is_verified || false,
-        createdAt: row.created_at,
-        updatedAt: row.updated_at
-      }));
-      
-      await directPool.end();
+      console.log('Admin-clean florists endpoint called - using SimpleStorage');
+      const { simpleStorage } = await import('./storage-simple');
+      const florists = await simpleStorage.getAllFlorists();
       console.log('Admin-clean florists retrieved:', florists.length);
-      console.log('Sample businesses:', florists.slice(0, 3).map((f: any) => f.businessName));
       res.json(florists);
-      
     } catch (error) {
       console.error("Admin-clean florists error:", error);
       res.status(500).json({ error: "Failed to get florists" });
