@@ -14,7 +14,7 @@ import FloristLogin from "@/pages/florist-login";
 import FloristRegister from "@/pages/florist-register";
 import FloristDashboard from "@/pages/florist-dashboard";
 import FloristProfileSetup from "@/pages/florist-profile-setup";
-import CustomerAuth from "@/pages/customer-auth";
+import Auth from "@/pages/auth";
 import AdminDashboard from "@/pages/admin-dashboard";
 import AdminUsers from "@/pages/admin-users";
 import AdminCustomers from "@/pages/admin-customers";
@@ -28,7 +28,7 @@ function Router() {
   return (
     <Switch>
       {/* Authentication routes - always available */}
-      <Route path="/auth" component={CustomerAuth} />
+      <Route path="/auth" component={Auth} />
       <Route path="/admin-dashboard" component={() => {
         // Check admin authentication before rendering
         const token = localStorage.getItem('customerToken');

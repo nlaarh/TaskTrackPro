@@ -139,7 +139,7 @@ export default function Navigation() {
                 <Button variant="ghost" size="sm" className="flex items-center gap-2 text-gray-700">
                   <User className="h-4 w-4" />
                   <span className="hidden sm:inline">
-                    {user?.firstName || 'Account'}
+                    Account
                   </span>
                 </Button>
                 
@@ -154,31 +154,17 @@ export default function Navigation() {
                 </Button>
               </div>
             ) : (
-              <>
-                <Button 
-                  asChild
-                  variant="ghost" 
-                  size="sm"
-                  className="text-gray-700 hover:text-gray-900 hidden sm:flex"
-                >
-                  <Link href="/florist-login">
-                    <Store className="h-4 w-4 mr-2" />
-                    Florist Login
-                  </Link>
-                </Button>
-                
-                <Button 
-                  asChild
-                  variant="ghost" 
-                  size="sm"
-                  className="text-gray-700 hover:text-gray-900 hidden sm:flex"
-                >
-                  <Link href="/auth">
-                    <User className="h-4 w-4 mr-2" />
-                    Customer Login
-                  </Link>
-                </Button>
-              </>
+              <Button 
+                asChild
+                variant="ghost" 
+                size="sm"
+                className="text-gray-700 hover:text-gray-900 hidden sm:flex"
+              >
+                <Link href="/auth">
+                  <User className="h-4 w-4 mr-2" />
+                  Login
+                </Link>
+              </Button>
             )}
             
             <Button 
@@ -198,9 +184,9 @@ export default function Navigation() {
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 ml-2"
               size="sm"
             >
-              <Link href="/florist-register">
-                <Store className="h-4 w-4 mr-2" />
-                Join as Florist
+              <Link href="/auth?mode=register">
+                <Users className="h-4 w-4 mr-2" />
+                Join
               </Link>
             </Button>
             
@@ -250,24 +236,37 @@ export default function Navigation() {
                   </div>
                   
                   <div className="border-t pt-4 space-y-3">
-                    <Button asChild className="w-full btn-primary">
-                      <Link href="/register" onClick={() => setMobileMenuOpen(false)}>
-                        <Store className="h-4 w-4 mr-2" />
-                        Get Listed Today
-                      </Link>
-                    </Button>
-                    
-                    {!isAuthenticated && (
+                    {!isAuthenticated ? (
+                      <>
+                        <Button asChild className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                          <Link href="/auth?mode=register" onClick={() => setMobileMenuOpen(false)}>
+                            <Users className="h-4 w-4 mr-2" />
+                            Join
+                          </Link>
+                        </Button>
+                        
+                        <Button 
+                          asChild
+                          variant="outline" 
+                          className="w-full"
+                        >
+                          <Link href="/auth" onClick={() => setMobileMenuOpen(false)}>
+                            <User className="h-4 w-4 mr-2" />
+                            Login
+                          </Link>
+                        </Button>
+                      </>
+                    ) : (
                       <Button 
                         onClick={() => {
                           setMobileMenuOpen(false);
-                          window.location.href = "/api/login";
+                          window.location.href = "/api/logout";
                         }}
                         variant="outline" 
                         className="w-full"
                       >
-                        <User className="h-4 w-4 mr-2" />
-                        Login
+                        <LogOut className="h-4 w-4 mr-2" />
+                        Logout
                       </Button>
                     )}
                   </div>
