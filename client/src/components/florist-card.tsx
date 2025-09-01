@@ -33,11 +33,11 @@ export default function FloristCard({ florist, viewMode }: FloristCardProps) {
   const { toast } = useToast();
   const [isSaved, setIsSaved] = useState(false);
 
-  const primaryImage = florist.images.find(img => img.isPrimary) || florist.images[0];
+  const primaryImage = florist.profileImageUrl ? { url: florist.profileImageUrl, alt: florist.businessName } : null;
   
   // Debug: log the image data to see what we're getting
   console.log('Florist:', florist.businessName, 'Primary image URL length:', primaryImage?.url?.length, 'URL start:', primaryImage?.url?.substring(0, 50));
-  const stars = generateStars(parseFloat(florist.rating));
+  const stars = generateStars(parseFloat(florist.averageRating || '0'));
 
   const saveFloristMutation = useMutation({
     mutationFn: async () => {
@@ -116,7 +116,7 @@ export default function FloristCard({ florist, viewMode }: FloristCardProps) {
             <div className="absolute bottom-4 left-4">
               <Badge className="bg-gray-900 text-white">
                 <Star className="h-3 w-3 mr-1" />
-                {formatRating(parseFloat(florist.rating))}
+                {formatRating(parseFloat(florist.averageRating || '0'))}
               </Badge>
             </div>
           </div>
@@ -158,7 +158,7 @@ export default function FloristCard({ florist, viewMode }: FloristCardProps) {
                       )
                     ))}
                   </div>
-                  <span className="text-sm text-muted-foreground">({florist.reviewCount} reviews)</span>
+                  <span className="text-sm text-muted-foreground">({florist.reviewCount || 0} reviews)</span>
                 </div>
                 <div className="flex items-center text-xs text-green-600">
                   <Clock className="h-3 w-3 mr-1" />
@@ -168,18 +168,18 @@ export default function FloristCard({ florist, viewMode }: FloristCardProps) {
             </div>
             
             <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
-              {florist.description || "A professional florist dedicated to creating beautiful arrangements for all your special occasions."}
+              {florist.profileSummary || florist.description || "A professional florist dedicated to creating beautiful arrangements for all your special occasions."}
             </p>
             
             <div className="flex flex-wrap gap-2 mb-4">
-              {florist.services.slice(0, 3).map((service) => (
+              {(florist.services || []).slice(0, 3).map((service) => (
                 <Badge key={service} variant="secondary" className="text-xs">
                   {service}
                 </Badge>
               ))}
-              {florist.services.length > 3 && (
+              {(florist.services || []).length > 3 && (
                 <Badge variant="outline" className="text-xs">
-                  +{florist.services.length - 3} more
+                  +{(florist.services || []).length - 3} more
                 </Badge>
               )}
             </div>
@@ -228,7 +228,7 @@ export default function FloristCard({ florist, viewMode }: FloristCardProps) {
         <div className="absolute bottom-4 left-4">
           <Badge className="bg-green-600 text-white">
             <Star className="h-3 w-3 mr-1" />
-            {formatRating(parseFloat(florist.rating))}
+            {formatRating(parseFloat(florist.averageRating || '0'))}
           </Badge>
         </div>
       </div>
@@ -268,11 +268,11 @@ export default function FloristCard({ florist, viewMode }: FloristCardProps) {
               )
             ))}
           </div>
-          <span className="text-sm text-muted-foreground">({florist.reviewCount})</span>
+          <span className="text-sm text-muted-foreground">({florist.reviewCount || 0})</span>
         </div>
         
         <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
-          {florist.description || "A professional florist dedicated to creating beautiful arrangements for all your special occasions."}
+          {florist.profileSummary || florist.description || "A professional florist dedicated to creating beautiful arrangements for all your special occasions."}
         </p>
         
         <div className="flex flex-wrap gap-1 mb-4">
