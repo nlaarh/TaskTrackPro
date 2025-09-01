@@ -710,68 +710,45 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update florist image after upload
+  // SIMPLE Image upload endpoint - stores base64 data directly in database
   app.put('/api/florists/:id/image', authenticateCustomer, checkAdminRole, async (req, res) => {
     try {
-      const { id } = req.params;
-      const { imageData, imageURL } = req.body;
+      const floristId = parseInt(req.params.id);
+      const { imageData } = req.body;
 
-      console.log(`📷 Updating florist ${id} image...`);
+      console.log(`📷 Updating florist ${floristId} image with base64 data`);
 
-      if (!imageData && !imageURL) {
-        return res.status(400).json({ message: 'Image data or URL is required' });
+      if (!floristId || isNaN(floristId)) {
+        return res.status(400).json({ message: 'Valid florist ID is required' });
       }
 
-      const floristId = parseInt(id);
-      if (isNaN(floristId)) {
-        return res.status(400).json({ message: 'Invalid florist ID' });
+      if (!imageData) {
+        return res.status(400).json({ message: 'Image data is required' });
       }
 
-      // Convert the full GCS URL to a relative path for consistency
-      let relativePath = imageURL;
-      if (imageURL.includes('storage.googleapis.com')) {
-        const urlParts = imageURL.split('/');
-        const bucketIndex = urlParts.findIndex(part => part.includes('repl-default-bucket'));
-        if (bucketIndex !== -1 && bucketIndex < urlParts.length - 1) {
-          relativePath = `/objects/${urlParts.slice(bucketIndex + 1).join('/')}`;
-        }
+      // Validate base64 image data
+      if (!imageData.startsWith('data:image/')) {
+        return res.status(400).json({ message: 'Invalid image data format' });
       }
 
-      // NEW: Handle both base64 image data and URL storage
-      let query, queryParams;
-      
-      if (imageData) {
-        // Store base64 image data directly in database
-        console.log('💾 Storing base64 image data in database');
-        query = `
-          UPDATE florist_auth 
-          SET profile_image_data = $1, updated_at = NOW()
-          WHERE id = $2
-          RETURNING id, business_name, profile_image_data, profile_image_url
-        `;
-        queryParams = [imageData, floristId];
-      } else if (imageURL) {
-        // Fallback to URL storage
-        console.log(`🔗 Storing image URL:`, relativePath);
-        query = `
-          UPDATE florist_auth 
-          SET profile_image_url = $1, updated_at = NOW()
-          WHERE id = $2
-          RETURNING id, business_name, profile_image_data, profile_image_url
-        `;
-        queryParams = [relativePath, floristId];
-      }
-      
-      const result = await pool.query(query, queryParams);
+      // Simple database update - store base64 image data
+      const result = await pool.query(
+        'UPDATE florist_auth SET profile_image_data = $1, updated_at = NOW() WHERE id = $2 RETURNING id, business_name', 
+        [imageData, floristId]
+      );
       
       if (result.rows.length === 0) {
         return res.status(404).json({ message: 'Florist not found' });
       }
       
-      console.log(`Successfully updated florist ${floristId}:`, result.rows[0]);
-      res.json({ message: 'Image updated successfully', florist: result.rows[0] });
+      console.log(`✅ Successfully updated florist ${floristId} image`);
+      res.json({ 
+        message: 'Image updated successfully', 
+        florist: result.rows[0]
+      });
+      
     } catch (error) {
-      console.error('Error updating florist image:', error);
+      console.error('❌ Error updating florist image:', error);
       res.status(500).json({ message: 'Failed to update florist image' });
     }
   });
