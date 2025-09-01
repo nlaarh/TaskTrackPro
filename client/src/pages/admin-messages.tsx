@@ -10,9 +10,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, MessageSquare, Send, Plus, Mail, MailOpen, Clock, User, Building } from "lucide-react";
+import { Loader2, MessageSquare, Send, Plus, Mail, MailOpen, Clock, User, Building, ArrowLeft, Archive, Search, MoreHorizontal, Star, Trash2, Reply, Forward } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import Navigation from "@/components/navigation";
+import { cn } from "@/lib/utils";
 
 interface Message {
   id: number;
