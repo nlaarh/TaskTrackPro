@@ -22,6 +22,7 @@ import {
   Building,
   Settings,
   UserMinus
+  // Import check: Settings icon properly imported from lucide-react
 } from "lucide-react";
 import { 
   FaEye, 
