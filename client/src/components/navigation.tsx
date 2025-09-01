@@ -166,10 +166,10 @@ export default function Navigation() {
                 variant="ghost" 
                 className={cn(
                   "text-gray-700 hover:text-gray-900 hover:bg-gray-50 font-medium px-4 py-2 relative",
-                  location.startsWith("/admin-messages") && "text-gray-900 bg-gray-50"
+                  location.startsWith("/messages") && "text-gray-900 bg-gray-50"
                 )}
               >
-                <Link href="/admin-messages">
+                <Link href="/messages">
                   <MessageSquare className="h-4 w-4 mr-2" />
                   Messages
                   {unreadCount?.unreadCount > 0 && (

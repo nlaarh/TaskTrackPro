@@ -17,6 +17,8 @@ import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import Navigation from "@/components/navigation";
 import { cn } from "@/lib/utils";
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 interface Message {
   id: number;
@@ -43,6 +45,7 @@ export default function AdminMessagesRedesign() {
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [isComposeOpen, setIsComposeOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [recipientSearchQuery, setRecipientSearchQuery] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -56,7 +59,7 @@ export default function AdminMessagesRedesign() {
       setPreSelectedFloristId(composeFloristId);
       setIsComposeOpen(true);
       // Clean URL without refreshing
-      window.history.replaceState({}, '', '/admin-messages');
+      window.history.replaceState({}, '', '/messages');
     }
   }, []);
 
@@ -189,6 +192,7 @@ export default function AdminMessagesRedesign() {
         const florist = florists.find((f: Florist) => f.id.toString() === preSelectedFloristId);
         if (florist) {
           setRecipientId(preSelectedFloristId);
+          setRecipientSearchQuery(florist.businessName || florist.name || florist.email);
           setSubject(`Message for ${florist.businessName || florist.name}`);
         }
       }
@@ -198,6 +202,7 @@ export default function AdminMessagesRedesign() {
     React.useEffect(() => {
       if (!isComposeOpen) {
         setRecipientId("");
+        setRecipientSearchQuery("");
         setSubject("");
         setMessageBody("");
       }
@@ -231,28 +236,63 @@ export default function AdminMessagesRedesign() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="recipient" className="text-sm font-medium">To</Label>
-              <Select value={recipientId} onValueChange={setRecipientId}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select recipient..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {florists?.map((florist: Florist) => (
-                    <SelectItem key={florist.id} value={florist.id.toString()}>
-                      <div className="flex items-center gap-2">
-                        <Avatar className="h-6 w-6">
-                          <AvatarFallback className="text-xs">
-                            {florist.businessName?.charAt(0) || florist.name?.charAt(0)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex flex-col">
-                          <span className="text-sm font-medium">{florist.businessName}</span>
-                          <span className="text-xs text-muted-foreground">{florist.email}</span>
+              <div className="relative">
+                <Input
+                  placeholder="Search for a business to message..."
+                  value={recipientSearchQuery}
+                  onChange={(e) => setRecipientSearchQuery(e.target.value)}
+                  className="w-full"
+                />
+                {recipientSearchQuery && (
+                  <div className="absolute z-50 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto mt-1">
+                    {florists
+                      ?.filter((florist: Florist) => 
+                        (florist.businessName?.toLowerCase().includes(recipientSearchQuery.toLowerCase()) || 
+                         florist.name?.toLowerCase().includes(recipientSearchQuery.toLowerCase()) ||
+                         florist.email?.toLowerCase().includes(recipientSearchQuery.toLowerCase()))
+                      )
+                      .map((florist: Florist) => (
+                        <div
+                          key={florist.id}
+                          onClick={() => {
+                            setRecipientId(florist.id.toString());
+                            setRecipientSearchQuery(florist.businessName || florist.name || florist.email);
+                          }}
+                          className="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                        >
+                          <Avatar className="h-8 w-8">
+                            <AvatarFallback className="text-sm">
+                              {(florist.businessName?.charAt(0) || florist.name?.charAt(0) || 'F')}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex flex-col flex-1 min-w-0">
+                            <span className="text-sm font-medium text-gray-900 truncate">
+                              {florist.businessName || florist.name || 'Unnamed Business'}
+                            </span>
+                            <span className="text-xs text-gray-500 truncate">
+                              {florist.email}
+                            </span>
+                            {florist.name && florist.businessName && (
+                              <span className="text-xs text-gray-400">
+                                Contact: {florist.name}
+                              </span>
+                            )}
+                          </div>
                         </div>
+                      ))
+                    }
+                    {florists?.filter((florist: Florist) => 
+                      (florist.businessName?.toLowerCase().includes(recipientSearchQuery.toLowerCase()) || 
+                       florist.name?.toLowerCase().includes(recipientSearchQuery.toLowerCase()) ||
+                       florist.email?.toLowerCase().includes(recipientSearchQuery.toLowerCase()))
+                    ).length === 0 && (
+                      <div className="p-3 text-sm text-gray-500 text-center">
+                        No businesses found matching "{recipientSearchQuery}"
                       </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="subject" className="text-sm font-medium">Subject</Label>
@@ -266,14 +306,27 @@ export default function AdminMessagesRedesign() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="message" className="text-sm font-medium">Message</Label>
-              <Textarea
-                id="message"
-                value={messageBody}
-                onChange={(e) => setMessageBody(e.target.value)}
-                placeholder="Write your message..."
-                rows={8}
-                className="w-full resize-none"
-              />
+              <div className="min-h-[200px]">
+                <ReactQuill
+                  value={messageBody}
+                  onChange={setMessageBody}
+                  placeholder="Write your message..."
+                  modules={{
+                    toolbar: [
+                      [{ 'header': [1, 2, 3, false] }],
+                      ['bold', 'italic', 'underline'],
+                      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                      ['link'],
+                      ['clean']
+                    ]
+                  }}
+                  formats={[
+                    'header', 'bold', 'italic', 'underline',
+                    'list', 'bullet', 'link'
+                  ]}
+                  className="bg-white"
+                />
+              </div>
             </div>
             <div className="flex justify-between items-center pt-4">
               <Button type="button" variant="outline" onClick={() => setIsComposeOpen(false)}>
@@ -455,9 +508,10 @@ export default function AdminMessagesRedesign() {
                 {/* Message Content */}
                 <ScrollArea className="flex-1 p-6">
                   <div className="prose max-w-none">
-                    <div className="whitespace-pre-wrap text-gray-900 leading-relaxed">
-                      {selectedMessage.message_body}
-                    </div>
+                    <div 
+                      className="text-gray-900 leading-relaxed"
+                      dangerouslySetInnerHTML={{ __html: selectedMessage.message_body }}
+                    />
                   </div>
                 </ScrollArea>
 
