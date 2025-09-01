@@ -19,12 +19,35 @@ export class SimpleStorage {
     }
   }
 
-  // Get all florists from florist_auth table (FIXED)
+  // Get all florists from florist_auth table (PERFORMANCE OPTIMIZED)
   async getAllFlorists() {
     console.log('SimpleStorage: getAllFlorists called - reading from florist_auth table');
     try {
+      // PERFORMANCE: Exclude large profile_image_data from the main query
       const result = await db
-        .select()
+        .select({
+          id: floristAuth.id,
+          businessName: floristAuth.businessName,
+          email: floristAuth.email,
+          firstName: floristAuth.firstName,
+          lastName: floristAuth.lastName,
+          address: floristAuth.address,
+          city: floristAuth.city,
+          state: floristAuth.state,
+          zipCode: floristAuth.zipCode,
+          phone: floristAuth.phone,
+          website: floristAuth.website,
+          profileSummary: floristAuth.profileSummary,
+          yearsOfExperience: floristAuth.yearsOfExperience,
+          specialties: floristAuth.specialties,
+          servicesOffered: floristAuth.servicesOffered,
+          profileImageUrl: floristAuth.profileImageUrl,
+          businessHours: floristAuth.businessHours,
+          isVerified: floristAuth.isVerified,
+          createdAt: floristAuth.createdAt,
+          updatedAt: floristAuth.updatedAt
+          // Explicitly exclude profileImageData for performance
+        })
         .from(floristAuth)
         .orderBy(desc(floristAuth.createdAt));
       
@@ -47,8 +70,8 @@ export class SimpleStorage {
         yearsOfExperience: florist.yearsOfExperience || 0,
         specialties: florist.specialties || [],
         services: florist.servicesOffered || [],
-        profileImageUrl: florist.profileImageUrl,
-        profileImageData: florist.profileImageData,
+        profileImageUrl: `/api/florists/${florist.id}/image`, // Use optimized image endpoint
+        profileImageData: undefined, // Exclude large base64 data for performance
         businessHours: florist.businessHours,
         isFeatured: florist.isVerified || false,
         createdAt: florist.createdAt,
