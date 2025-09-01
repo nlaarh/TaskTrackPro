@@ -63,6 +63,7 @@ export const floristAuth = pgTable("florist_auth", {
   zipCode: varchar("zip_code"),
   phone: varchar("phone"),
   profileImageUrl: varchar("profile_image_url"),
+  profileImageData: text("profile_image_data"), // Base64 encoded image data
   profileSummary: text("profile_summary"),
   yearsOfExperience: integer("years_of_experience"),
   specialties: text("specialties").array(),

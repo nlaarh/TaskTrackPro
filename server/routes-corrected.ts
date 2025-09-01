@@ -714,12 +714,12 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
   app.put('/api/florists/:id/image', authenticateCustomer, checkAdminRole, async (req, res) => {
     try {
       const { id } = req.params;
-      const { imageURL } = req.body;
+      const { imageData, imageURL } = req.body;
 
-      console.log(`Updating florist ${id} with image URL:`, imageURL);
+      console.log(`📷 Updating florist ${id} image...`);
 
-      if (!imageURL) {
-        return res.status(400).json({ message: 'Image URL is required' });
+      if (!imageData && !imageURL) {
+        return res.status(400).json({ message: 'Image data or URL is required' });
       }
 
       const floristId = parseInt(id);
@@ -737,17 +737,32 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
         }
       }
 
-      console.log(`Saving relative path:`, relativePath);
-
-      // Update florist profile image in database
-      const query = `
-        UPDATE florist_auth 
-        SET profile_image_url = $1, updated_at = NOW()
-        WHERE id = $2
-        RETURNING id, business_name, profile_image_url
-      `;
+      // NEW: Handle both base64 image data and URL storage
+      let query, queryParams;
       
-      const result = await pool.query(query, [relativePath, floristId]);
+      if (imageData) {
+        // Store base64 image data directly in database
+        console.log('💾 Storing base64 image data in database');
+        query = `
+          UPDATE florist_auth 
+          SET profile_image_data = $1, updated_at = NOW()
+          WHERE id = $2
+          RETURNING id, business_name, profile_image_data, profile_image_url
+        `;
+        queryParams = [imageData, floristId];
+      } else if (imageURL) {
+        // Fallback to URL storage
+        console.log(`🔗 Storing image URL:`, relativePath);
+        query = `
+          UPDATE florist_auth 
+          SET profile_image_url = $1, updated_at = NOW()
+          WHERE id = $2
+          RETURNING id, business_name, profile_image_data, profile_image_url
+        `;
+        queryParams = [relativePath, floristId];
+      }
+      
+      const result = await pool.query(query, queryParams);
       
       if (result.rows.length === 0) {
         return res.status(404).json({ message: 'Florist not found' });

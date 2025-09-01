@@ -216,6 +216,7 @@ export class DatabaseStorage implements IStorage {
         'businessName': 'business_name',
         'zipCode': 'zip_code', 
         'profileImageUrl': 'profile_image_url',
+        'profileImageData': 'profile_image_data',
         'profileSummary': 'profile_summary',
         'yearsOfExperience': 'years_of_experience',
         'specialties': 'specialties',

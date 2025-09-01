@@ -48,6 +48,7 @@ export class SimpleStorage {
         specialties: florist.specialties || [],
         services: florist.servicesOffered || [],
         profileImageUrl: florist.profileImageUrl,
+        profileImageData: florist.profileImageData,
         businessHours: florist.businessHours,
         isFeatured: florist.isVerified || false,
         createdAt: florist.createdAt,

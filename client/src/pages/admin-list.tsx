@@ -1480,43 +1480,38 @@ export default function AdminList() {
                       <div className="relative">
                         <img 
                           src={(() => {
-                            console.log('🔍 EDIT MODAL: editFlorist full object =', editFlorist);
-                            console.log('🔍 EDIT MODAL: editFlorist.profileImageUrl =', editFlorist.profileImageUrl);
-                            console.log('🔍 EDIT MODAL: editFlorist keys =', Object.keys(editFlorist));
+                            console.log('🔍 EDIT MODAL: Checking image data...');
+                            console.log('profileImageData:', editFlorist.profileImageData ? 'Present (' + editFlorist.profileImageData.length + ' chars)' : 'Missing');
+                            console.log('profileImageUrl:', editFlorist.profileImageUrl || 'Missing');
+                            
+                            // Priority 1: Use stored base64 image data
+                            if (editFlorist.profileImageData && editFlorist.profileImageData.trim() !== '') {
+                              console.log('📷 Using stored base64 image data');
+                              return editFlorist.profileImageData;
+                            }
+                            
+                            // Priority 2: Use URL as fallback
                             const imageUrl = editFlorist.profileImageUrl;
-                            
-                            if (!imageUrl || imageUrl.trim() === '') {
-                              console.log('📷 No image URL, using placeholder');
-                              return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCIgdmlld0JveD0iMCAwIDEyOCAxMjgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMjgiIGhlaWdodD0iMTI4IiBmaWxsPSIjRjNGNEY2Ii8+PGNpcmNsZSBjeD0iNjQiIGN5PSI0OCIgcj0iMTYiIGZpbGw9IiM5Q0EzQUYiLz4KPHBhdGggZD0ibTQ4IDcyIDggOCA4LTggOCA4IDgtOFoiIGZpbGw9IiM5Q0EzQUYiLz48L3N2Zz4=';
+                            if (imageUrl && imageUrl.trim() !== '') {
+                              if (imageUrl.startsWith('data:')) {
+                                console.log('📷 Using base64 URL');
+                                return imageUrl;
+                              }
+                              
+                              if (imageUrl.startsWith('http')) {
+                                console.log('📷 Using external URL');
+                                return imageUrl;
+                              }
+                              
+                              if (imageUrl.includes('storage.googleapis.com')) {
+                                console.log('📷 Using Google Cloud Storage URL');
+                                return imageUrl;
+                              }
                             }
                             
-                            // For Google Cloud Storage URLs (object storage), use directly
-                            if (imageUrl.includes('storage.googleapis.com')) {
-                              console.log('📷 Using Google Cloud Storage URL directly:', imageUrl.substring(0, 60) + '...');
-                              return imageUrl;
-                            }
-                            
-                            // Handle different URL types
-                            if (imageUrl.startsWith('data:')) {
-                              console.log('📷 Using base64/data URL directly');
-                              return imageUrl;
-                            }
-                            
-                            if (imageUrl.startsWith('http')) {
-                              console.log('📷 Using external URL directly:', imageUrl.substring(0, 60) + '...');
-                              return imageUrl;
-                            }
-                            
-                            // For object storage paths that need /objects/ prefix
-                            if (imageUrl.startsWith('/objects/')) {
-                              console.log('📷 Using object storage path directly');
-                              return imageUrl;
-                            }
-                            
-                            // Add /objects/ prefix for relative paths
-                            const finalUrl = `/objects/${imageUrl.replace(/^\//, '')}`;
-                            console.log('📷 Adding /objects/ prefix:', finalUrl);
-                            return finalUrl;
+                            // Priority 3: Default placeholder
+                            console.log('📷 Using placeholder image');
+                            return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCIgdmlld0JveD0iMCAwIDEyOCAxMjgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMjgiIGhlaWdodD0iMTI4IiBmaWxsPSIjRjNGNEY2Ii8+PGNpcmNsZSBjeD0iNjQiIGN5PSI0OCIgcj0iMTYiIGZpbGw9IiM5Q0EzQUYiLz4KPHBhdGggZD0ibTQ4IDcyIDggOCA4LTggOCA4IDgtOFoiIGZpbGw9IiM5Q0EzQUYiLz48L3N2Zz4=';
                           })()} 
                           alt="Profile"
                           className="w-32 h-32 rounded-lg object-cover border-2 border-gray-200"
@@ -1540,78 +1535,98 @@ export default function AdminList() {
                           onChange={async (e) => {
                             const file = e.target.files?.[0];
                             if (!file) return;
+                            
+                            // Validate file size (max 2MB)
+                            if (file.size > 2 * 1024 * 1024) {
+                              toast({
+                                title: "Error",
+                                description: "Image must be smaller than 2MB",
+                                variant: "destructive",
+                              });
+                              return;
+                            }
+                            
+                            // Validate file type
+                            if (!file.type.startsWith('image/')) {
+                              toast({
+                                title: "Error", 
+                                description: "Please select an image file",
+                                variant: "destructive",
+                              });
+                              return;
+                            }
                           
                           try {
                             setUploadingImage(true);
                             
-                            // Get upload URL
-                            const token = localStorage.getItem('customerToken');
-                            const response = await fetch('/api/objects/upload', {
-                              method: 'POST',
-                              headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${token}`
-                              },
-                            });
-                            
-                            if (!response.ok) {
-                              throw new Error('Failed to get upload URL');
-                            }
-                            
-                            const { uploadURL } = await response.json();
-                            
-                            // Upload file directly
-                            const uploadResponse = await fetch(uploadURL, {
-                              method: 'PUT',
-                              body: file,
-                              headers: {
-                                'Content-Type': file.type,
+                            // Convert image to base64
+                            const reader = new FileReader();
+                            reader.onload = async () => {
+                              try {
+                                const base64Data = reader.result as string;
+                                console.log('📷 Image converted to base64:', base64Data.substring(0, 50) + '...');
+                                
+                                // Update florist image in database
+                                const token = localStorage.getItem('customerToken');
+                                const updateResponse = await fetch(`/api/florists/${editFlorist.id}/image`, {
+                                  method: 'PUT',
+                                  headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${token}`
+                                  },
+                                  body: JSON.stringify({ imageData: base64Data })
+                                });
+                                
+                                if (!updateResponse.ok) {
+                                  const errorText = await updateResponse.text();
+                                  console.error('Update response error:', errorText);
+                                  throw new Error('Failed to update florist image in database');
+                                }
+                                
+                                const updateResult = await updateResponse.json();
+                                console.log('Update result:', updateResult);
+                                
+                                // Update the editFlorist state with new image data
+                                const updatedFlorist = {...editFlorist, profileImageData: base64Data};
+                                setEditFlorist(updatedFlorist);
+                                console.log('✅ Updated florist state with new image');
+                                
+                                toast({
+                                  title: "Success",
+                                  description: "Profile photo updated successfully!",
+                                });
+                                
+                                // Clear the file input
+                                const fileInput = document.getElementById(`florist-image-${editFlorist.id}`) as HTMLInputElement;
+                                if (fileInput) fileInput.value = '';
+                                
+                                // Refresh florists list
+                                queryClient.invalidateQueries({ queryKey: ['/api/admin-clean/florists'] });
+                                
+                              } catch (error) {
+                                console.error('Error in file reader:', error);
+                                toast({
+                                  title: "Error",
+                                  description: "Failed to process image. Please try again.",
+                                  variant: "destructive",
+                                });
+                              } finally {
+                                setUploadingImage(false);
                               }
-                            });
+                            };
                             
-                            if (!uploadResponse.ok) {
-                              throw new Error('Failed to upload image');
-                            }
+                            reader.onerror = () => {
+                              console.error('File reader error');
+                              toast({
+                                title: "Error",
+                                description: "Failed to read image file",
+                                variant: "destructive",
+                              });
+                              setUploadingImage(false);
+                            };
                             
-                            // Get the clean image URL (without query parameters)
-                            const cleanImageURL = uploadURL.split('?')[0];
-                            console.log('Clean image URL:', cleanImageURL);
+                            reader.readAsDataURL(file);
                             
-                            // Update florist image in database
-                            const updateResponse = await fetch(`/api/florists/${editFlorist.id}/image`, {
-                              method: 'PUT',
-                              headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${token}`
-                              },
-                              body: JSON.stringify({ imageURL: cleanImageURL })
-                            });
-                            
-                            if (!updateResponse.ok) {
-                              const errorText = await updateResponse.text();
-                              console.error('Update response error:', errorText);
-                              throw new Error('Failed to update florist image in database');
-                            }
-                            
-                            const updateResult = await updateResponse.json();
-                            console.log('Update result:', updateResult);
-                            
-                            // Update the editFlorist state with new image URL
-                            const updatedFlorist = {...editFlorist, profileImageUrl: cleanImageURL};
-                            setEditFlorist(updatedFlorist);
-                            console.log('Updated florist state with image URL:', cleanImageURL);
-                            
-                            toast({
-                              title: "Success",
-                              description: "Profile photo updated successfully!",
-                            });
-                            
-                            // Clear the file input
-                            const fileInput = document.getElementById(`florist-image-${editFlorist.id}`) as HTMLInputElement;
-                            if (fileInput) fileInput.value = '';
-                            
-                            // Refresh florists list
-                            queryClient.invalidateQueries({ queryKey: ['/api/admin-clean/florists'] });
                           } catch (error) {
                             console.error('Error updating image:', error);
                             toast({
@@ -1619,7 +1634,6 @@ export default function AdminList() {
                               description: "Failed to update profile photo. Please try again.",
                               variant: "destructive",
                             });
-                          } finally {
                             setUploadingImage(false);
                           }
                         }}
