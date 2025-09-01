@@ -243,14 +243,20 @@ export default function AdminMessagesRedesign() {
                   onChange={(e) => setRecipientSearchQuery(e.target.value)}
                   className="w-full"
                 />
-                {recipientSearchQuery && (
+                {recipientSearchQuery.length > 0 && !recipientId && (
                   <div className="absolute z-50 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto mt-1">
                     {florists
-                      ?.filter((florist: Florist) => 
-                        (florist.businessName?.toLowerCase().includes(recipientSearchQuery.toLowerCase()) || 
-                         florist.name?.toLowerCase().includes(recipientSearchQuery.toLowerCase()) ||
-                         florist.email?.toLowerCase().includes(recipientSearchQuery.toLowerCase()))
-                      )
+                      ?.filter((florist: Florist) => {
+                        const searchTerm = recipientSearchQuery.toLowerCase();
+                        const businessName = florist.businessName?.toLowerCase() || '';
+                        const contactName = florist.name?.toLowerCase() || '';
+                        const email = florist.email?.toLowerCase() || '';
+                        
+                        return businessName.includes(searchTerm) || 
+                               contactName.includes(searchTerm) || 
+                               email.includes(searchTerm);
+                      })
+                      .slice(0, 10)
                       .map((florist: Florist) => (
                         <div
                           key={florist.id}
@@ -261,13 +267,13 @@ export default function AdminMessagesRedesign() {
                           className="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
                         >
                           <Avatar className="h-8 w-8">
-                            <AvatarFallback className="text-sm">
-                              {(florist.businessName?.charAt(0) || florist.name?.charAt(0) || 'F')}
+                            <AvatarFallback className="text-sm bg-blue-100 text-blue-700">
+                              {(florist.businessName?.charAt(0) || florist.name?.charAt(0) || 'F').toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
                           <div className="flex flex-col flex-1 min-w-0">
                             <span className="text-sm font-medium text-gray-900 truncate">
-                              {florist.businessName || florist.name || 'Unnamed Business'}
+                              {florist.businessName || `${florist.name}'s Flower Shop` || 'Flower Business'}
                             </span>
                             <span className="text-xs text-gray-500 truncate">
                               {florist.email}
@@ -281,15 +287,37 @@ export default function AdminMessagesRedesign() {
                         </div>
                       ))
                     }
-                    {florists?.filter((florist: Florist) => 
-                      (florist.businessName?.toLowerCase().includes(recipientSearchQuery.toLowerCase()) || 
-                       florist.name?.toLowerCase().includes(recipientSearchQuery.toLowerCase()) ||
-                       florist.email?.toLowerCase().includes(recipientSearchQuery.toLowerCase()))
-                    ).length === 0 && (
+                    {florists?.filter((florist: Florist) => {
+                      const searchTerm = recipientSearchQuery.toLowerCase();
+                      const businessName = florist.businessName?.toLowerCase() || '';
+                      const contactName = florist.name?.toLowerCase() || '';
+                      const email = florist.email?.toLowerCase() || '';
+                      
+                      return businessName.includes(searchTerm) || 
+                             contactName.includes(searchTerm) || 
+                             email.includes(searchTerm);
+                    }).length === 0 && (
                       <div className="p-3 text-sm text-gray-500 text-center">
                         No businesses found matching "{recipientSearchQuery}"
                       </div>
                     )}
+                  </div>
+                )}
+                {recipientId && (
+                  <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-md flex items-center justify-between">
+                    <span className="text-sm text-blue-800">
+                      Selected: {recipientSearchQuery}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setRecipientId("");
+                        setRecipientSearchQuery("");
+                      }}
+                      className="text-blue-600 hover:text-blue-800 ml-2"
+                    >
+                      ✕
+                    </button>
                   </div>
                 )}
               </div>
