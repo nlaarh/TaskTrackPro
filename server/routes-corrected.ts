@@ -8,6 +8,7 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { db } from "./db";
 import { sql } from "drizzle-orm";
 import { Pool } from 'pg';
+import { simpleStorage } from "./storage-simple";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
@@ -694,33 +695,64 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Florist search endpoint
+  // Florist search endpoint using SimpleStorage
   app.get('/api/florists/search', async (req, res) => {
     try {
-      const { location, specialty, service, limit, offset } = req.query;
-      
-      const searchParams = {
-        location: location as string | undefined,
-        specialty: specialty as string | undefined,
-        service: service as string | undefined,
-        limit: limit ? parseInt(limit as string) : 50,
-        offset: offset ? parseInt(offset as string) : 0,
-      };
+      console.log('Florist search API called with params:', req.query);
+      const { 
+        keyword = '', 
+        location = '', 
+        services = [], 
+        sortBy = 'distance',
+        limit = 12,
+        offset = 0 
+      } = req.query;
 
-      console.log('Search request:', searchParams);
-      
-      const searchResult = await correctedStorage.searchFlorists(searchParams);
-      
-      // Return data in the format expected by frontend
+      // Get all florists from Railway database using simple storage
+      const allFlorists = await simpleStorage.getAllFlorists();
+      console.log(`Found ${allFlorists.length} total florists in database`);
+
+      // Filter florists based on search criteria
+      let filteredFlorists = allFlorists.filter(florist => {
+        const matchesKeyword = !keyword || 
+          florist.businessName?.toLowerCase().includes(keyword.toString().toLowerCase()) ||
+          florist.firstName?.toLowerCase().includes(keyword.toString().toLowerCase()) ||
+          florist.lastName?.toLowerCase().includes(keyword.toString().toLowerCase());
+
+        const matchesLocation = !location ||
+          florist.city?.toLowerCase().includes(location.toString().toLowerCase()) ||
+          florist.state?.toLowerCase().includes(location.toString().toLowerCase()) ||
+          florist.address?.toLowerCase().includes(location.toString().toLowerCase());
+
+        return matchesKeyword && matchesLocation;
+      });
+
+      console.log(`Filtered to ${filteredFlorists.length} florists matching criteria`);
+
+      // Sort results
+      if (sortBy === 'newest') {
+        filteredFlorists.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      } else if (sortBy === 'rating') {
+        filteredFlorists.sort((a, b) => (b.averageRating || 0) - (a.averageRating || 0));
+      }
+
+      // Pagination
+      const startIndex = parseInt(offset.toString()) || 0;
+      const pageSize = parseInt(limit.toString()) || 12;
+      const paginatedFlorists = filteredFlorists.slice(startIndex, startIndex + pageSize);
+
+      console.log(`Returning ${paginatedFlorists.length} florists (page ${Math.floor(startIndex/pageSize) + 1})`);
+
       res.json({
-        florists: searchResult.florists,
-        total: searchResult.total,
-        page: Math.floor((searchParams.offset || 0) / (searchParams.limit || 50)) + 1,
-        limit: searchParams.limit || 50
+        florists: paginatedFlorists,
+        total: filteredFlorists.length,
+        offset: startIndex,
+        limit: pageSize,
+        hasMore: startIndex + pageSize < filteredFlorists.length
       });
     } catch (error) {
-      console.error("Error searching florists:", error);
-      res.status(500).json({ message: "Failed to search florists" });
+      console.error('Florist search error:', error);
+      res.status(500).json({ message: 'Failed to search florists' });
     }
   });
 

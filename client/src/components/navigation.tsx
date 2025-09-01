@@ -45,6 +45,10 @@ export default function Navigation() {
               src="/attached_assets/image_1756685957746.png" 
               alt="FloriHub Logo" 
               className="w-12 h-12 object-contain"
+              onError={(e) => {
+                console.log('Logo failed to load, using fallback');
+                (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjQiIGN5PSIyNCIgcj0iMjAiIGZpbGw9IiNmMTc2OGEiLz4KPHR1eHQgeD0iMjQiIHk9IjMwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ3aGl0ZSIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjAiIGZvbnQtd2VpZ2h0PSJib2xkIj5GPC90ZXh0Pgo8L3N2Zz4K';
+              }}
             />
             <div className="flex flex-col">
               <span className="text-2xl font-bold text-gray-900">FloriHub</span>

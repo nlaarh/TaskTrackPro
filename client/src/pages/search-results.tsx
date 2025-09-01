@@ -172,7 +172,7 @@ export default function SearchResults() {
                       handleSearch(searchParams.keyword, searchParams.location);
                     }
                   }}
-                  className="pl-10"
+                  className="pl-10 text-gray-900 placeholder:text-gray-500 bg-white border-gray-300 focus:border-primary"
                 />
               </div>
               <div className="relative flex-1">
@@ -185,6 +185,7 @@ export default function SearchResults() {
                       handleSearch(searchParams.keyword, searchParams.location);
                     }
                   }}
+                  className="text-gray-900 placeholder:text-gray-500 bg-white border-gray-300 focus:border-primary"
                 />
               </div>
               <Button
