@@ -42,10 +42,13 @@ export default function AdminMessages() {
   const queryClient = useQueryClient();
 
   // Check for compose parameter to auto-open compose dialog
+  const [preSelectedFloristId, setPreSelectedFloristId] = useState<string>('');
+  
   React.useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const composeFloristId = urlParams.get('compose');
     if (composeFloristId) {
+      setPreSelectedFloristId(composeFloristId);
       setIsComposeOpen(true);
       // Clean URL without refreshing
       window.history.replaceState({}, '', '/admin-messages');
@@ -149,18 +152,16 @@ export default function AdminMessages() {
     const [subject, setSubject] = useState("");
     const [messageBody, setMessageBody] = useState("");
 
-    // Auto-select florist if coming from URL parameter
+    // Auto-select florist if coming from admin list
     React.useEffect(() => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const composeFloristId = urlParams.get('compose');
-      if (composeFloristId && florists) {
-        const florist = florists.find(f => f.id.toString() === composeFloristId);
+      if (preSelectedFloristId && florists && florists.length > 0) {
+        const florist = florists.find(f => f.id.toString() === preSelectedFloristId);
         if (florist) {
-          setRecipientId(composeFloristId);
+          setRecipientId(preSelectedFloristId);
           setSubject(`Message for ${florist.businessName || florist.name}`);
         }
       }
-    }, [florists]);
+    }, [preSelectedFloristId, florists]);
 
     const handleSubmit = (e: React.FormEvent) => {
       e.preventDefault();
