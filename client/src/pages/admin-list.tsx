@@ -87,13 +87,27 @@ export default function AdminList() {
   const updateUserMutation = useMutation({
     mutationFn: async (userData: any) => {
       const token = localStorage.getItem('customerToken');
+      
+      // Create payload, only include password if provided
+      const payload: any = {
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        email: userData.email,
+        role: userData.role
+      };
+      
+      // Only add password if it's provided and not empty
+      if (userData.newPassword && userData.newPassword.trim() !== '') {
+        payload.password = userData.newPassword;
+      }
+      
       const response = await fetch(`/api/admin/users/${userData.id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(userData),
+        body: JSON.stringify(payload),
       });
       if (!response.ok) throw new Error('Failed to update user');
       return response.json();
@@ -118,7 +132,14 @@ export default function AdminList() {
           'Authorization': `Bearer ${token}`,
         },
       });
-      if (!response.ok) throw new Error('Failed to delete user');
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to delete user: ${errorText}`);
+      }
+      // Handle 204 No Content response (successful deletion)
+      if (response.status === 204) {
+        return { success: true };
+      }
       return response.json();
     },
     onSuccess: () => {
@@ -127,6 +148,7 @@ export default function AdminList() {
       setDeleteUser(null);
     },
     onError: (error: any) => {
+      console.error('Delete error:', error);
       toast({ title: "Error", description: error.message, variant: "destructive" });
     }
   });
@@ -175,7 +197,11 @@ export default function AdminList() {
       // For now, just show an alert - can be enhanced later  
       alert(`Edit functionality for florist "${item.businessName}" will be implemented in future update.`);
     } else if (type === 'user') {
-      setEditUser({...item}); // Create a proper copy
+      // Create a proper copy with empty password field
+      setEditUser({
+        ...item, 
+        newPassword: '' // Initialize password field as empty
+      });
     }
   };
 
@@ -854,16 +880,20 @@ export default function AdminList() {
                   <Label htmlFor="firstName">First Name</Label>
                   <Input
                     id="firstName"
-                    value={editUser.firstName}
+                    value={editUser.firstName || ''}
                     onChange={(e) => setEditUser({...editUser, firstName: e.target.value})}
+                    placeholder="Enter first name"
+                    autoComplete="given-name"
                   />
                 </div>
                 <div>
                   <Label htmlFor="lastName">Last Name</Label>
                   <Input
                     id="lastName"
-                    value={editUser.lastName}
+                    value={editUser.lastName || ''}
                     onChange={(e) => setEditUser({...editUser, lastName: e.target.value})}
+                    placeholder="Enter last name"
+                    autoComplete="family-name"
                   />
                 </div>
                 <div>
@@ -871,8 +901,10 @@ export default function AdminList() {
                   <Input
                     id="email"
                     type="email"
-                    value={editUser.email}
+                    value={editUser.email || ''}
                     onChange={(e) => setEditUser({...editUser, email: e.target.value})}
+                    placeholder="Enter email address"
+                    autoComplete="email"
                   />
                 </div>
                 <div>
@@ -887,6 +919,17 @@ export default function AdminList() {
                       <SelectItem value="admin">Admin</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+                <div>
+                  <Label htmlFor="newPassword">New Password (Optional)</Label>
+                  <Input
+                    id="newPassword"
+                    type="password"
+                    placeholder="Leave blank to keep current password"
+                    value={editUser.newPassword || ''}
+                    onChange={(e) => setEditUser({...editUser, newPassword: e.target.value})}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Only enter a password if you want to change it</p>
                 </div>
                 <div className="flex gap-2 pt-4">
                   <Button 
