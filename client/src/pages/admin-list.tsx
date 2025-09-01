@@ -19,7 +19,10 @@ import {
   ArrowDown,
   UserPlus,
   Building,
-  AlertCircle
+  AlertCircle,
+  Settings,
+  FileText,
+  UserMinus
 } from "lucide-react";
 
 type SortConfig = {
@@ -32,26 +35,45 @@ export default function AdminList() {
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: '', direction: 'asc' });
 
   // CRUD handlers
-  const handleView = (type: 'user' | 'florist', id: string) => {
-    alert(`View ${type}: ${id}`);
-    // TODO: Navigate to detail view
+  const handleView = (type: 'user' | 'florist', record: any) => {
+    const details = type === 'user' 
+      ? `Name: ${record.firstName} ${record.lastName}\nEmail: ${record.email}\nRole: ${record.role}\nVerified: ${record.isVerified ? 'Yes' : 'No'}\nJoined: ${new Date(record.createdAt).toLocaleDateString()}`
+      : `Business: ${record.businessName}\nEmail: ${record.email}\nLocation: ${record.city}, ${record.state}\nPhone: ${record.phone || 'N/A'}\nJoined: ${new Date(record.createdAt).toLocaleDateString()}`;
+    
+    alert(`${type.toUpperCase()} DETAILS:\n\n${details}`);
   };
 
-  const handleEdit = (type: 'user' | 'florist', id: string) => {
-    alert(`Edit ${type}: ${id}`);
-    // TODO: Navigate to edit form
+  const handleEdit = (type: 'user' | 'florist', record: any) => {
+    const name = type === 'user' ? `${record.firstName} ${record.lastName}` : record.businessName;
+    const confirmed = window.confirm(`Open edit form for ${name}?\n\nThis will navigate to the edit page.`);
+    if (confirmed) {
+      console.log(`Edit ${type}:`, record);
+      // TODO: Navigate to edit form
+      alert(`Edit form for ${name} would open here`);
+    }
   };
 
-  const handleDelete = (type: 'user' | 'florist', id: string, name: string) => {
-    if (window.confirm(`Are you sure you want to delete ${name}? This action cannot be undone.`)) {
-      alert(`Delete ${type}: ${id}`);
-      // TODO: Call delete API
+  const handleDelete = (type: 'user' | 'florist', record: any) => {
+    const name = type === 'user' ? `${record.firstName} ${record.lastName}` : record.businessName;
+    const confirmed = window.confirm(`⚠️ DELETE WARNING ⚠️\n\nYou are about to permanently delete:\n${name}\n\nThis action CANNOT be undone!\n\nAre you absolutely sure?`);
+    
+    if (confirmed) {
+      const doubleConfirm = window.confirm(`FINAL CONFIRMATION\n\nType "DELETE" in the next dialog to confirm deletion of ${name}`);
+      if (doubleConfirm) {
+        console.log(`Delete ${type}:`, record);
+        alert(`${name} has been scheduled for deletion.\n\nAPI call would be made here.`);
+        // TODO: Call delete API
+      }
     }
   };
 
   const handleCreate = (type: 'user' | 'florist') => {
-    alert(`Create new ${type}`);
-    // TODO: Navigate to create form
+    const confirmed = window.confirm(`Create a new ${type}?\n\nThis will open the creation form.`);
+    if (confirmed) {
+      console.log(`Create new ${type}`);
+      alert(`${type === 'user' ? 'User' : 'Florist'} creation form would open here`);
+      // TODO: Navigate to create form
+    }
   };
 
   // Fetch users data
@@ -332,33 +354,33 @@ export default function AdminList() {
                           })}
                         </TableCell>
                         <TableCell>
-                          <div className="flex justify-center gap-1">
+                          <div className="flex justify-center gap-2">
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              className="h-9 w-9 p-0 hover:bg-blue-50 hover:text-blue-700 transition-all duration-200 rounded-md border border-transparent hover:border-blue-200"
-                              title="View Details"
-                              onClick={() => handleView('user', user.id)}
+                              className="h-10 w-10 p-0 hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100 hover:text-blue-700 transition-all duration-300 rounded-lg border border-transparent hover:border-blue-300 hover:shadow-md group"
+                              title="View User Details"
+                              onClick={() => handleView('user', user)}
                             >
-                              <Eye className="h-4 w-4" />
+                              <FileText className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
                             </Button>
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              className="h-9 w-9 p-0 hover:bg-amber-50 hover:text-amber-700 transition-all duration-200 rounded-md border border-transparent hover:border-amber-200"
-                              title="Edit User"
-                              onClick={() => handleEdit('user', user.id)}
+                              className="h-10 w-10 p-0 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-emerald-100 hover:text-emerald-700 transition-all duration-300 rounded-lg border border-transparent hover:border-emerald-300 hover:shadow-md group"
+                              title="Edit User Settings"
+                              onClick={() => handleEdit('user', user)}
                             >
-                              <Edit3 className="h-4 w-4" />
+                              <Settings className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
                             </Button>
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              className="h-9 w-9 p-0 hover:bg-red-50 hover:text-red-700 transition-all duration-200 rounded-md border border-transparent hover:border-red-200"
+                              className="h-10 w-10 p-0 hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100 hover:text-red-700 transition-all duration-300 rounded-lg border border-transparent hover:border-red-300 hover:shadow-md group"
                               title="Delete User"
-                              onClick={() => handleDelete('user', user.id, `${user.firstName} ${user.lastName}`)}
+                              onClick={() => handleDelete('user', user)}
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <UserMinus className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
                             </Button>
                           </div>
                         </TableCell>
@@ -449,33 +471,33 @@ export default function AdminList() {
                           })}
                         </TableCell>
                         <TableCell>
-                          <div className="flex justify-center gap-1">
+                          <div className="flex justify-center gap-2">
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              className="h-9 w-9 p-0 hover:bg-blue-50 hover:text-blue-700 transition-all duration-200 rounded-md border border-transparent hover:border-blue-200"
-                              title="View Customer Details"
-                              onClick={() => handleView('user', customer.id)}
+                              className="h-10 w-10 p-0 hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100 hover:text-blue-700 transition-all duration-300 rounded-lg border border-transparent hover:border-blue-300 hover:shadow-md group"
+                              title="View Customer Profile"
+                              onClick={() => handleView('user', customer)}
                             >
-                              <Eye className="h-4 w-4" />
+                              <FileText className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
                             </Button>
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              className="h-9 w-9 p-0 hover:bg-amber-50 hover:text-amber-700 transition-all duration-200 rounded-md border border-transparent hover:border-amber-200"
-                              title="Edit Customer"
-                              onClick={() => handleEdit('user', customer.id)}
+                              className="h-10 w-10 p-0 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-emerald-100 hover:text-emerald-700 transition-all duration-300 rounded-lg border border-transparent hover:border-emerald-300 hover:shadow-md group"
+                              title="Edit Customer Account"
+                              onClick={() => handleEdit('user', customer)}
                             >
-                              <Edit3 className="h-4 w-4" />
+                              <Settings className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
                             </Button>
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              className="h-9 w-9 p-0 hover:bg-red-50 hover:text-red-700 transition-all duration-200 rounded-md border border-transparent hover:border-red-200"
-                              title="Delete Customer"
-                              onClick={() => handleDelete('user', customer.id, `${customer.firstName} ${customer.lastName}`)}
+                              className="h-10 w-10 p-0 hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100 hover:text-red-700 transition-all duration-300 rounded-lg border border-transparent hover:border-red-300 hover:shadow-md group"
+                              title="Remove Customer"
+                              onClick={() => handleDelete('user', customer)}
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <UserMinus className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
                             </Button>
                           </div>
                         </TableCell>
@@ -583,33 +605,33 @@ export default function AdminList() {
                           })}
                         </TableCell>
                         <TableCell>
-                          <div className="flex justify-center gap-1">
+                          <div className="flex justify-center gap-2">
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              className="h-9 w-9 p-0 hover:bg-blue-50 hover:text-blue-700 transition-all duration-200 rounded-md border border-transparent hover:border-blue-200"
-                              title="View Florist Details"
-                              onClick={() => handleView('florist', florist.id)}
+                              className="h-10 w-10 p-0 hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100 hover:text-blue-700 transition-all duration-300 rounded-lg border border-transparent hover:border-blue-300 hover:shadow-md group"
+                              title="View Business Profile"
+                              onClick={() => handleView('florist', florist)}
                             >
-                              <Eye className="h-4 w-4" />
+                              <Building className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
                             </Button>
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              className="h-9 w-9 p-0 hover:bg-amber-50 hover:text-amber-700 transition-all duration-200 rounded-md border border-transparent hover:border-amber-200"
-                              title="Edit Florist"
-                              onClick={() => handleEdit('florist', florist.id)}
+                              className="h-10 w-10 p-0 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-emerald-100 hover:text-emerald-700 transition-all duration-300 rounded-lg border border-transparent hover:border-emerald-300 hover:shadow-md group"
+                              title="Edit Business Settings"
+                              onClick={() => handleEdit('florist', florist)}
                             >
-                              <Edit3 className="h-4 w-4" />
+                              <Settings className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
                             </Button>
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              className="h-9 w-9 p-0 hover:bg-red-50 hover:text-red-700 transition-all duration-200 rounded-md border border-transparent hover:border-red-200"
-                              title="Delete Florist"
-                              onClick={() => handleDelete('florist', florist.id, florist.businessName)}
+                              className="h-10 w-10 p-0 hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100 hover:text-red-700 transition-all duration-300 rounded-lg border border-transparent hover:border-red-300 hover:shadow-md group"
+                              title="Remove Florist"
+                              onClick={() => handleDelete('florist', florist)}
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Store className="h-5 w-5 group-hover:scale-110 transition-transform duration-200 line-through" />
                             </Button>
                           </div>
                         </TableCell>
