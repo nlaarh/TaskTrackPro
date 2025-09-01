@@ -1477,19 +1477,29 @@ export default function AdminList() {
                     <div className="flex justify-center mb-4">
                       <div className="relative">
                         <img 
-                          src={editFlorist.profileImageUrl && editFlorist.profileImageUrl.trim() !== '' ? 
-                            (editFlorist.profileImageUrl.startsWith('/objects/') ? 
-                              editFlorist.profileImageUrl : 
-                              `/objects/${editFlorist.profileImageUrl.replace(/^\//, '')}`) :
-                            'https://via.placeholder.com/128x128.png?text=No+Image'
-                          } 
+                          src={(() => {
+                            console.log('DEBUG: editFlorist.profileImageUrl =', editFlorist.profileImageUrl);
+                            const hasImage = editFlorist.profileImageUrl && editFlorist.profileImageUrl.trim() !== '';
+                            console.log('DEBUG: hasImage =', hasImage);
+                            
+                            if (hasImage) {
+                              const imageSrc = editFlorist.profileImageUrl.startsWith('/objects/') ? 
+                                editFlorist.profileImageUrl : 
+                                `/objects/${editFlorist.profileImageUrl.replace(/^\//, '')}`;
+                              console.log('DEBUG: Using image src =', imageSrc);
+                              return imageSrc;
+                            } else {
+                              console.log('DEBUG: Using placeholder');
+                              return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCIgdmlld0JveD0iMCAwIDEyOCAxMjgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMjgiIGhlaWdodD0iMTI4IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik00MCA2MEg4OFY5Nkg0MFY2MFoiIGZpbGw9IiM5Q0EzQUYiLz4KPHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAzMiAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHA+CjwvZz4KPHN2Zz4K';
+                            }
+                          })()} 
                           alt="Profile"
                           className="w-32 h-32 rounded-lg object-cover border-2 border-gray-200"
-                          onLoad={() => console.log('Image loaded:', editFlorist.profileImageUrl || 'placeholder')}
+                          onLoad={() => console.log('✓ Image loaded successfully')}
                           onError={(e) => {
-                            console.log('Image failed to load, using fallback');
+                            console.log('✗ Image load failed, using final fallback');
                             const target = e.target as HTMLImageElement;
-                            target.src = 'https://via.placeholder.com/128x128.png?text=Error';
+                            target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCIgdmlld0JveD0iMCAwIDEyOCAxMjgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMjgiIGhlaWdodD0iMTI4IiBmaWxsPSIjRjNGNEY2Ii8+CjxjaXJjbGUgY3g9IjY0IiBjeT0iNjQiIHI9IjE2IiBmaWxsPSIjOUNBM0FGIi8+CjwvZW5kbD5K';
                           }}
                         />
                       </div>
