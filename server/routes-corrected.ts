@@ -9,6 +9,7 @@ import { db } from "./db";
 import { sql } from "drizzle-orm";
 import { Pool } from 'pg';
 import { simpleStorage } from "./storage-simple";
+import { ObjectStorageService } from "./objectStorage";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
@@ -692,6 +693,55 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching florist:", error);
       res.status(500).json({ message: "Failed to fetch florist" });
+    }
+  });
+
+  // Object storage upload endpoint for florist images
+  app.post('/api/objects/upload', isAuthenticated, async (req, res) => {
+    try {
+      const objectStorageService = new ObjectStorageService();
+      const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+      res.json({ uploadURL });
+    } catch (error) {
+      console.error('Error getting upload URL:', error);
+      res.status(500).json({ message: 'Failed to get upload URL' });
+    }
+  });
+
+  // Update florist image after upload
+  app.put('/api/florists/:id/image', isAuthenticated, checkAdminRole, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { imageURL } = req.body;
+
+      if (!imageURL) {
+        return res.status(400).json({ message: 'Image URL is required' });
+      }
+
+      const floristId = parseInt(id);
+      if (isNaN(floristId)) {
+        return res.status(400).json({ message: 'Invalid florist ID' });
+      }
+
+      // Update florist profile image in database
+      const query = `
+        UPDATE florist_auth 
+        SET profile_image_url = $1, updated_at = NOW()
+        WHERE id = $2
+        RETURNING *
+      `;
+      
+      const result = await pool.query(query, [imageURL, floristId]);
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ message: 'Florist not found' });
+      }
+      
+      console.log(`Updated florist ${floristId} image to:`, imageURL);
+      res.json({ message: 'Image updated successfully', florist: result.rows[0] });
+    } catch (error) {
+      console.error('Error updating florist image:', error);
+      res.status(500).json({ message: 'Failed to update florist image' });
     }
   });
 

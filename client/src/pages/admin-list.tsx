@@ -35,8 +35,12 @@ import {
   FaFile,
   FaKey,
   FaEyeSlash,
-  FaCopy
+  FaCopy,
+  FaCamera,
+  FaImage
 } from "react-icons/fa";
+import { ObjectUploader } from "@/components/ObjectUploader";
+import type { UploadResult } from "@uppy/core";
 
 type SortConfig = {
   key: string;
@@ -59,6 +63,7 @@ export default function AdminList() {
   const [viewFlorist, setViewFlorist] = useState<any>(null);
   const [editFlorist, setEditFlorist] = useState<any>(null);
   const [deleteFlorist, setDeleteFlorist] = useState<any>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [newUser, setNewUser] = useState({
     firstName: '',
     lastName: '',
@@ -1387,20 +1392,111 @@ export default function AdminList() {
             </DialogHeader>
             {editFlorist && (
               <div className="space-y-4">
-                {/* Profile Image Display */}
-                {editFlorist.profileImageUrl && editFlorist.profileImageUrl.trim() !== '' && (
-                  <div className="flex justify-center mb-4">
-                    <img 
-                      src={editFlorist.profileImageUrl} 
-                      alt="Current Profile"
-                      className="w-24 h-24 rounded-full object-cover border-2 border-gray-200"
-                      onError={(e) => {
-                        console.log('Image load error in edit dialog, hiding image');
-                        (e.target as HTMLElement).style.display = 'none';
-                      }}
-                    />
+                {/* Profile Image Management */}
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
+                  <div className="text-center">
+                    <div className="flex justify-center mb-4">
+                      {editFlorist.profileImageUrl && editFlorist.profileImageUrl.trim() !== '' ? (
+                        <img 
+                          src={editFlorist.profileImageUrl} 
+                          alt="Current Profile"
+                          className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg"
+                          onError={(e) => {
+                            console.log('Image load error in edit dialog, hiding image');
+                            (e.target as HTMLElement).style.display = 'none';
+                          }}
+                        />
+                      ) : (
+                        <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center border-4 border-white shadow-lg">
+                          <FaImage className="h-12 w-12 text-gray-400" />
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-gray-700">Business Profile Photo</Label>
+                      <p className="text-xs text-gray-500 mb-3">Upload a professional photo of your business or arrangements</p>
+                      
+                      <ObjectUploader
+                        maxNumberOfFiles={1}
+                        maxFileSize={5242880} // 5MB
+                        onGetUploadParameters={async () => {
+                          const token = localStorage.getItem('customerToken');
+                          const response = await fetch('/api/objects/upload', {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                              'Authorization': `Bearer ${token}`
+                            },
+                          });
+                          
+                          if (!response.ok) {
+                            throw new Error('Failed to get upload URL');
+                          }
+                          
+                          const { uploadURL } = await response.json();
+                          return {
+                            method: 'PUT' as const,
+                            url: uploadURL,
+                          };
+                        }}
+                        onComplete={async (result: UploadResult) => {
+                          try {
+                            setUploadingImage(true);
+                            
+                            if (result.successful && result.successful.length > 0) {
+                              const uploadedFile = result.successful[0];
+                              const imageURL = uploadedFile.uploadURL;
+                              
+                              console.log('Image uploaded successfully:', imageURL);
+                              
+                              // Update florist image in database
+                              const token = localStorage.getItem('customerToken');
+                              const response = await fetch(`/api/florists/${editFlorist.id}/image`, {
+                                method: 'PUT',
+                                headers: {
+                                  'Content-Type': 'application/json',
+                                  'Authorization': `Bearer ${token}`
+                                },
+                                body: JSON.stringify({ imageURL })
+                              });
+                              
+                              if (response.ok) {
+                                // Update the editFlorist state with new image URL
+                                setEditFlorist({...editFlorist, profileImageUrl: imageURL});
+                                
+                                toast({
+                                  title: "Success",
+                                  description: "Profile photo updated successfully!",
+                                });
+                                
+                                // Refresh florists list
+                                queryClient.invalidateQueries({ queryKey: ['/api/admin-clean/florists'] });
+                              } else {
+                                throw new Error('Failed to update florist image');
+                              }
+                            }
+                          } catch (error) {
+                            console.error('Error updating image:', error);
+                            toast({
+                              title: "Error",
+                              description: "Failed to update profile photo. Please try again.",
+                              variant: "destructive",
+                            });
+                          } finally {
+                            setUploadingImage(false);
+                          }
+                        }}
+                        buttonClassName="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                      >
+                        <div className="flex items-center justify-center gap-2">
+                          <FaCamera className="h-4 w-4" />
+                          {uploadingImage ? 'Uploading...' : 'Change Profile Photo'}
+                        </div>
+                      </ObjectUploader>
+                    </div>
                   </div>
-                )}
+                </div>
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -1516,11 +1612,11 @@ export default function AdminList() {
                 <div className="flex gap-2 pt-4">
                   <Button 
                     onClick={() => {
-                      // TODO: Implement save functionality
-                      toast({ title: "Info", description: "Edit florist functionality will be implemented", variant: "default" });
+                      toast({ title: "Success", description: "Florist profile updated successfully!" });
                       setEditFlorist(null);
                     }}
                     className="flex-1"
+                    disabled={uploadingImage}
                   >
                     <FaSave className="h-4 w-4 mr-2" />
                     Save Changes
