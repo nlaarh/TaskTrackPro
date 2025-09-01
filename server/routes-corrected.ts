@@ -634,6 +634,208 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // MESSAGING SYSTEM ENDPOINTS
+  
+  // Get messages for admin or florist
+  app.get('/api/messages', authenticateCustomer, async (req, res) => {
+    try {
+      const user = req.user;
+      let userId, userType;
+      
+      // Determine user type and ID
+      if (user.userObj?.role === 'admin') {
+        userId = user.userId;
+        userType = 'admin';
+      } else if (user.florist) {
+        userId = user.florist.id.toString();
+        userType = 'florist';
+      } else {
+        return res.status(400).json({ message: 'Invalid user type for messaging' });
+      }
+
+      console.log(`📨 Getting messages for ${userType} ${userId}`);
+
+      const query = `
+        SELECT m.*, 
+               CASE 
+                 WHEN m.sender_type = 'admin' THEN (
+                   SELECT CONCAT(u.first_name, ' ', u.last_name) 
+                   FROM users u 
+                   WHERE u.id = m.sender_id
+                 )
+                 WHEN m.sender_type = 'florist' THEN (
+                   SELECT CONCAT(fa.first_name, ' ', fa.last_name) 
+                   FROM florist_auth fa 
+                   WHERE fa.id::text = m.sender_id
+                 )
+               END as sender_name,
+               CASE 
+                 WHEN m.recipient_type = 'admin' THEN (
+                   SELECT CONCAT(u.first_name, ' ', u.last_name) 
+                   FROM users u 
+                   WHERE u.id = m.recipient_id
+                 )
+                 WHEN m.recipient_type = 'florist' THEN (
+                   SELECT CONCAT(fa.first_name, ' ', fa.last_name) 
+                   FROM florist_auth fa 
+                   WHERE fa.id::text = m.recipient_id
+                 )
+               END as recipient_name
+        FROM messages m
+        WHERE (m.sender_id = $1 AND m.sender_type = $2) 
+           OR (m.recipient_id = $1 AND m.recipient_type = $2)
+        ORDER BY m.created_at DESC
+      `;
+      
+      const result = await pool.query(query, [userId, userType]);
+      res.json(result.rows);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+      res.status(500).json({ message: 'Failed to fetch messages' });
+    }
+  });
+
+  // Send a new message
+  app.post('/api/messages', authenticateCustomer, async (req, res) => {
+    try {
+      const user = req.user;
+      const { recipientId, recipientType, subject, messageBody } = req.body;
+      
+      let senderId, senderType;
+      
+      // Determine sender type and ID
+      if (user.userObj?.role === 'admin') {
+        senderId = user.userId;
+        senderType = 'admin';
+      } else if (user.florist) {
+        senderId = user.florist.id.toString();
+        senderType = 'florist';
+      } else {
+        return res.status(400).json({ message: 'Invalid user type for messaging' });
+      }
+
+      console.log(`📤 Sending message from ${senderType} ${senderId} to ${recipientType} ${recipientId}`);
+
+      if (!recipientId || !recipientType || !subject || !messageBody) {
+        return res.status(400).json({ message: 'All fields are required' });
+      }
+
+      const query = `
+        INSERT INTO messages (sender_id, sender_type, recipient_id, recipient_type, subject, message_body, created_at)
+        VALUES ($1, $2, $3, $4, $5, $6, NOW())
+        RETURNING *
+      `;
+      
+      const result = await pool.query(query, [senderId, senderType, recipientId, recipientType, subject, messageBody]);
+      
+      res.status(201).json(result.rows[0]);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      res.status(500).json({ message: 'Failed to send message' });
+    }
+  });
+
+  // Mark message as read
+  app.put('/api/messages/:id/read', authenticateCustomer, async (req, res) => {
+    try {
+      const messageId = parseInt(req.params.id);
+      const user = req.user;
+      
+      let userId, userType;
+      
+      // Determine user type and ID
+      if (user.userObj?.role === 'admin') {
+        userId = user.userId;
+        userType = 'admin';
+      } else if (user.florist) {
+        userId = user.florist.id.toString();
+        userType = 'florist';
+      } else {
+        return res.status(400).json({ message: 'Invalid user type for messaging' });
+      }
+
+      console.log(`📖 Marking message ${messageId} as read for ${userType} ${userId}`);
+
+      const query = `
+        UPDATE messages 
+        SET is_read = TRUE, updated_at = NOW()
+        WHERE id = $1 AND recipient_id = $2 AND recipient_type = $3
+        RETURNING *
+      `;
+      
+      const result = await pool.query(query, [messageId, userId, userType]);
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ message: 'Message not found or access denied' });
+      }
+      
+      res.json(result.rows[0]);
+    } catch (error) {
+      console.error('Error marking message as read:', error);
+      res.status(500).json({ message: 'Failed to mark message as read' });
+    }
+  });
+
+  // Get unread message count
+  app.get('/api/messages/unread-count', authenticateCustomer, async (req, res) => {
+    try {
+      const user = req.user;
+      let userId, userType;
+      
+      // Determine user type and ID
+      if (user.userObj?.role === 'admin') {
+        userId = user.userId;
+        userType = 'admin';
+      } else if (user.florist) {
+        userId = user.florist.id.toString();
+        userType = 'florist';
+      } else {
+        return res.status(400).json({ message: 'Invalid user type for messaging' });
+      }
+
+      const query = `
+        SELECT COUNT(*) as unread_count
+        FROM messages
+        WHERE recipient_id = $1 AND recipient_type = $2 AND is_read = FALSE
+      `;
+      
+      const result = await pool.query(query, [userId, userType]);
+      
+      res.json({ unreadCount: parseInt(result.rows[0].unread_count) });
+    } catch (error) {
+      console.error('Error getting unread count:', error);
+      res.status(500).json({ message: 'Failed to get unread count' });
+    }
+  });
+
+  // Get list of florists for admin to message
+  app.get('/api/messages/florists', authenticateCustomer, checkAdminRole, async (req, res) => {
+    try {
+      console.log('📋 Getting florist list for admin messaging');
+      
+      const query = `
+        SELECT fa.id, fa.first_name, fa.last_name, fa.email, f.business_name
+        FROM florist_auth fa
+        LEFT JOIN florists f ON fa.id = f.id
+        ORDER BY fa.first_name, fa.last_name
+      `;
+      
+      const result = await pool.query(query);
+      
+      const florists = result.rows.map(row => ({
+        id: row.id,
+        name: `${row.first_name} ${row.last_name}`,
+        email: row.email,
+        businessName: row.business_name || 'No business name'
+      }));
+      
+      res.json(florists);
+    } catch (error) {
+      console.error('Error getting florists for messaging:', error);
+      res.status(500).json({ message: 'Failed to get florists' });
+    }
+  });
+
 
 
   // Get individual florist by ID (use more specific route first)
