@@ -13,7 +13,15 @@ import {
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Heart, Menu, Phone, User, LogOut, Store, Search, Shield, Users, ChevronDown, MessageSquare, Bell } from "lucide-react";
+import { Heart, Menu, Phone, User, LogOut, Store, Search, Shield, Users, ChevronDown, MessageSquare, Bell, Globe, BarChart3 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 // Logo removed - using text logo instead
@@ -185,9 +193,12 @@ export default function Navigation() {
             <Button 
               asChild
               variant="ghost" 
-              className="text-gray-700 hover:text-gray-900 hover:bg-gray-50 font-medium px-4 py-2"
+              className={cn(
+                "text-gray-700 hover:text-gray-900 hover:bg-gray-50 font-medium px-4 py-2",
+                location === "/contact" && "text-gray-900 bg-gray-50"
+              )}
             >
-              <Link href="#contact">
+              <Link href="/contact">
                 <Phone className="h-4 w-4 mr-2" />
                 Contact
               </Link>
@@ -276,17 +287,60 @@ export default function Navigation() {
               </Button>
             )}
             
-            <Button 
-              asChild
-              variant="ghost" 
-              size="sm" 
-              className="text-gray-700 hover:text-gray-900 hidden md:flex"
-            >
-              <Link href="/admin-list">
-                <Shield className="h-4 w-4 mr-2" />
-                Admin
-              </Link>
-            </Button>
+            {/* Admin Dropdown - Only for admins */}
+            {(() => {
+              try {
+                const user = localStorage.getItem('customerUser');
+                if (!user) return null;
+                const userData = JSON.parse(user);
+                return userData.role === 'admin';
+              } catch {
+                return false;
+              }
+            })() && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-gray-700 hover:text-gray-900 hidden md:flex"
+                  >
+                    <Shield className="h-4 w-4 mr-2" />
+                    Admin
+                    <ChevronDown className="h-3 w-3 ml-1" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>Admin Panel</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin-list" className="cursor-pointer">
+                      <Users className="h-4 w-4 mr-2" />
+                      Manage Users
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/florists" className="cursor-pointer">
+                      <Store className="h-4 w-4 mr-2" />
+                      Manage Florists
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/website-info" className="cursor-pointer">
+                      <Globe className="h-4 w-4 mr-2" />
+                      Website Info
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin-dashboard" className="cursor-pointer">
+                      <BarChart3 className="h-4 w-4 mr-2" />
+                      Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
             
             <Button 
               asChild 
