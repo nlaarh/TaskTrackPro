@@ -11,8 +11,9 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Heart, Menu, Phone, User, LogOut, Store, Search, Shield, Users } from "lucide-react";
+import { Heart, Menu, Phone, User, LogOut, Store, Search, Shield, Users, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import logoImage from "@assets/image_1756685957746.png";
 
 export default function Navigation() {
   const { user, isAuthenticated } = useAuth();
@@ -36,52 +37,57 @@ export default function Navigation() {
   ];
 
   return (
-    <nav className="bg-white/95 backdrop-blur-lg shadow-sm sticky top-0 z-50 border-b border-gray-100">
+    <nav className="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-purple-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">F</span>
-            </div>
+            <img 
+              src={logoImage} 
+              alt="FloriHub Logo" 
+              className="h-10 w-auto object-contain"
+            />
             <div className="flex flex-col">
-              <span className="text-2xl font-bold text-gray-900">FloriHub</span>
-              <span className="text-xs text-gray-600 hidden sm:block font-medium">
-                Connecting Your Special Moments
+              <span className="text-xl font-bold text-gray-900">FloriHub</span>
+              <span className="text-xs text-gray-500 hidden sm:block">
+                Professional Florist Directory
               </span>
             </div>
           </Link>
           
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-8">
-            <Link 
-              href="/" 
+          <div className="hidden lg:flex items-center space-x-1">
+            <Button 
+              asChild
+              variant="ghost" 
               className={cn(
-                "text-gray-700 hover:text-gray-900 transition-colors duration-200 font-medium",
-                location === "/" && "text-gray-900 font-semibold"
+                "text-gray-700 hover:text-gray-900 hover:bg-gray-50 font-medium px-4 py-2",
+                location === "/" && "text-gray-900 bg-gray-50"
               )}
             >
-              Home
-            </Link>
+              <Link href="/">Home</Link>
+            </Button>
             
-            <Link 
-              href="/search" 
+            <Button 
+              asChild
+              variant="ghost" 
               className={cn(
-                "text-gray-700 hover:text-gray-900 transition-colors duration-200 font-medium",
-                location.startsWith("/search") && "text-gray-900 font-semibold"
+                "text-gray-700 hover:text-gray-900 hover:bg-gray-50 font-medium px-4 py-2",
+                location.startsWith("/search") && "text-gray-900 bg-gray-50"
               )}
             >
-              Search Members
-            </Link>
+              <Link href="/search">Search Members</Link>
+            </Button>
             
             <NavigationMenu>
               <NavigationMenuList>
                 <NavigationMenuItem>
-                  <NavigationMenuTrigger className="text-gray-700 hover:text-gray-900 transition-colors duration-200 font-medium">
+                  <NavigationMenuTrigger className="text-gray-700 hover:text-gray-900 hover:bg-gray-50 font-medium px-4 py-2 h-auto">
                     Categories
+                    <ChevronDown className="ml-1 h-3 w-3" />
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
-                    <div className="w-48 p-2">
+                    <div className="w-56 p-2">
                       {categories.map((category) => (
                         <NavigationMenuLink key={category.href} asChild>
                           <Link
@@ -98,31 +104,39 @@ export default function Navigation() {
               </NavigationMenuList>
             </NavigationMenu>
             
-            <Link 
-              href="#community" 
-              className="text-gray-700 hover:text-gray-900 transition-colors duration-200 font-medium"
+            <Button 
+              asChild
+              variant="ghost" 
+              className="text-gray-700 hover:text-gray-900 hover:bg-gray-50 font-medium px-4 py-2"
             >
-              Community
-            </Link>
+              <Link href="#community">Community</Link>
+            </Button>
             
-            <Link 
-              href="#" 
-              className="text-gray-700 hover:text-gray-900 transition-colors duration-200 font-medium"
+            <Button 
+              asChild
+              variant="ghost" 
+              className="text-gray-700 hover:text-gray-900 hover:bg-gray-50 font-medium px-4 py-2"
             >
-              Blog
-            </Link>
+              <Link href="#">Blog</Link>
+            </Button>
+            
+            <Button 
+              asChild
+              variant="ghost" 
+              className="text-gray-700 hover:text-gray-900 hover:bg-gray-50 font-medium px-4 py-2"
+            >
+              <Link href="#contact">
+                <Phone className="h-4 w-4 mr-2" />
+                Contact
+              </Link>
+            </Button>
           </div>
           
           {/* Auth Buttons */}
-          <div className="flex items-center space-x-3">
-            <Button variant="ghost" size="sm" className="hidden sm:flex items-center gap-2">
-              <Phone className="h-4 w-4" />
-              Contact
-            </Button>
-            
+          <div className="flex items-center space-x-2">
             {isAuthenticated ? (
-              <div className="flex items-center space-x-3">
-                <Button variant="ghost" size="sm" className="flex items-center gap-2">
+              <div className="flex items-center space-x-2">
+                <Button variant="ghost" size="sm" className="flex items-center gap-2 text-gray-700">
                   <User className="h-4 w-4" />
                   <span className="hidden sm:inline">
                     {user?.firstName || 'Account'}
@@ -140,39 +154,50 @@ export default function Navigation() {
                 </Button>
               </div>
             ) : (
-              <div className="flex items-center space-x-3">
-                <Link href="/florist-login">
-                  <Button 
-                    variant="outline"
-                    size="sm"
-                    className="border-gray-300 text-gray-700 hover:bg-gray-50"
-                  >
+              <>
+                <Button 
+                  asChild
+                  variant="ghost" 
+                  size="sm"
+                  className="text-gray-700 hover:text-gray-900 hidden sm:flex"
+                >
+                  <Link href="/florist-login">
                     <Store className="h-4 w-4 mr-2" />
                     Florist Login
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
                 
-                <Link href="/auth">
-                  <Button 
-                    variant="ghost"
-                    size="sm"
-                    className="text-gray-700 hover:text-gray-900"
-                  >
+                <Button 
+                  asChild
+                  variant="ghost" 
+                  size="sm"
+                  className="text-gray-700 hover:text-gray-900 hidden sm:flex"
+                >
+                  <Link href="/auth">
                     <User className="h-4 w-4 mr-2" />
                     Customer Login
-                  </Button>
-                </Link>
-              </div>
+                  </Link>
+                </Button>
+              </>
             )}
             
-            <Link href="/admin-list">
-              <Button variant="ghost" size="sm" className="text-gray-700 hover:text-gray-900">
+            <Button 
+              asChild
+              variant="ghost" 
+              size="sm" 
+              className="text-gray-700 hover:text-gray-900 hidden md:flex"
+            >
+              <Link href="/admin-list">
                 <Shield className="h-4 w-4 mr-2" />
                 Admin
-              </Button>
-            </Link>
+              </Link>
+            </Button>
             
-            <Button asChild className="bg-gray-900 hover:bg-gray-800 text-white">
+            <Button 
+              asChild 
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 ml-2"
+              size="sm"
+            >
               <Link href="/florist-register">
                 <Store className="h-4 w-4 mr-2" />
                 Join as Florist
@@ -189,9 +214,11 @@ export default function Navigation() {
               <SheetContent side="right">
                 <SheetHeader>
                   <SheetTitle className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-gradient-to-br from-pink-500 to-purple-600 rounded-lg flex items-center justify-center">
-                      <span className="text-white font-bold text-sm">F</span>
-                    </div>
+                    <img 
+                      src={logoImage} 
+                      alt="FloriHub" 
+                      className="h-8 w-auto object-contain"
+                    />
                     FloriHub
                   </SheetTitle>
                 </SheetHeader>
