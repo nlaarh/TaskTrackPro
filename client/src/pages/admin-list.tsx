@@ -1478,9 +1478,7 @@ export default function AdminList() {
                       <div className="relative">
                         <img 
                           src={editFlorist.profileImageUrl && editFlorist.profileImageUrl.trim() !== '' ? 
-                            (editFlorist.profileImageUrl.startsWith('http') ? 
-                              editFlorist.profileImageUrl : 
-                              editFlorist.profileImageUrl.startsWith('/objects/') ? 
+                            (editFlorist.profileImageUrl.startsWith('/objects/') ? 
                               editFlorist.profileImageUrl : 
                               `/objects/${editFlorist.profileImageUrl.replace(/^\//, '')}`) :
                             'https://via.placeholder.com/128x128.png?text=No+Image'
