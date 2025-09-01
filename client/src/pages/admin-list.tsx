@@ -11,12 +11,15 @@ import {
   Store, 
   User, 
   Search, 
-  Edit, 
+  Edit3, 
   Trash2, 
   Eye,
   ArrowUpDown,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
+  UserPlus,
+  Building,
+  AlertCircle
 } from "lucide-react";
 
 type SortConfig = {
@@ -27,6 +30,29 @@ type SortConfig = {
 export default function AdminList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: '', direction: 'asc' });
+
+  // CRUD handlers
+  const handleView = (type: 'user' | 'florist', id: string) => {
+    alert(`View ${type}: ${id}`);
+    // TODO: Navigate to detail view
+  };
+
+  const handleEdit = (type: 'user' | 'florist', id: string) => {
+    alert(`Edit ${type}: ${id}`);
+    // TODO: Navigate to edit form
+  };
+
+  const handleDelete = (type: 'user' | 'florist', id: string, name: string) => {
+    if (window.confirm(`Are you sure you want to delete ${name}? This action cannot be undone.`)) {
+      alert(`Delete ${type}: ${id}`);
+      // TODO: Call delete API
+    }
+  };
+
+  const handleCreate = (type: 'user' | 'florist') => {
+    alert(`Create new ${type}`);
+    // TODO: Navigate to create form
+  };
 
   // Fetch users data
   const { data: users = [], isLoading: usersLoading } = useQuery({
@@ -166,6 +192,20 @@ export default function AdminList() {
                   Clear
                 </Button>
               )}
+              <Button
+                onClick={() => handleCreate('user')}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                <UserPlus className="h-4 w-4 mr-2" />
+                Add User
+              </Button>
+              <Button
+                onClick={() => handleCreate('florist')}
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                <Building className="h-4 w-4 mr-2" />
+                Add Florist
+              </Button>
             </div>
           </div>
         </div>
@@ -174,15 +214,15 @@ export default function AdminList() {
           <TabsList className="mb-6">
             <TabsTrigger value="users">
               <Users className="h-4 w-4 mr-2" />
-              Users ({users.length})
+              Users ({filteredAndSortedUsers.length})
             </TabsTrigger>
             <TabsTrigger value="customers">
               <User className="h-4 w-4 mr-2" />
-              Customers ({customers.length})
+              Customers ({filteredAndSortedCustomers.length})
             </TabsTrigger>
             <TabsTrigger value="florists">
               <Store className="h-4 w-4 mr-2" />
-              Florists ({florists.length})
+              Florists ({filteredAndSortedFlorists.length})
             </TabsTrigger>
           </TabsList>
 
@@ -296,24 +336,27 @@ export default function AdminList() {
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              className="h-8 w-8 p-0 hover:bg-blue-50 hover:text-blue-600"
+                              className="h-9 w-9 p-0 hover:bg-blue-50 hover:text-blue-700 transition-all duration-200 rounded-md border border-transparent hover:border-blue-200"
                               title="View Details"
+                              onClick={() => handleView('user', user.id)}
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              className="h-8 w-8 p-0 hover:bg-yellow-50 hover:text-yellow-600"
+                              className="h-9 w-9 p-0 hover:bg-amber-50 hover:text-amber-700 transition-all duration-200 rounded-md border border-transparent hover:border-amber-200"
                               title="Edit User"
+                              onClick={() => handleEdit('user', user.id)}
                             >
-                              <Edit className="h-4 w-4" />
+                              <Edit3 className="h-4 w-4" />
                             </Button>
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600"
+                              className="h-9 w-9 p-0 hover:bg-red-50 hover:text-red-700 transition-all duration-200 rounded-md border border-transparent hover:border-red-200"
                               title="Delete User"
+                              onClick={() => handleDelete('user', user.id, `${user.firstName} ${user.lastName}`)}
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -410,24 +453,27 @@ export default function AdminList() {
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              className="h-8 w-8 p-0 hover:bg-blue-50 hover:text-blue-600"
-                              title="View Details"
+                              className="h-9 w-9 p-0 hover:bg-blue-50 hover:text-blue-700 transition-all duration-200 rounded-md border border-transparent hover:border-blue-200"
+                              title="View Customer Details"
+                              onClick={() => handleView('user', customer.id)}
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              className="h-8 w-8 p-0 hover:bg-yellow-50 hover:text-yellow-600"
+                              className="h-9 w-9 p-0 hover:bg-amber-50 hover:text-amber-700 transition-all duration-200 rounded-md border border-transparent hover:border-amber-200"
                               title="Edit Customer"
+                              onClick={() => handleEdit('user', customer.id)}
                             >
-                              <Edit className="h-4 w-4" />
+                              <Edit3 className="h-4 w-4" />
                             </Button>
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600"
+                              className="h-9 w-9 p-0 hover:bg-red-50 hover:text-red-700 transition-all duration-200 rounded-md border border-transparent hover:border-red-200"
                               title="Delete Customer"
+                              onClick={() => handleDelete('user', customer.id, `${customer.firstName} ${customer.lastName}`)}
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -541,24 +587,27 @@ export default function AdminList() {
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              className="h-8 w-8 p-0 hover:bg-blue-50 hover:text-blue-600"
-                              title="View Details"
+                              className="h-9 w-9 p-0 hover:bg-blue-50 hover:text-blue-700 transition-all duration-200 rounded-md border border-transparent hover:border-blue-200"
+                              title="View Florist Details"
+                              onClick={() => handleView('florist', florist.id)}
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              className="h-8 w-8 p-0 hover:bg-yellow-50 hover:text-yellow-600"
+                              className="h-9 w-9 p-0 hover:bg-amber-50 hover:text-amber-700 transition-all duration-200 rounded-md border border-transparent hover:border-amber-200"
                               title="Edit Florist"
+                              onClick={() => handleEdit('florist', florist.id)}
                             >
-                              <Edit className="h-4 w-4" />
+                              <Edit3 className="h-4 w-4" />
                             </Button>
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600"
+                              className="h-9 w-9 p-0 hover:bg-red-50 hover:text-red-700 transition-all duration-200 rounded-md border border-transparent hover:border-red-200"
                               title="Delete Florist"
+                              onClick={() => handleDelete('florist', florist.id, florist.businessName)}
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
