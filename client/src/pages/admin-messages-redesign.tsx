@@ -46,7 +46,6 @@ export default function AdminMessagesRedesign() {
   const [isComposeOpen, setIsComposeOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [recipientSearchQuery, setRecipientSearchQuery] = useState("");
-  const [showSearchDropdown, setShowSearchDropdown] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -193,9 +192,7 @@ export default function AdminMessagesRedesign() {
         const florist = florists.find((f: Florist) => f.id.toString() === preSelectedFloristId);
         if (florist) {
           setRecipientId(preSelectedFloristId);
-          setRecipientSearchQuery(florist.businessName || `${florist.name}'s Flower Shop` || 'Flower Business');
           setSubject(`Message for ${florist.businessName || florist.name}`);
-          setShowSearchDropdown(false);
         }
       }
     }, [preSelectedFloristId, florists]);
@@ -207,7 +204,6 @@ export default function AdminMessagesRedesign() {
         setRecipientSearchQuery("");
         setSubject("");
         setMessageBody("");
-        setShowSearchDropdown(false);
       }
     }, [isComposeOpen]);
 
@@ -239,103 +235,62 @@ export default function AdminMessagesRedesign() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="recipient" className="text-sm font-medium">To</Label>
-              {!recipientId ? (
-                <div className="relative">
-                  <Input
-                    placeholder="Search for a business to message..."
-                    value={recipientSearchQuery}
-                    onChange={(e) => {
-                      setRecipientSearchQuery(e.target.value);
-                      setShowSearchDropdown(e.target.value.length > 0);
-                    }}
-                    onFocus={() => setShowSearchDropdown(recipientSearchQuery.length > 0)}
-                    onBlur={() => {
-                      // Delay hiding dropdown to allow clicks
-                      setTimeout(() => setShowSearchDropdown(false), 150);
-                    }}
-                    className="w-full"
-                  />
-                  {showSearchDropdown && recipientSearchQuery.length > 0 && (
-                    <div className="absolute z-50 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto mt-1">
-                      {(() => {
-                        const filteredFlorists = florists?.filter((florist: Florist) => {
-                          const searchTerm = recipientSearchQuery.toLowerCase();
-                          const businessName = florist.businessName?.toLowerCase() || '';
-                          const contactName = florist.name?.toLowerCase() || '';
-                          const email = florist.email?.toLowerCase() || '';
-                          
-                          return businessName.includes(searchTerm) || 
-                                 contactName.includes(searchTerm) || 
-                                 email.includes(searchTerm);
-                        }) || [];
-
-                        if (filteredFlorists.length === 0) {
-                          return (
-                            <div className="p-3 text-sm text-gray-500 text-center">
-                              No businesses found matching "{recipientSearchQuery}"
-                            </div>
-                          );
-                        }
-
-                        return filteredFlorists.slice(0, 10).map((florist: Florist) => (
-                          <div
-                            key={florist.id}
-                            onClick={() => {
-                              setRecipientId(florist.id.toString());
-                              setRecipientSearchQuery(florist.businessName || `${florist.name}'s Flower Shop` || 'Flower Business');
-                              setShowSearchDropdown(false);
-                            }}
-                            className="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
-                          >
-                            <Avatar className="h-8 w-8">
-                              <AvatarFallback className="text-sm bg-blue-100 text-blue-700">
-                                {(florist.businessName?.charAt(0) || florist.name?.charAt(0) || 'F').toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex flex-col flex-1 min-w-0">
-                              <span className="text-sm font-medium text-gray-900 truncate">
-                                {florist.businessName || `${florist.name}'s Flower Shop` || 'Flower Business'}
-                              </span>
-                              <span className="text-xs text-gray-500 truncate">
-                                {florist.email}
-                              </span>
-                              {florist.name && florist.businessName && (
-                                <span className="text-xs text-gray-400">
-                                  Contact: {florist.name}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        ));
-                      })()}
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="p-3 bg-blue-50 border border-blue-200 rounded-md flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Avatar className="h-6 w-6">
-                      <AvatarFallback className="text-xs bg-blue-100 text-blue-700">
-                        {recipientSearchQuery.charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="text-sm text-blue-800 font-medium">
-                      {recipientSearchQuery}
-                    </span>
+              <Select 
+                value={recipientId} 
+                onValueChange={(value) => {
+                  setRecipientId(value);
+                  // Clear search when selecting
+                  setRecipientSearchQuery("");
+                }}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a business to message..." />
+                </SelectTrigger>
+                <SelectContent className="max-h-60">
+                  <div className="p-2 border-b">
+                    <Input
+                      placeholder="Search businesses..."
+                      value={recipientSearchQuery}
+                      onChange={(e) => setRecipientSearchQuery(e.target.value)}
+                      className="h-8"
+                    />
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setRecipientId("");
-                      setRecipientSearchQuery("");
-                      setShowSearchDropdown(false);
-                    }}
-                    className="text-blue-600 hover:text-blue-800 text-lg leading-none"
-                  >
-                    ×
-                  </button>
-                </div>
-              )}
+                  {florists
+                    ?.filter((florist: Florist) => {
+                      if (!recipientSearchQuery) return true;
+                      const search = recipientSearchQuery.toLowerCase();
+                      return (
+                        florist.businessName?.toLowerCase().includes(search) ||
+                        florist.name?.toLowerCase().includes(search) ||
+                        florist.email?.toLowerCase().includes(search)
+                      );
+                    })
+                    .map((florist: Florist) => (
+                      <SelectItem key={florist.id} value={florist.id.toString()}>
+                        <div className="flex items-center gap-3 py-1">
+                          <Avatar className="h-8 w-8">
+                            <AvatarFallback className="text-sm bg-blue-100 text-blue-700">
+                              {(florist.businessName?.charAt(0) || florist.name?.charAt(0) || 'F').toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium">
+                              {florist.businessName || `${florist.name}'s Florist` || 'Florist Business'}
+                            </span>
+                            <span className="text-xs text-gray-500">
+                              {florist.email}
+                            </span>
+                            {florist.name && florist.businessName && (
+                              <span className="text-xs text-gray-400">
+                                Contact: {florist.name}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="subject" className="text-sm font-medium">Subject</Label>
