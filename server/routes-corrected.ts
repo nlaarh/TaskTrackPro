@@ -805,14 +805,16 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
     try {
       const { firstName, lastName, email, role } = req.body;
       
+      // Generate unique ID for the user
+      const userId = `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       const tempPassword = Math.random().toString(36).slice(-8);
       const passwordHash = await bcrypt.hash(tempPassword, 10);
       
       const result = await pool.query(`
-        INSERT INTO users (email, password_hash, first_name, last_name, role, created_at)
-        VALUES ($1, $2, $3, $4, $5, NOW())
-        RETURNING id, email, first_name, last_name, role, created_at
-      `, [email, passwordHash, firstName, lastName, role]);
+        INSERT INTO users (id, email, password_hash, first_name, last_name, role, is_verified, created_at, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
+        RETURNING id, email, first_name, last_name, role, is_verified, created_at
+      `, [userId, email, passwordHash, firstName, lastName, role, true]);
       
       const user = result.rows[0];
       res.status(201).json({
@@ -821,6 +823,7 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
         firstName: user.first_name,
         lastName: user.last_name,
         role: user.role,
+        isVerified: user.is_verified,
         createdAt: user.created_at,
         tempPassword
       });
@@ -833,14 +836,36 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
   app.put('/api/admin/users/:id', authenticateCustomer, checkAdminRole, async (req, res) => {
     try {
       const { id } = req.params;
-      const { firstName, lastName, email, role } = req.body;
+      const { firstName, lastName, email, role, password } = req.body;
       
-      const result = await pool.query(`
-        UPDATE users 
-        SET first_name = $1, last_name = $2, email = $3, role = $4
-        WHERE id = $5
-        RETURNING id, email, first_name, last_name, role, created_at
-      `, [firstName, lastName, email, role, id]);
+      let query, values;
+      
+      if (password && password.trim() !== '') {
+        // Update with new password
+        const passwordHash = await bcrypt.hash(password, 10);
+        query = `
+          UPDATE users 
+          SET first_name = $1, last_name = $2, email = $3, role = $4, password_hash = $5, updated_at = NOW()
+          WHERE id = $6
+          RETURNING id, email, first_name, last_name, role, is_verified, created_at
+        `;
+        values = [firstName, lastName, email, role, passwordHash, id];
+      } else {
+        // Update without changing password
+        query = `
+          UPDATE users 
+          SET first_name = $1, last_name = $2, email = $3, role = $4, updated_at = NOW()
+          WHERE id = $5
+          RETURNING id, email, first_name, last_name, role, is_verified, created_at
+        `;
+        values = [firstName, lastName, email, role, id];
+      }
+      
+      const result = await pool.query(query, values);
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ message: 'User not found' });
+      }
       
       const user = result.rows[0];
       res.json({
@@ -849,6 +874,7 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
         firstName: user.first_name,
         lastName: user.last_name,
         role: user.role,
+        isVerified: user.is_verified,
         createdAt: user.created_at
       });
     } catch (error) {
