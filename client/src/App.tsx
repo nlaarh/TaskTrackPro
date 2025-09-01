@@ -3,7 +3,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { useAuth } from "@/hooks/useAuth";
+
 import { ProtectedRoute } from "@/components/protected-route";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
@@ -27,8 +27,6 @@ import AdminWebsiteInfo from "@/pages/admin-website-info";
 import Contact from "@/pages/contact";
 
 function Router() {
-  const { isAuthenticated, isLoading } = useAuth();
-
   return (
     <Switch>
       {/* Authentication routes - always available */}
@@ -62,6 +60,7 @@ function Router() {
         window.location.href = '/admin-list';
         return <div>Redirecting...</div>;
       }} />
+      
       {/* Protected Admin Routes */}
       <Route path="/admin/users" component={() => <ProtectedRoute requireAdmin><AdminUsers /></ProtectedRoute>} />
       <Route path="/admin/customers" component={() => <ProtectedRoute requireAdmin><AdminCustomers /></ProtectedRoute>} />
@@ -79,24 +78,14 @@ function Router() {
       <Route path="/florist-dashboard" component={() => <ProtectedRoute requireFlorist><FloristDashboard /></ProtectedRoute>} />
       <Route path="/florist-profile-setup" component={() => <ProtectedRoute requireFlorist><FloristProfileSetup /></ProtectedRoute>} />
       
-      {/* Regular app routes based on authentication */}
-      {isLoading || !isAuthenticated ? (
-        <>
-          <Route path="/" component={Landing} />
-          <Route path="/search" component={SearchResults} />
-          <Route path="/contact" component={Contact} />
-          <Route path="/florist/:id" component={FloristDetail} />
-          <Route path="/register" component={FloristRegistration} />
-        </>
-      ) : (
-        <>
-          <Route path="/" component={Home} />
-          <Route path="/search" component={SearchResults} />
-          <Route path="/contact" component={Contact} />
-          <Route path="/florist/:id" component={FloristDetail} />
-          <Route path="/register" component={FloristRegistration} />
-        </>
-      )}
+      {/* Public Routes - Always Available */}
+      <Route path="/" component={Landing} />
+      <Route path="/search" component={SearchResults} />
+      <Route path="/contact" component={Contact} />
+      <Route path="/florist/:id" component={FloristDetail} />
+      <Route path="/register" component={FloristRegistration} />
+      
+      {/* Catch all */}
       <Route component={NotFound} />
     </Switch>
   );
