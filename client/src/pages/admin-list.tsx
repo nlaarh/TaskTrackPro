@@ -33,7 +33,9 @@ import {
   FaSave,
   FaTimes,
   FaFile,
-  FaKey
+  FaKey,
+  FaEyeSlash,
+  FaCopy
 } from "react-icons/fa";
 
 type SortConfig = {
@@ -50,6 +52,8 @@ export default function AdminList() {
   const [showCreateUser, setShowCreateUser] = useState(false);
   const [changePasswordUser, setChangePasswordUser] = useState<any>(null);
   const [passwordForm, setPasswordForm] = useState({ newPassword: '', confirmPassword: '' });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [newUser, setNewUser] = useState({
     firstName: '',
     lastName: '',
@@ -275,6 +279,17 @@ export default function AdminList() {
   const handleChangePassword = (user: any) => {
     setChangePasswordUser(user);
     setPasswordForm({ newPassword: '', confirmPassword: '' });
+    setShowPassword(false);
+    setShowConfirmPassword(false);
+  };
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast({ title: "Success", description: "Password copied to clipboard" });
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to copy password", variant: "destructive" });
+    }
   };
 
   // Fetch users data
@@ -1065,25 +1080,79 @@ export default function AdminList() {
               <div className="space-y-4">
                 <div>
                   <Label htmlFor="newPassword">New Password</Label>
-                  <Input
-                    id="newPassword"
-                    type="password"
-                    placeholder="Enter new password"
-                    value={passwordForm.newPassword}
-                    onChange={(e) => setPasswordForm({...passwordForm, newPassword: e.target.value})}
-                    autoComplete="new-password"
-                  />
+                  <div className="relative">
+                    <Input
+                      id="newPassword"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Enter new password"
+                      value={passwordForm.newPassword}
+                      onChange={(e) => setPasswordForm({...passwordForm, newPassword: e.target.value})}
+                      autoComplete="new-password"
+                      className="pr-20"
+                    />
+                    <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex gap-1">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0 hover:bg-gray-100"
+                        onClick={() => setShowPassword(!showPassword)}
+                        title={showPassword ? "Hide password" : "Show password"}
+                      >
+                        {showPassword ? <FaEyeSlash className="h-4 w-4" /> : <FaEye className="h-4 w-4" />}
+                      </Button>
+                      {passwordForm.newPassword && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0 hover:bg-gray-100"
+                          onClick={() => copyToClipboard(passwordForm.newPassword)}
+                          title="Copy password"
+                        >
+                          <FaCopy className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
                 </div>
                 <div>
                   <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    placeholder="Confirm new password"
-                    value={passwordForm.confirmPassword}
-                    onChange={(e) => setPasswordForm({...passwordForm, confirmPassword: e.target.value})}
-                    autoComplete="new-password"
-                  />
+                  <div className="relative">
+                    <Input
+                      id="confirmPassword"
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="Confirm new password"
+                      value={passwordForm.confirmPassword}
+                      onChange={(e) => setPasswordForm({...passwordForm, confirmPassword: e.target.value})}
+                      autoComplete="new-password"
+                      className="pr-20"
+                    />
+                    <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex gap-1">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0 hover:bg-gray-100"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        title={showConfirmPassword ? "Hide password" : "Show password"}
+                      >
+                        {showConfirmPassword ? <FaEyeSlash className="h-4 w-4" /> : <FaEye className="h-4 w-4" />}
+                      </Button>
+                      {passwordForm.confirmPassword && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0 hover:bg-gray-100"
+                          onClick={() => copyToClipboard(passwordForm.confirmPassword)}
+                          title="Copy password"
+                        >
+                          <FaCopy className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
                   {passwordForm.newPassword && passwordForm.confirmPassword && passwordForm.newPassword !== passwordForm.confirmPassword && (
                     <p className="text-sm text-red-600 mt-1">Passwords do not match</p>
                   )}
