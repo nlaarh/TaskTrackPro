@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Photo Upload</title>
+</head>
+<body>
+    <h2>Test Photo Upload System</h2>
+    
+    <h3>Step 1: Login as admin</h3>
+    <p>Use: alaaroubi@gmail.com / Password123!</p>
+    
+    <h3>Step 2: Go to Admin Dashboard</h3>
+    <p>Navigate to /admin-list</p>
+    
+    <h3>Step 3: Edit Buffalo State College Blooms</h3>
+    <p>Click edit button and try uploading a photo</p>
+    
+    <h3>Expected Debug Output in Console:</h3>
+    <pre>
+DEBUG: editFlorist.profileImageUrl = ""
+DEBUG: hasImage = false  
+DEBUG: Using placeholder
+✓ Image loaded successfully
+    </pre>
+    
+    <h3>After Upload:</h3>
+    <pre>
+DEBUG: editFlorist.profileImageUrl = "/objects/uploads/some-uuid"
+DEBUG: hasImage = true
+DEBUG: Using image src = /objects/uploads/some-uuid
+✓ Image loaded successfully
+    </pre>
+</body>
+</html>
