@@ -19,6 +19,7 @@ import AdminDashboard from "@/pages/admin-dashboard";
 import AdminUsers from "@/pages/admin-users";
 import AdminCustomers from "@/pages/admin-customers";
 import AdminFlorists from "@/pages/admin-florists";
+import SimpleAdmin from "@/pages/simple-admin";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -59,6 +60,7 @@ function Router() {
       <Route path="/admin/users" component={AdminUsers} />
       <Route path="/admin/customers" component={AdminCustomers} />
       <Route path="/admin/florists" component={AdminFlorists} />
+      <Route path="/simple-admin" component={SimpleAdmin} />
       <Route path="/florist-login" component={FloristLogin} />
       <Route path="/florist-register" component={FloristRegister} />
       <Route path="/florist-dashboard" component={FloristDashboard} />
