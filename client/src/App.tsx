@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
+import { ProtectedRoute } from "@/components/protected-route";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
@@ -61,17 +62,22 @@ function Router() {
         window.location.href = '/admin-list';
         return <div>Redirecting...</div>;
       }} />
-      <Route path="/admin/users" component={AdminUsers} />
-      <Route path="/admin/customers" component={AdminCustomers} />
-      <Route path="/admin/florists" component={AdminFlorists} />
-      <Route path="/admin-clean" component={AdminClean} />
-      <Route path="/admin-list" component={AdminList} />
-      <Route path="/admin/website-info" component={AdminWebsiteInfo} />
-      <Route path="/messages" component={AdminMessagesRedesign} />
+      {/* Protected Admin Routes */}
+      <Route path="/admin/users" component={() => <ProtectedRoute requireAdmin><AdminUsers /></ProtectedRoute>} />
+      <Route path="/admin/customers" component={() => <ProtectedRoute requireAdmin><AdminCustomers /></ProtectedRoute>} />
+      <Route path="/admin/florists" component={() => <ProtectedRoute requireAdmin><AdminFlorists /></ProtectedRoute>} />
+      <Route path="/admin-clean" component={() => <ProtectedRoute requireAdmin><AdminClean /></ProtectedRoute>} />
+      <Route path="/admin-list" component={() => <ProtectedRoute requireAdmin><AdminList /></ProtectedRoute>} />
+      <Route path="/admin/website-info" component={() => <ProtectedRoute requireAdmin><AdminWebsiteInfo /></ProtectedRoute>} />
+      <Route path="/messages" component={() => <ProtectedRoute requireAdmin><AdminMessagesRedesign /></ProtectedRoute>} />
+      
+      {/* Public Florist Routes */}
       <Route path="/florist-login" component={FloristLogin} />
       <Route path="/florist-register" component={FloristRegister} />
-      <Route path="/florist-dashboard" component={FloristDashboard} />
-      <Route path="/florist-profile-setup" component={FloristProfileSetup} />
+      
+      {/* Protected Florist Routes */}
+      <Route path="/florist-dashboard" component={() => <ProtectedRoute requireFlorist><FloristDashboard /></ProtectedRoute>} />
+      <Route path="/florist-profile-setup" component={() => <ProtectedRoute requireFlorist><FloristProfileSetup /></ProtectedRoute>} />
       
       {/* Regular app routes based on authentication */}
       {isLoading || !isAuthenticated ? (

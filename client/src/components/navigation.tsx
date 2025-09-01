@@ -67,10 +67,15 @@ export default function Navigation() {
     refetchInterval: 30000, // Refetch every 30 seconds
   });
 
-  const navItems = [
+  // Always visible navigation items
+  const publicNavItems = [
     { href: "/", label: "Home" },
     { href: "/search", label: "Search Members" },
     { href: "/contact", label: "Contact" },
+  ];
+
+  // Protected navigation items (only visible when authenticated)
+  const protectedNavItems = [
     { href: "#", label: "Local Events" },
     { href: "#", label: "Local Deals" },
   ];
@@ -371,7 +376,20 @@ export default function Navigation() {
                 </SheetHeader>
                 
                 <div className="mt-6 space-y-4">
-                  {navItems.map((item) => (
+                  {/* Always visible public navigation */}
+                  {publicNavItems.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className="block py-2 text-gray-700 hover:text-gray-900 font-medium"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                  
+                  {/* Protected navigation items - only visible when authenticated */}
+                  {isAdminOrFlorist() && protectedNavItems.map((item) => (
                     <Link
                       key={item.href}
                       href={item.href}
