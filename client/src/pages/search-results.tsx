@@ -258,18 +258,6 @@ export default function SearchResults() {
           <div className={cn(
             showFilters ? "lg:col-span-3" : "lg:col-span-4"
           )}>
-            {/* Debug Info */}
-            <div className="mb-4 p-4 bg-gray-100 rounded text-sm">
-              <p><strong>Debug:</strong></p>
-              <p>Loading: {isLoading ? 'true' : 'false'}</p>
-              <p>Error: {error ? error.message : 'none'}</p>
-              <p>Results: {searchResults ? JSON.stringify({
-                floristsCount: searchResults.florists?.length || 0,
-                total: searchResults.total,
-                hasFlorists: !!searchResults.florists,
-                isArray: Array.isArray(searchResults.florists)
-              }) : 'null'}</p>
-            </div>
             
             {isLoading ? (
               <div className="grid gap-6">
