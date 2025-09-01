@@ -1,7 +1,6 @@
 import {
   users,
   floristAuth,
-  florists,
   specialtiesReference,
   servicesReference,
   type User,
@@ -81,7 +80,6 @@ export class DatabaseStorage implements IStorage {
       return {
         id: row.id,
         email: row.email,
-        password: row.password,
         firstName: row.first_name,
         lastName: row.last_name,
         businessName: row.business_name,
@@ -101,6 +99,7 @@ export class DatabaseStorage implements IStorage {
         createdAt: row.created_at,
         updatedAt: row.updated_at,
         passwordHash: row.password_hash,
+        servicesOffered: row.services_offered,
       };
     } catch (error) {
       console.error('Error creating florist auth:', error);
@@ -125,7 +124,6 @@ export class DatabaseStorage implements IStorage {
       return {
         id: row.id,
         email: row.email,
-        password: row.password,
         firstName: row.first_name,
         lastName: row.last_name,
         businessName: row.business_name,
@@ -145,6 +143,7 @@ export class DatabaseStorage implements IStorage {
         createdAt: row.created_at,
         updatedAt: row.updated_at,
         passwordHash: row.password_hash,
+        servicesOffered: row.services_offered,
       };
     } catch (error) {
       console.error('Error getting florist auth by email:', error);
@@ -169,7 +168,6 @@ export class DatabaseStorage implements IStorage {
       return {
         id: row.id,
         email: row.email,
-        password: row.password,
         firstName: row.first_name,
         lastName: row.last_name,
         businessName: row.business_name,
@@ -189,6 +187,7 @@ export class DatabaseStorage implements IStorage {
         createdAt: row.created_at,
         updatedAt: row.updated_at,
         passwordHash: row.password_hash,
+        servicesOffered: row.services_offered,
       };
     } catch (error) {
       console.error('Error getting florist auth by ID:', error);
@@ -208,12 +207,12 @@ export class DatabaseStorage implements IStorage {
       }
 
       // Update the florist_auth table directly - this is the correct table that exists
-      const updateFields = [];
-      const updateValues = [];
+      const updateFields: string[] = [];
+      const updateValues: any[] = [];
       let paramIndex = 1;
       
       // Map frontend field names to database field names and build dynamic update
-      const fieldMappings = {
+      const fieldMappings: Record<string, string> = {
         'businessName': 'business_name',
         'zipCode': 'zip_code', 
         'profileImageUrl': 'profile_image_url',
