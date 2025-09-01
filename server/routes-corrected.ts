@@ -796,7 +796,7 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
           fa.email,
           fa.phone
         FROM florist_auth fa
-        WHERE fa.is_approved = true
+        WHERE fa.is_verified = true
         ORDER BY fa.business_name ASC
       `;
       
