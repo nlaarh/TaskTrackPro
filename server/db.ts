@@ -2,14 +2,21 @@ import { Pool } from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from "@shared/schema";
 
-// Use ONLY the Railway PostgreSQL database - no local Neon database
+// COMPLETELY REMOVE NEON - USE ONLY RAILWAY DATABASE
 const RAILWAY_DATABASE_URL = "postgresql://postgres:RwDPqwPPtxhBNDzKDGiJlrHDtdTBZBYx@yamanote.proxy.rlwy.net:18615/floristdb";
 
-// FORCE Railway database - ignore any environment DATABASE_URL
-console.log('Using Railway PostgreSQL database ONLY:', RAILWAY_DATABASE_URL);
-console.log('Ignoring environment DATABASE_URL:', process.env.DATABASE_URL ? 'Present' : 'Not set');
+// DESTROY environment DATABASE_URL to force Railway only
+delete process.env.DATABASE_URL;
+delete process.env.PGDATABASE;
+delete process.env.PGHOST;
+delete process.env.PGPORT;
+delete process.env.PGUSER;
+delete process.env.PGPASSWORD;
 
-// Create connection pool for Railway database only
+console.log('🔥 REMOVED ALL NEON DATABASE ENVIRONMENT VARIABLES');
+console.log('✅ USING RAILWAY DATABASE ONLY:', RAILWAY_DATABASE_URL);
+
+// Create connection pool for Railway database EXCLUSIVELY
 export const pool = new Pool({ 
   connectionString: RAILWAY_DATABASE_URL,
   ssl: false,
