@@ -1,4 +1,5 @@
 import { Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import Navigation from "@/components/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,6 +22,41 @@ import {
 } from "lucide-react";
 
 export default function AdminDashboard() {
+  // Fetch users data
+  const { data: users = [], isLoading: usersLoading } = useQuery({
+    queryKey: ['/api/admin-clean/users'],
+    queryFn: async () => {
+      const token = localStorage.getItem('customerToken');
+      const response = await fetch('/api/admin-clean/users', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) throw new Error('Failed to fetch users');
+      return response.json();
+    },
+    retry: false,
+  });
+
+  // Fetch florists data
+  const { data: florists = [], isLoading: floristsLoading } = useQuery({
+    queryKey: ['/api/admin-clean/florists'],
+    queryFn: async () => {
+      const token = localStorage.getItem('customerToken');
+      const response = await fetch('/api/admin-clean/florists', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) throw new Error('Failed to fetch florists');
+      return response.json();
+    },
+    retry: false,
+  });
+
+  const customers = users.filter((user: any) => user.role === 'customer');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
@@ -60,7 +96,7 @@ export default function AdminDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-blue-600">Total Users</p>
-                  <p className="text-3xl font-bold text-blue-900">Loading...</p>
+                  <p className="text-3xl font-bold text-blue-900">{usersLoading ? 'Loading...' : users.length}</p>
                   <p className="text-xs text-blue-600/70 mt-1">
                     <TrendingUp className="h-3 w-3 inline mr-1" />
                     +12% from last month
@@ -76,7 +112,7 @@ export default function AdminDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-green-600">Active Florists</p>
-                  <p className="text-3xl font-bold text-green-900">Loading...</p>
+                  <p className="text-3xl font-bold text-green-900">{floristsLoading ? 'Loading...' : florists.length}</p>
                   <p className="text-xs text-green-600/70 mt-1">
                     <Star className="h-3 w-3 inline mr-1" />
                     4.8 avg rating
@@ -92,7 +128,7 @@ export default function AdminDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-purple-600">Customers</p>
-                  <p className="text-3xl font-bold text-purple-900">Loading...</p>
+                  <p className="text-3xl font-bold text-purple-900">{usersLoading ? 'Loading...' : customers.length}</p>
                   <p className="text-xs text-purple-600/70 mt-1">
                     <Calendar className="h-3 w-3 inline mr-1" />
                     85% active this month

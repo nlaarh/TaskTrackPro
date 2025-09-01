@@ -11,7 +11,7 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Heart, Menu, Phone, User, LogOut, Store, Search, Shield } from "lucide-react";
+import { Heart, Menu, Phone, User, LogOut, Store, Search, Shield, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function Navigation() {
@@ -165,12 +165,57 @@ export default function Navigation() {
               </div>
             )}
             
-            <Link href="/admin">
-              <Button variant="ghost" size="sm" className="text-gray-700 hover:text-gray-900">
-                <Shield className="h-4 w-4 mr-2" />
-                Admin
-              </Button>
-            </Link>
+            {/* Admin Menu */}
+            <NavigationMenu>
+              <NavigationMenuList>
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger className="text-gray-700 hover:text-gray-900 font-medium">
+                    <Shield className="h-4 w-4 mr-2" />
+                    Admin
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <div className="w-48 p-2">
+                      <NavigationMenuLink asChild>
+                        <Link
+                          href="/admin-dashboard"
+                          className="flex items-center px-3 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors duration-200"
+                        >
+                          <Shield className="h-4 w-4 mr-2" />
+                          Dashboard
+                        </Link>
+                      </NavigationMenuLink>
+                      <NavigationMenuLink asChild>
+                        <Link
+                          href="/admin/users"
+                          className="flex items-center px-3 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors duration-200"
+                        >
+                          <Users className="h-4 w-4 mr-2" />
+                          Users
+                        </Link>
+                      </NavigationMenuLink>
+                      <NavigationMenuLink asChild>
+                        <Link
+                          href="/admin/customers"
+                          className="flex items-center px-3 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors duration-200"
+                        >
+                          <User className="h-4 w-4 mr-2" />
+                          Customers
+                        </Link>
+                      </NavigationMenuLink>
+                      <NavigationMenuLink asChild>
+                        <Link
+                          href="/admin/florists"
+                          className="flex items-center px-3 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors duration-200"
+                        >
+                          <Store className="h-4 w-4 mr-2" />
+                          Florists
+                        </Link>
+                      </NavigationMenuLink>
+                    </div>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
             
             <Button asChild className="bg-gray-900 hover:bg-gray-800 text-white">
               <Link href="/florist-register">
