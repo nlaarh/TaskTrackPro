@@ -697,7 +697,7 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
   });
 
   // Object storage upload endpoint for florist images
-  app.post('/api/objects/upload', isAuthenticated, async (req, res) => {
+  app.post('/api/objects/upload', authenticateCustomer, async (req, res) => {
     try {
       const objectStorageService = new ObjectStorageService();
       const uploadURL = await objectStorageService.getObjectEntityUploadURL();
@@ -709,7 +709,7 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
   });
 
   // Update florist image after upload
-  app.put('/api/florists/:id/image', isAuthenticated, checkAdminRole, async (req, res) => {
+  app.put('/api/florists/:id/image', authenticateCustomer, checkAdminRole, async (req, res) => {
     try {
       const { id } = req.params;
       const { imageURL } = req.body;
