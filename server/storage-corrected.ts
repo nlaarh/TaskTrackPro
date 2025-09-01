@@ -620,14 +620,80 @@ export class CorrectedDatabaseStorage implements IStorage {
 
   async getAllFlorists(): Promise<Florist[]> {
     try {
+      console.log('getAllFlorists: Starting query...');
+      
+      // First check florists table
+      const floristResult = await db.execute(sql`
+        SELECT COUNT(*) as count FROM florists
+      `);
+      console.log('getAllFlorists: Florists table count:', floristResult.rows[0]);
+
+      // Check florist_auth table  
+      const authResult = await db.execute(sql`
+        SELECT COUNT(*) as count FROM florist_auth
+      `);
+      console.log('getAllFlorists: Florist_auth table count:', authResult.rows[0]);
+
+      // Query with detailed logging
       const result = await db.execute(sql`
-        SELECT * FROM florists 
-        ORDER BY created_at DESC
+        SELECT 
+          f.id,
+          f.business_name,
+          f.address,
+          f.city, 
+          f.state,
+          f.zip_code,
+          f.phone,
+          f.website,
+          f.profile_summary,
+          f.years_of_experience,
+          f.specialties,
+          f.services,
+          f.profile_image_url,
+          f.created_at,
+          fa.email,
+          fa.first_name,
+          fa.last_name
+        FROM florists f
+        LEFT JOIN florist_auth fa ON f.user_id = fa.id
+        ORDER BY f.created_at DESC
       `);
       
-      return result.rows as Florist[];
+      console.log('getAllFlorists: Query result count:', result.rows?.length || 0);
+      console.log('getAllFlorists: Sample row:', result.rows?.[0]);
+      
+      if (!result.rows || result.rows.length === 0) {
+        console.warn('getAllFlorists: No florists found in database');
+        return [];
+      }
+
+      // Transform the raw database rows to match Florist interface
+      const florists = result.rows.map((row: any) => ({
+        id: row.id,
+        businessName: row.business_name,
+        address: row.address,
+        city: row.city,
+        state: row.state,
+        zipCode: row.zip_code,
+        phone: row.phone,
+        website: row.website,
+        profileSummary: row.profile_summary,
+        yearsOfExperience: row.years_of_experience,
+        specialties: row.specialties,
+        services: row.services,
+        profileImageUrl: row.profile_image_url,
+        createdAt: row.created_at,
+        email: row.email,
+        firstName: row.first_name,
+        lastName: row.last_name,
+        userId: row.user_id
+      }));
+      
+      console.log('getAllFlorists: Returning', florists.length, 'florists');
+      return florists;
+      
     } catch (error) {
-      console.error('Error getting all florists:', error);
+      console.error('getAllFlorists: Error occurred:', error);
       throw error;
     }
   }
