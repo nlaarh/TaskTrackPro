@@ -11,7 +11,10 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Heart, Menu, Phone, User, LogOut, Store, Search, Shield, Users, ChevronDown } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Heart, Menu, Phone, User, LogOut, Store, Search, Shield, Users, ChevronDown, MessageSquare, Bell } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import logoImage from "@assets/image_1756685957746.png";
 
@@ -19,6 +22,42 @@ export default function Navigation() {
   const { user, isAuthenticated } = useAuth();
   const [location] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Check if user is admin or florist to show messages
+  const isAdminOrFlorist = () => {
+    const token = localStorage.getItem('customerToken');
+    const userData = localStorage.getItem('customerUser');
+    
+    if (!token || !userData) return false;
+    
+    try {
+      const user = JSON.parse(userData);
+      return user.role === 'admin';
+    } catch {
+      // Check if it's a florist token
+      const floristToken = localStorage.getItem('floristToken');
+      return !!floristToken;
+    }
+  };
+
+  // Get unread message count
+  const { data: unreadCount } = useQuery({
+    queryKey: ['/api/messages/unread-count'],
+    queryFn: async () => {
+      if (!isAdminOrFlorist()) return { unreadCount: 0 };
+      
+      const token = localStorage.getItem('customerToken') || localStorage.getItem('floristToken');
+      const response = await fetch('/api/messages/unread-count', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) return { unreadCount: 0 };
+      return response.json();
+    },
+    enabled: isAdminOrFlorist(),
+    refetchInterval: 30000, // Refetch every 30 seconds
+  });
 
   const navItems = [
     { href: "/", label: "Home" },
@@ -136,6 +175,53 @@ export default function Navigation() {
           <div className="flex items-center space-x-2">
             {isAuthenticated ? (
               <div className="flex items-center space-x-2">
+                {/* Messages Button - Only for Admin/Florist */}
+                {isAdminOrFlorist() && (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="ghost" size="sm" className="relative flex items-center gap-2 text-gray-700 hover:text-gray-900">
+                        <MessageSquare className="h-4 w-4" />
+                        <span className="hidden sm:inline">Messages</span>
+                        {unreadCount?.unreadCount > 0 && (
+                          <Badge 
+                            variant="destructive" 
+                            className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+                          >
+                            {unreadCount.unreadCount > 9 ? '9+' : unreadCount.unreadCount}
+                          </Badge>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-64 p-2" align="end">
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between px-2 py-1">
+                          <h3 className="font-semibold text-sm">Messages</h3>
+                          {unreadCount?.unreadCount > 0 && (
+                            <Badge variant="secondary" className="text-xs">
+                              {unreadCount.unreadCount} unread
+                            </Badge>
+                          )}
+                        </div>
+                        <Button 
+                          asChild
+                          variant="ghost" 
+                          className="w-full justify-start text-left h-auto p-2"
+                        >
+                          <Link href="/admin-messages">
+                            <MessageSquare className="h-4 w-4 mr-2" />
+                            <div>
+                              <div className="font-medium text-sm">View All Messages</div>
+                              <div className="text-xs text-gray-500">
+                                Send and receive messages
+                              </div>
+                            </div>
+                          </Link>
+                        </Button>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                )}
+
                 <Button variant="ghost" size="sm" className="flex items-center gap-2 text-gray-700">
                   <User className="h-4 w-4" />
                   <span className="hidden sm:inline">

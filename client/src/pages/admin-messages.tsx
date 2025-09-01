@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,6 +40,17 @@ export default function AdminMessages() {
   const [isComposeOpen, setIsComposeOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Check for compose parameter to auto-open compose dialog
+  React.useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const composeFloristId = urlParams.get('compose');
+    if (composeFloristId) {
+      setIsComposeOpen(true);
+      // Clean URL without refreshing
+      window.history.replaceState({}, '', '/admin-messages');
+    }
+  }, []);
 
   // Fetch messages
   const { data: messages, isLoading: messagesLoading } = useQuery<Message[]>({
@@ -137,6 +148,19 @@ export default function AdminMessages() {
     const [recipientId, setRecipientId] = useState("");
     const [subject, setSubject] = useState("");
     const [messageBody, setMessageBody] = useState("");
+
+    // Auto-select florist if coming from URL parameter
+    React.useEffect(() => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const composeFloristId = urlParams.get('compose');
+      if (composeFloristId && florists) {
+        const florist = florists.find(f => f.id.toString() === composeFloristId);
+        if (florist) {
+          setRecipientId(composeFloristId);
+          setSubject(`Message for ${florist.businessName || florist.name}`);
+        }
+      }
+    }, [florists]);
 
     const handleSubmit = (e: React.FormEvent) => {
       e.preventDefault();

@@ -22,7 +22,8 @@ import {
   Building,
   Settings,
   UserMinus,
-  MessageSquare
+  MessageSquare,
+  Send
   // Import check: Settings icon properly imported from lucide-react
 } from "lucide-react";
 import { 
@@ -945,6 +946,15 @@ export default function AdminList() {
                               onClick={() => handleEdit('florist', florist)}
                             >
                               <FaEdit className="h-4 w-4 text-emerald-600 group-hover:scale-110 transition-transform duration-200" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-10 w-10 p-0 hover:bg-gradient-to-r hover:from-purple-50 hover:to-purple-100 hover:text-purple-700 transition-all duration-300 rounded-lg border border-transparent hover:border-purple-300 hover:shadow-md group"
+                              title="Send Message to Florist"
+                              onClick={() => window.location.href = `/admin-messages?compose=${florist.id}`}
+                            >
+                              <Send className="h-4 w-4 text-purple-600 group-hover:scale-110 transition-transform duration-200" />
                             </Button>
                             <Button 
                               variant="ghost" 
