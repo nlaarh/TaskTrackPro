@@ -21,32 +21,9 @@ import {
   Crown
 } from "lucide-react";
 
-interface User {
-  id: number;
-  firstName: string;
-  lastName: string;
-  email: string;
-  role: string;
-  isVerified: boolean;
-  createdAt: string;
-}
-
-interface Florist {
-  id: number;
-  businessName: string;
-  email: string;
-  phone?: string;
-  city: string;
-  state: string;
-  zipCode: string;
-  createdAt: string;
-}
-
-export default function SimpleAdmin() {
+export default function AdminClean() {
   const [activeTab, setActiveTab] = useState("users");
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortField, setSortField] = useState("");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
   // Fetch users data
   const { data: users = [], isLoading: usersLoading } = useQuery({
@@ -82,66 +59,25 @@ export default function SimpleAdmin() {
     retry: false,
   });
 
-  const customers = users.filter((user: User) => user.role === 'customer');
+  const customers = users.filter((user: any) => user.role === 'customer');
 
-  const handleSort = (field: string) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    } else {
-      setSortField(field);
-      setSortDirection("asc");
-    }
-  };
-
-  const sortData = (data: any[]) => {
-    if (!sortField) return data;
-    
-    return [...data].sort((a, b) => {
-      const aValue = a[sortField] || '';
-      const bValue = b[sortField] || '';
-      
-      if (sortDirection === "asc") {
-        return aValue.toString().localeCompare(bValue.toString());
-      } else {
-        return bValue.toString().localeCompare(aValue.toString());
-      }
-    });
-  };
-
-  const filterData = (data: any[]) => {
-    if (!searchTerm) return data;
-    
-    return data.filter((item: any) => 
-      Object.values(item).some((value: any) => 
-        value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    );
-  };
-
-  const SortableHeader = ({ field, children }: { field: string; children: React.ReactNode }) => (
-    <TableHead 
-      className="cursor-pointer hover:bg-gray-50 select-none" 
-      onClick={() => handleSort(field)}
-    >
-      <div className="flex items-center gap-2">
-        {children}
-        <ArrowUpDown className="h-4 w-4" />
-      </div>
-    </TableHead>
+  const filteredUsers = users.filter((user: any) =>
+    user.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.role?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const ActionButtons = ({ onView, onEdit, onDelete }: { onView: () => void; onEdit: () => void; onDelete: () => void }) => (
-    <div className="flex items-center gap-1">
-      <Button variant="ghost" size="sm" onClick={onView} className="h-8 w-8 p-0">
-        <Eye className="h-4 w-4" />
-      </Button>
-      <Button variant="ghost" size="sm" onClick={onEdit} className="h-8 w-8 p-0">
-        <Edit className="h-4 w-4" />
-      </Button>
-      <Button variant="ghost" size="sm" onClick={onDelete} className="h-8 w-8 p-0 text-red-600 hover:text-red-700">
-        <Trash2 className="h-4 w-4" />
-      </Button>
-    </div>
+  const filteredCustomers = customers.filter((user: any) =>
+    user.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.email?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const filteredFlorists = florists.filter((florist: any) =>
+    florist.businessName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    florist.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    florist.city?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -154,7 +90,7 @@ export default function SimpleAdmin() {
           <p className="text-gray-600">Manage users, customers, and florists</p>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <Tabs defaultValue="users" className="w-full">
           <TabsList className="grid w-full grid-cols-3 mb-6">
             <TabsTrigger value="users" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
@@ -188,26 +124,34 @@ export default function SimpleAdmin() {
           </div>
 
           {/* Users Tab */}
-          <TabsContent value="users" className="space-y-4">
+          <TabsContent value="users">
             <Card>
               <CardHeader>
-                <CardTitle>All Users Management</CardTitle>
+                <CardTitle>All Users ({users.length})</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Role</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Created</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {usersLoading ? (
                       <TableRow>
-                        <SortableHeader field="firstName">Name</SortableHeader>
-                        <SortableHeader field="email">Email</SortableHeader>
-                        <SortableHeader field="role">Role</SortableHeader>
-                        <SortableHeader field="isVerified">Status</SortableHeader>
-                        <SortableHeader field="createdAt">Created</SortableHeader>
-                        <TableHead>Actions</TableHead>
+                        <TableCell colSpan={6} className="text-center py-8">Loading users...</TableCell>
                       </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {sortData(filterData(users)).map((user: User) => (
+                    ) : filteredUsers.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center py-8">No users found</TableCell>
+                      </TableRow>
+                    ) : (
+                      filteredUsers.map((user: any) => (
                         <TableRow key={user.id}>
                           <TableCell>
                             <div className="flex items-center gap-3">
@@ -236,41 +180,51 @@ export default function SimpleAdmin() {
                           </TableCell>
                           <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
                           <TableCell>
-                            <ActionButtons
-                              onView={() => console.log('View user', user.id)}
-                              onEdit={() => console.log('Edit user', user.id)}
-                              onDelete={() => console.log('Delete user', user.id)}
-                            />
+                            <div className="flex items-center gap-1">
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-red-600 hover:text-red-700">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
               </CardContent>
             </Card>
           </TabsContent>
 
           {/* Customers Tab */}
-          <TabsContent value="customers" className="space-y-4">
+          <TabsContent value="customers">
             <Card>
               <CardHeader>
-                <CardTitle>Customer Management</CardTitle>
+                <CardTitle>Customers ({customers.length})</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Joined</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredCustomers.length === 0 ? (
                       <TableRow>
-                        <SortableHeader field="firstName">Name</SortableHeader>
-                        <SortableHeader field="email">Email</SortableHeader>
-                        <SortableHeader field="isVerified">Status</SortableHeader>
-                        <SortableHeader field="createdAt">Joined</SortableHeader>
-                        <TableHead>Actions</TableHead>
+                        <TableCell colSpan={5} className="text-center py-8">No customers found</TableCell>
                       </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {sortData(filterData(customers)).map((customer: User) => (
+                    ) : (
+                      filteredCustomers.map((customer: any) => (
                         <TableRow key={customer.id}>
                           <TableCell>
                             <div className="flex items-center gap-3">
@@ -291,42 +245,56 @@ export default function SimpleAdmin() {
                           </TableCell>
                           <TableCell>{new Date(customer.createdAt).toLocaleDateString()}</TableCell>
                           <TableCell>
-                            <ActionButtons
-                              onView={() => console.log('View customer', customer.id)}
-                              onEdit={() => console.log('Edit customer', customer.id)}
-                              onDelete={() => console.log('Delete customer', customer.id)}
-                            />
+                            <div className="flex items-center gap-1">
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-red-600 hover:text-red-700">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
               </CardContent>
             </Card>
           </TabsContent>
 
           {/* Florists Tab */}
-          <TabsContent value="florists" className="space-y-4">
+          <TabsContent value="florists">
             <Card>
               <CardHeader>
-                <CardTitle>Florist Management</CardTitle>
+                <CardTitle>Florists ({florists.length})</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Business</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Location</TableHead>
+                      <TableHead>Phone</TableHead>
+                      <TableHead>Joined</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {floristsLoading ? (
                       <TableRow>
-                        <SortableHeader field="businessName">Business</SortableHeader>
-                        <SortableHeader field="email">Email</SortableHeader>
-                        <SortableHeader field="city">Location</SortableHeader>
-                        <SortableHeader field="phone">Phone</SortableHeader>
-                        <SortableHeader field="createdAt">Joined</SortableHeader>
-                        <TableHead>Actions</TableHead>
+                        <TableCell colSpan={6} className="text-center py-8">Loading florists...</TableCell>
                       </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {sortData(filterData(florists)).map((florist: Florist) => (
+                    ) : filteredFlorists.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center py-8">No florists found</TableCell>
+                      </TableRow>
+                    ) : (
+                      filteredFlorists.map((florist: any) => (
                         <TableRow key={florist.id}>
                           <TableCell>
                             <div className="flex items-center gap-3">
@@ -344,17 +312,23 @@ export default function SimpleAdmin() {
                           <TableCell>{florist.phone || 'N/A'}</TableCell>
                           <TableCell>{new Date(florist.createdAt).toLocaleDateString()}</TableCell>
                           <TableCell>
-                            <ActionButtons
-                              onView={() => console.log('View florist', florist.id)}
-                              onEdit={() => console.log('Edit florist', florist.id)}
-                              onDelete={() => console.log('Delete florist', florist.id)}
-                            />
+                            <div className="flex items-center gap-1">
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-red-600 hover:text-red-700">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
               </CardContent>
             </Card>
           </TabsContent>
