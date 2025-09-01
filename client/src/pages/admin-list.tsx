@@ -39,8 +39,7 @@ import {
   FaCamera,
   FaImage
 } from "react-icons/fa";
-import { ObjectUploader } from "@/components/ObjectUploader";
-import type { UploadResult } from "@uppy/core";
+// ObjectUploader removed - using simple file input instead
 
 type SortConfig = {
   key: string;
@@ -64,6 +63,10 @@ export default function AdminList() {
   const [editFlorist, setEditFlorist] = useState<any>(null);
   const [deleteFlorist, setDeleteFlorist] = useState<any>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+  
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [newUser, setNewUser] = useState({
     firstName: '',
     lastName: '',
@@ -411,6 +414,14 @@ export default function AdminList() {
     return sortData(filtered, sortConfig.key);
   }, [users, searchTerm, sortConfig]);
 
+  const paginatedUsers = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredAndSortedUsers.slice(startIndex, endIndex);
+  }, [filteredAndSortedUsers, currentPage, itemsPerPage]);
+
+  const totalUserPages = Math.ceil(filteredAndSortedUsers.length / itemsPerPage);
+
   const filteredAndSortedCustomers = useMemo(() => {
     const filtered = customers.filter((user: any) =>
       user.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -429,6 +440,14 @@ export default function AdminList() {
     );
     return sortData(filtered, sortConfig.key);
   }, [florists, searchTerm, sortConfig]);
+
+  const paginatedFlorists = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredAndSortedFlorists.slice(startIndex, endIndex);
+  }, [filteredAndSortedFlorists, currentPage, itemsPerPage]);
+
+  const totalFloristPages = Math.ceil(filteredAndSortedFlorists.length / itemsPerPage);
 
   // Sort icon component
   const SortIcon = ({ column }: { column: string }) => {
@@ -569,14 +588,14 @@ export default function AdminList() {
                         </div>
                       </TableCell>
                     </TableRow>
-                  ) : filteredAndSortedUsers.length === 0 ? (
+                  ) : paginatedUsers.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={6} className="text-center py-12 text-gray-500">
                         {searchTerm ? `No users found matching "${searchTerm}"` : 'No users found'}
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredAndSortedUsers.map((user: any, index: number) => (
+                    paginatedUsers.map((user: any, index: number) => (
                       <TableRow key={user.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}>
                         <TableCell className="font-medium text-gray-900">
                           {user.firstName} {user.lastName}
@@ -651,6 +670,36 @@ export default function AdminList() {
                 </TableBody>
               </Table>
             </div>
+            
+            {/* Users Pagination */}
+            {totalUserPages > 1 && (
+              <div className="flex items-center justify-between px-4 py-3 bg-white border-t">
+                <div className="text-sm text-gray-600">
+                  Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredAndSortedUsers.length)} of {filteredAndSortedUsers.length} users
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(currentPage - 1)}
+                    disabled={currentPage === 1}
+                  >
+                    Previous
+                  </Button>
+                  <span className="text-sm text-gray-600">
+                    Page {currentPage} of {totalUserPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(currentPage + 1)}
+                    disabled={currentPage === totalUserPages}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
+            )}
           </TabsContent>
 
           {/* Customers Tab */}
@@ -848,14 +897,14 @@ export default function AdminList() {
                         </div>
                       </TableCell>
                     </TableRow>
-                  ) : filteredAndSortedFlorists.length === 0 ? (
+                  ) : paginatedFlorists.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={6} className="text-center py-12 text-gray-500">
                         {searchTerm ? `No florists found matching "${searchTerm}"` : 'No florists found'}
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredAndSortedFlorists.map((florist: any, index: number) => (
+                    paginatedFlorists.map((florist: any, index: number) => (
                       <TableRow key={florist.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}>
                         <TableCell className="font-medium text-gray-900">
                           {florist.businessName}
@@ -911,6 +960,36 @@ export default function AdminList() {
                 </TableBody>
               </Table>
             </div>
+            
+            {/* Florists Pagination */}
+            {totalFloristPages > 1 && (
+              <div className="flex items-center justify-between px-4 py-3 bg-white border-t">
+                <div className="text-sm text-gray-600">
+                  Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredAndSortedFlorists.length)} of {filteredAndSortedFlorists.length} florists
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(currentPage - 1)}
+                    disabled={currentPage === 1}
+                  >
+                    Previous
+                  </Button>
+                  <span className="text-sm text-gray-600">
+                    Page {currentPage} of {totalFloristPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(currentPage + 1)}
+                    disabled={currentPage === totalFloristPages}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
+            )}
           </TabsContent>
         </Tabs>
 
@@ -1393,88 +1472,91 @@ export default function AdminList() {
             {editFlorist && (
               <div className="space-y-4">
                 {/* Profile Image Management */}
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
                   <div className="text-center">
                     <div className="flex justify-center mb-4">
                       {editFlorist.profileImageUrl && editFlorist.profileImageUrl.trim() !== '' ? (
                         <img 
                           src={editFlorist.profileImageUrl} 
                           alt="Current Profile"
-                          className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg"
+                          className="w-24 h-24 rounded-full object-cover border-2 border-gray-200"
                           onError={(e) => {
                             console.log('Image load error in edit dialog, hiding image');
                             (e.target as HTMLElement).style.display = 'none';
                           }}
                         />
                       ) : (
-                        <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center border-4 border-white shadow-lg">
-                          <FaImage className="h-12 w-12 text-gray-400" />
+                        <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center border-2 border-gray-200">
+                          <FaImage className="h-8 w-8 text-gray-400" />
                         </div>
                       )}
                     </div>
                     
                     <div className="space-y-2">
-                      <Label className="text-sm font-medium text-gray-700">Business Profile Photo</Label>
-                      <p className="text-xs text-gray-500 mb-3">Upload a professional photo of your business or arrangements</p>
-                      
-                      <ObjectUploader
-                        maxNumberOfFiles={1}
-                        maxFileSize={5242880} // 5MB
-                        onGetUploadParameters={async () => {
-                          const token = localStorage.getItem('customerToken');
-                          const response = await fetch('/api/objects/upload', {
-                            method: 'POST',
-                            headers: {
-                              'Content-Type': 'application/json',
-                              'Authorization': `Bearer ${token}`
-                            },
-                          });
+                      <Label className="text-sm font-medium text-gray-700">Profile Photo</Label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
                           
-                          if (!response.ok) {
-                            throw new Error('Failed to get upload URL');
-                          }
-                          
-                          const { uploadURL } = await response.json();
-                          return {
-                            method: 'PUT' as const,
-                            url: uploadURL,
-                          };
-                        }}
-                        onComplete={async (result: UploadResult) => {
                           try {
                             setUploadingImage(true);
                             
-                            if (result.successful && result.successful.length > 0) {
-                              const uploadedFile = result.successful[0];
-                              const imageURL = uploadedFile.uploadURL;
+                            // Get upload URL
+                            const token = localStorage.getItem('customerToken');
+                            const response = await fetch('/api/objects/upload', {
+                              method: 'POST',
+                              headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                              },
+                            });
+                            
+                            if (!response.ok) {
+                              throw new Error('Failed to get upload URL');
+                            }
+                            
+                            const { uploadURL } = await response.json();
+                            
+                            // Upload file directly
+                            const uploadResponse = await fetch(uploadURL, {
+                              method: 'PUT',
+                              body: file,
+                              headers: {
+                                'Content-Type': file.type,
+                              }
+                            });
+                            
+                            if (!uploadResponse.ok) {
+                              throw new Error('Failed to upload image');
+                            }
+                            
+                            // Update florist image in database
+                            const updateResponse = await fetch(`/api/florists/${editFlorist.id}/image`, {
+                              method: 'PUT',
+                              headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                              },
+                              body: JSON.stringify({ imageURL: uploadURL.split('?')[0] })
+                            });
+                            
+                            if (updateResponse.ok) {
+                              // Update the editFlorist state with new image URL
+                              const imageURL = uploadURL.split('?')[0];
+                              setEditFlorist({...editFlorist, profileImageUrl: imageURL});
                               
-                              console.log('Image uploaded successfully:', imageURL);
-                              
-                              // Update florist image in database
-                              const token = localStorage.getItem('customerToken');
-                              const response = await fetch(`/api/florists/${editFlorist.id}/image`, {
-                                method: 'PUT',
-                                headers: {
-                                  'Content-Type': 'application/json',
-                                  'Authorization': `Bearer ${token}`
-                                },
-                                body: JSON.stringify({ imageURL })
+                              toast({
+                                title: "Success",
+                                description: "Profile photo updated successfully!",
                               });
                               
-                              if (response.ok) {
-                                // Update the editFlorist state with new image URL
-                                setEditFlorist({...editFlorist, profileImageUrl: imageURL});
-                                
-                                toast({
-                                  title: "Success",
-                                  description: "Profile photo updated successfully!",
-                                });
-                                
-                                // Refresh florists list
-                                queryClient.invalidateQueries({ queryKey: ['/api/admin-clean/florists'] });
-                              } else {
-                                throw new Error('Failed to update florist image');
-                              }
+                              // Refresh florists list
+                              queryClient.invalidateQueries({ queryKey: ['/api/admin-clean/florists'] });
+                            } else {
+                              throw new Error('Failed to update florist image');
                             }
                           } catch (error) {
                             console.error('Error updating image:', error);
@@ -1487,13 +1569,12 @@ export default function AdminList() {
                             setUploadingImage(false);
                           }
                         }}
-                        buttonClassName="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                      >
-                        <div className="flex items-center justify-center gap-2">
-                          <FaCamera className="h-4 w-4" />
-                          {uploadingImage ? 'Uploading...' : 'Change Profile Photo'}
-                        </div>
-                      </ObjectUploader>
+                        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                        disabled={uploadingImage}
+                      />
+                      {uploadingImage && (
+                        <div className="text-sm text-blue-600 mt-2">Uploading...</div>
+                      )}
                     </div>
                   </div>
                 </div>
