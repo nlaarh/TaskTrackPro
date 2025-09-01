@@ -53,8 +53,8 @@ function Router() {
         return <AdminDashboard />;
       }} />
       <Route path="/admin" component={() => {
-        // Redirect /admin to /admin-dashboard
-        window.location.href = '/admin-dashboard';
+        // Redirect /admin to /simple-admin
+        window.location.href = '/simple-admin';
         return <div>Redirecting...</div>;
       }} />
       <Route path="/admin/users" component={AdminUsers} />
