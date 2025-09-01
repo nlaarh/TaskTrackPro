@@ -32,7 +32,8 @@ import {
   FaStore,
   FaSave,
   FaTimes,
-  FaFile
+  FaFile,
+  FaKey
 } from "react-icons/fa";
 
 type SortConfig = {
@@ -47,6 +48,8 @@ export default function AdminList() {
   const [editUser, setEditUser] = useState<any>(null);
   const [deleteUser, setDeleteUser] = useState<any>(null);
   const [showCreateUser, setShowCreateUser] = useState(false);
+  const [changePasswordUser, setChangePasswordUser] = useState<any>(null);
+  const [passwordForm, setPasswordForm] = useState({ newPassword: '', confirmPassword: '' });
   const [newUser, setNewUser] = useState({
     firstName: '',
     lastName: '',
@@ -122,6 +125,36 @@ export default function AdminList() {
     }
   });
 
+  // Change password mutation
+  const changePasswordMutation = useMutation({
+    mutationFn: async ({ userId, password }: { userId: string, password: string }) => {
+      const token = localStorage.getItem('customerToken');
+      const response = await fetch(`/api/admin/users/${userId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ password }),
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to change password: ${errorText}`);
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin-clean/users'] });
+      toast({ title: "Success", description: "Password changed successfully" });
+      setChangePasswordUser(null);
+      setPasswordForm({ newPassword: '', confirmPassword: '' });
+    },
+    onError: (error: any) => {
+      console.error('Change password error:', error);
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
+  });
+
   // Delete user mutation
   const deleteUserMutation = useMutation({
     mutationFn: async (userId: string) => {
@@ -178,6 +211,26 @@ export default function AdminList() {
     }
   };
 
+  // Handle change password
+  const handleChangePasswordSubmit = () => {
+    if (!passwordForm.newPassword || !passwordForm.confirmPassword) {
+      toast({ title: "Error", description: "Please fill in both password fields", variant: "destructive" });
+      return;
+    }
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      toast({ title: "Error", description: "Passwords do not match", variant: "destructive" });
+      return;
+    }
+    if (passwordForm.newPassword.length < 6) {
+      toast({ title: "Error", description: "Password must be at least 6 characters long", variant: "destructive" });
+      return;
+    }
+    changePasswordMutation.mutate({ 
+      userId: changePasswordUser.id, 
+      password: passwordForm.newPassword 
+    });
+  };
+
   // Handler functions for view, edit, delete actions
   const handleView = (type: string, item: any) => {
     console.log(`View ${type}:`, item);
@@ -217,6 +270,11 @@ export default function AdminList() {
     } else if (type === 'user') {
       setDeleteUser(item);
     }
+  };
+
+  const handleChangePassword = (user: any) => {
+    setChangePasswordUser(user);
+    setPasswordForm({ newPassword: '', confirmPassword: '' });
   };
 
   // Fetch users data
@@ -553,6 +611,15 @@ export default function AdminList() {
                             <Button 
                               variant="ghost" 
                               size="sm" 
+                              className="h-10 w-10 p-0 hover:bg-gradient-to-r hover:from-orange-50 hover:to-orange-100 hover:text-orange-700 transition-all duration-300 rounded-lg border border-transparent hover:border-orange-300 hover:shadow-md group"
+                              title="Change Password"
+                              onClick={() => handleChangePassword(user)}
+                            >
+                              <FaKey className="h-4 w-4 text-orange-600 group-hover:scale-110 transition-transform duration-200" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
                               className="h-10 w-10 p-0 hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100 hover:text-red-700 transition-all duration-300 rounded-lg border border-transparent hover:border-red-300 hover:shadow-md group"
                               title="Delete User"
                               onClick={() => handleDelete('user', user)}
@@ -666,6 +733,15 @@ export default function AdminList() {
                               onClick={() => handleEdit('user', customer)}
                             >
                               <FaEdit className="h-4 w-4 text-emerald-600 group-hover:scale-110 transition-transform duration-200" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-10 w-10 p-0 hover:bg-gradient-to-r hover:from-orange-50 hover:to-orange-100 hover:text-orange-700 transition-all duration-300 rounded-lg border border-transparent hover:border-orange-300 hover:shadow-md group"
+                              title="Change Password"
+                              onClick={() => handleChangePassword(customer)}
+                            >
+                              <FaKey className="h-4 w-4 text-orange-600 group-hover:scale-110 transition-transform duration-200" />
                             </Button>
                             <Button 
                               variant="ghost" 
@@ -920,17 +996,7 @@ export default function AdminList() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div>
-                  <Label htmlFor="newPassword">New Password (Optional)</Label>
-                  <Input
-                    id="newPassword"
-                    type="password"
-                    placeholder="Leave blank to keep current password"
-                    value={editUser.newPassword || ''}
-                    onChange={(e) => setEditUser({...editUser, newPassword: e.target.value})}
-                  />
-                  <p className="text-xs text-gray-500 mt-1">Only enter a password if you want to change it</p>
-                </div>
+
                 <div className="flex gap-2 pt-4">
                   <Button 
                     onClick={handleUpdateUser}
@@ -978,6 +1044,64 @@ export default function AdminList() {
                     {deleteUserMutation.isPending ? 'Deleting...' : 'Delete User'}
                   </Button>
                   <Button variant="outline" onClick={() => setDeleteUser(null)}>
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Change Password Dialog */}
+        <Dialog open={!!changePasswordUser} onOpenChange={() => setChangePasswordUser(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FaKey className="h-5 w-5 text-orange-600" />
+                Change Password for {changePasswordUser?.firstName} {changePasswordUser?.lastName}
+              </DialogTitle>
+            </DialogHeader>
+            {changePasswordUser && (
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="newPassword">New Password</Label>
+                  <Input
+                    id="newPassword"
+                    type="password"
+                    placeholder="Enter new password"
+                    value={passwordForm.newPassword}
+                    onChange={(e) => setPasswordForm({...passwordForm, newPassword: e.target.value})}
+                    autoComplete="new-password"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    placeholder="Confirm new password"
+                    value={passwordForm.confirmPassword}
+                    onChange={(e) => setPasswordForm({...passwordForm, confirmPassword: e.target.value})}
+                    autoComplete="new-password"
+                  />
+                  {passwordForm.newPassword && passwordForm.confirmPassword && passwordForm.newPassword !== passwordForm.confirmPassword && (
+                    <p className="text-sm text-red-600 mt-1">Passwords do not match</p>
+                  )}
+                  {passwordForm.newPassword && passwordForm.confirmPassword && passwordForm.newPassword === passwordForm.confirmPassword && (
+                    <p className="text-sm text-green-600 mt-1">Passwords match ✓</p>
+                  )}
+                </div>
+                <div className="flex gap-2 pt-4">
+                  <Button 
+                    onClick={handleChangePasswordSubmit}
+                    disabled={changePasswordMutation.isPending || passwordForm.newPassword !== passwordForm.confirmPassword || !passwordForm.newPassword}
+                    className="flex-1"
+                  >
+                    <FaKey className="h-4 w-4 mr-2" />
+                    {changePasswordMutation.isPending ? 'Changing...' : 'Change Password'}
+                  </Button>
+                  <Button variant="outline" onClick={() => setChangePasswordUser(null)}>
+                    <FaTimes className="h-4 w-4 mr-2" />
                     Cancel
                   </Button>
                 </div>
