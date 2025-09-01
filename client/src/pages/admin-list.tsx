@@ -1475,32 +1475,35 @@ export default function AdminList() {
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
                   <div className="text-center">
                     <div className="flex justify-center mb-4">
-                      {editFlorist.profileImageUrl && editFlorist.profileImageUrl.trim() !== '' ? (
-                        <img 
-                          src={editFlorist.profileImageUrl.startsWith('http') ? 
-                            editFlorist.profileImageUrl : 
-                            editFlorist.profileImageUrl.startsWith('/objects/') ? 
-                            editFlorist.profileImageUrl : 
-                            `/objects/${editFlorist.profileImageUrl.replace(/^\//, '')}`
-                          } 
-                          alt="Current Profile"
-                          className="w-32 h-32 rounded-lg object-cover border-2 border-gray-200"
-                          onLoad={() => console.log('Image loaded successfully:', editFlorist.profileImageUrl)}
-                          onError={(e) => {
-                            console.log('Image load error:', editFlorist.profileImageUrl);
-                            const target = e.target as HTMLImageElement;
-                            target.style.display = 'none';
-                            // Show fallback
-                            const fallback = target.nextElementSibling as HTMLElement;
-                            if (fallback) fallback.style.display = 'flex';
-                          }}
-                        />
-                      ) : null}
-                      <div 
-                        className="w-32 h-32 rounded-lg bg-gray-200 flex items-center justify-center border-2 border-gray-200"
-                        style={{ display: editFlorist.profileImageUrl ? 'none' : 'flex' }}
-                      >
-                        <FaImage className="h-12 w-12 text-gray-400" />
+                      <div className="relative">
+                        {editFlorist.profileImageUrl && editFlorist.profileImageUrl.trim() !== '' ? (
+                          <img 
+                            src={editFlorist.profileImageUrl.startsWith('http') ? 
+                              editFlorist.profileImageUrl : 
+                              editFlorist.profileImageUrl.startsWith('/objects/') ? 
+                              editFlorist.profileImageUrl : 
+                              `/objects/${editFlorist.profileImageUrl.replace(/^\//, '')}`
+                            } 
+                            alt="Current Profile"
+                            className="w-32 h-32 rounded-lg object-cover border-2 border-gray-200"
+                            onLoad={() => console.log('Image loaded successfully:', editFlorist.profileImageUrl)}
+                            onError={(e) => {
+                              console.log('Image load error:', editFlorist.profileImageUrl);
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                              // Show fallback
+                              const fallback = target.parentNode?.querySelector('.fallback-image') as HTMLElement;
+                              if (fallback) fallback.style.display = 'flex';
+                            }}
+                          />
+                        ) : null}
+                        <div 
+                          className={`w-32 h-32 rounded-lg bg-gray-200 flex items-center justify-center border-2 border-gray-200 fallback-image ${
+                            editFlorist.profileImageUrl && editFlorist.profileImageUrl.trim() !== '' ? 'hidden' : 'flex'
+                          }`}
+                        >
+                          <FaImage className="h-12 w-12 text-gray-400" />
+                        </div>
                       </div>
                     </div>
                     
@@ -1571,12 +1574,18 @@ export default function AdminList() {
                             console.log('Update result:', updateResult);
                             
                             // Update the editFlorist state with new image URL
-                            setEditFlorist({...editFlorist, profileImageUrl: cleanImageURL});
+                            const updatedFlorist = {...editFlorist, profileImageUrl: cleanImageURL};
+                            setEditFlorist(updatedFlorist);
+                            console.log('Updated florist state with image URL:', cleanImageURL);
                             
                             toast({
                               title: "Success",
                               description: "Profile photo updated successfully!",
                             });
+                            
+                            // Clear the file input
+                            const fileInput = document.getElementById(`florist-image-${editFlorist.id}`) as HTMLInputElement;
+                            if (fileInput) fileInput.value = '';
                             
                             // Refresh florists list
                             queryClient.invalidateQueries({ queryKey: ['/api/admin-clean/florists'] });
