@@ -15,6 +15,7 @@ interface Florist {
   name: string;
   email: string;
   businessName: string;
+  phone: string;
 }
 
 interface ComposeMessageProps {
@@ -34,14 +35,19 @@ export default function ComposeMessage({ isOpen, onClose, florists, preSelectedF
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Filter florists based on search
+  // Filter florists based on search - include business name, email, phone, and contact name
   const filteredFlorists = florists?.filter((florist: Florist) => {
     if (!searchTerm || searchTerm.length < 1) return false;
     const term = searchTerm.toLowerCase();
     const businessName = florist.businessName?.toLowerCase() || "";
     const name = florist.name?.toLowerCase() || "";
     const email = florist.email?.toLowerCase() || "";
-    return businessName.includes(term) || name.includes(term) || email.includes(term);
+    const phone = florist.phone?.toLowerCase() || "";
+    
+    return businessName.includes(term) || 
+           name.includes(term) || 
+           email.includes(term) || 
+           phone.includes(term);
   }) || [];
 
   // Pre-select florist if coming from admin list
@@ -152,7 +158,7 @@ export default function ComposeMessage({ isOpen, onClose, florists, preSelectedF
                 <Input
                   value={searchTerm}
                   onChange={(e) => handleSearchChange(e.target.value)}
-                  placeholder="Type to search for a florist..."
+                  placeholder="Search by business name, email, phone, or contact name..."
                   className="w-full"
                   autoFocus
                 />
@@ -177,6 +183,11 @@ export default function ComposeMessage({ isOpen, onClose, florists, preSelectedF
                           <div className="text-xs text-gray-500">
                             {florist.email}
                           </div>
+                          {florist.phone && (
+                            <div className="text-xs text-gray-500">
+                              {florist.phone}
+                            </div>
+                          )}
                           {florist.name && florist.businessName && (
                             <div className="text-xs text-gray-400">
                               Contact: {florist.name}

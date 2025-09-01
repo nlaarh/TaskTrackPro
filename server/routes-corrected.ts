@@ -814,7 +814,7 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
       console.log('📋 Getting florist list for admin messaging');
       
       const query = `
-        SELECT fa.id, fa.first_name, fa.last_name, fa.email, f.business_name
+        SELECT fa.id, fa.first_name, fa.last_name, fa.email, f.business_name, f.phone
         FROM florist_auth fa
         LEFT JOIN florists f ON fa.id = f.id
         ORDER BY fa.first_name, fa.last_name
@@ -826,7 +826,8 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
         id: row.id,
         name: `${row.first_name} ${row.last_name}`,
         email: row.email,
-        businessName: row.business_name || 'No business name'
+        businessName: row.business_name || `${row.first_name} ${row.last_name}'s Florist`,
+        phone: row.phone || ''
       }));
       
       res.json(florists);

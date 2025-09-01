@@ -38,6 +38,7 @@ interface Florist {
   name: string;
   email: string;
   businessName: string;
+  phone: string;
 }
 
 export default function AdminMessagesRedesign() {
