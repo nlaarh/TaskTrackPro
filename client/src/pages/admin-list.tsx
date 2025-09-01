@@ -156,6 +156,40 @@ export default function AdminList() {
     }
   };
 
+  // Missing handler functions for florists
+  const handleView = (type: string, item: any) => {
+    console.log(`View ${type}:`, item);
+    if (type === 'florist') {
+      // For now, just show an alert - can be enhanced later
+      alert(`Viewing florist: ${item.businessName}\nEmail: ${item.email}\nLocation: ${item.city}, ${item.state}`);
+    } else if (type === 'user') {
+      setViewUser(item);
+    }
+  };
+
+  const handleEdit = (type: string, item: any) => {
+    console.log(`Edit ${type}:`, item);
+    if (type === 'florist') {
+      // For now, just show an alert - can be enhanced later  
+      alert(`Edit functionality for florist "${item.businessName}" will be implemented in future update.`);
+    } else if (type === 'user') {
+      setEditUser(item);
+    }
+  };
+
+  const handleDelete = (type: string, item: any) => {
+    console.log(`Delete ${type}:`, item);
+    if (type === 'florist') {
+      // For now, just show an alert - can be enhanced later
+      const confirmed = confirm(`Are you sure you want to remove florist "${item.businessName}"? This action cannot be undone.`);
+      if (confirmed) {
+        alert('Delete functionality for florists will be implemented in future update.');
+      }
+    } else if (type === 'user') {
+      setDeleteUser(item);
+    }
+  };
+
   // Fetch users data
   const { data: users = [], isLoading: usersLoading, error: usersError } = useQuery({
     queryKey: ['/api/admin-clean/users'],
