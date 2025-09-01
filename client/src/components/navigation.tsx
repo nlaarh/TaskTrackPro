@@ -165,30 +165,12 @@ export default function Navigation() {
               </div>
             )}
             
-            {/* Admin Menu */}
-            <NavigationMenu>
-              <NavigationMenuList>
-                <NavigationMenuItem>
-                  <NavigationMenuTrigger className="text-gray-700 hover:text-gray-900 font-medium">
-                    <Shield className="h-4 w-4 mr-2" />
-                    Admin
-                  </NavigationMenuTrigger>
-                  <NavigationMenuContent>
-                    <div className="w-48 p-2">
-                      <NavigationMenuLink asChild>
-                        <Link
-                          href="/admin-list"
-                          className="flex items-center px-3 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors duration-200"
-                        >
-                          <Shield className="h-4 w-4 mr-2" />
-                          Admin Panel
-                        </Link>
-                      </NavigationMenuLink>
-                    </div>
-                  </NavigationMenuContent>
-                </NavigationMenuItem>
-              </NavigationMenuList>
-            </NavigationMenu>
+            <Link href="/admin-list">
+              <Button variant="ghost" size="sm" className="text-gray-700 hover:text-gray-900">
+                <Shield className="h-4 w-4 mr-2" />
+                Admin
+              </Button>
+            </Link>
             
             <Button asChild className="bg-gray-900 hover:bg-gray-800 text-white">
               <Link href="/florist-register">
