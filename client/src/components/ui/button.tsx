@@ -9,11 +9,11 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        // Clean secondary button (Google/Apple style)
-        default: "bg-white text-gray-700 hover:bg-gray-50 border border-gray-300 hover:border-gray-400 rounded-md px-4 py-2 text-sm font-medium transition-colors duration-200",
+        // Modern SaaS-style secondary button
+        default: "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md rounded-lg font-medium transition-all duration-200",
         
-        // Clean minimal button (Google/Apple style)
-        action: "bg-gray-900 text-white hover:bg-gray-800 border border-gray-900 hover:border-gray-800 rounded-md px-4 py-2 text-sm font-medium transition-colors duration-200",
+        // Modern SaaS-style primary button
+        action: "bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 font-semibold rounded-lg",
         
         // Destructive remains red
         destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-sm hover:shadow-md",

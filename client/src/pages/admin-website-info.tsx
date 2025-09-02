@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Save, Globe, Phone, Mail, MapPin, Clock, Facebook, Instagram, Twitter, Linkedin, Youtube } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import Navigation from "@/components/navigation";
 
 interface WebsiteInfo {
   id: number;
@@ -142,15 +143,20 @@ export default function AdminWebsiteInfo() {
   const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Website Information</h1>
-        <p className="text-gray-600 mt-2">Manage your website's contact information and business details</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50">
+      <Navigation />
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="mb-8 text-center">
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl shadow-lg mb-6">
+          <Globe className="h-8 w-8 text-white" />
+        </div>
+        <h1 className="text-4xl font-bold text-gray-900 mb-3">Website Information</h1>
+        <p className="text-gray-600 text-lg max-w-2xl mx-auto">Manage your website's contact information and business details with our beautiful admin interface</p>
       </div>
 
       <form onSubmit={handleSubmit}>
-        <Tabs defaultValue="basic" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+        <Tabs defaultValue="basic" className="space-y-8">
+          <TabsList className="grid w-full grid-cols-4 bg-white/70 backdrop-blur-sm border border-gray-200/50 shadow-lg rounded-xl p-2">
             <TabsTrigger value="basic">Basic Info</TabsTrigger>
             <TabsTrigger value="contact">Contact</TabsTrigger>
             <TabsTrigger value="social">Social Media</TabsTrigger>
@@ -158,7 +164,7 @@ export default function AdminWebsiteInfo() {
           </TabsList>
 
           <TabsContent value="basic">
-            <Card>
+            <Card className="bg-white/70 backdrop-blur-sm border border-gray-200/50 shadow-xl rounded-2xl overflow-hidden">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Globe className="h-5 w-5" />
@@ -217,7 +223,7 @@ export default function AdminWebsiteInfo() {
           </TabsContent>
 
           <TabsContent value="contact">
-            <Card>
+            <Card className="bg-white/70 backdrop-blur-sm border border-gray-200/50 shadow-xl rounded-2xl overflow-hidden">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Phone className="h-5 w-5" />
@@ -291,7 +297,7 @@ export default function AdminWebsiteInfo() {
           </TabsContent>
 
           <TabsContent value="social">
-            <Card>
+            <Card className="bg-white/70 backdrop-blur-sm border border-gray-200/50 shadow-xl rounded-2xl overflow-hidden">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Facebook className="h-5 w-5" />
@@ -354,7 +360,7 @@ export default function AdminWebsiteInfo() {
           </TabsContent>
 
           <TabsContent value="hours">
-            <Card>
+            <Card className="bg-white/70 backdrop-blur-sm border border-gray-200/50 shadow-xl rounded-2xl overflow-hidden">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Clock className="h-5 w-5" />
@@ -373,6 +379,7 @@ export default function AdminWebsiteInfo() {
                     <div className="flex items-center space-x-2">
                       <Switch
                         checked={!formData.businessHours?.[day as keyof typeof formData.businessHours]?.closed}
+                        className="data-[state=checked]:bg-blue-600"
                         onCheckedChange={(checked) => 
                           handleBusinessHoursChange(day, 'closed', !checked)
                         }
@@ -403,17 +410,26 @@ export default function AdminWebsiteInfo() {
           </TabsContent>
         </Tabs>
 
-        <div className="flex justify-end pt-6">
+        <div className="flex justify-end pt-8 border-t border-gray-200/50 bg-gradient-to-r from-white/80 to-blue-50/80 backdrop-blur-sm p-8 rounded-2xl shadow-xl -mx-4 -mb-4 mt-8">
           <Button 
             type="submit" 
             disabled={updateMutation.isPending}
             variant="action"
+            className="px-8 py-3 text-base shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300"
           >
-            <Save className="h-4 w-4 mr-2" />
-            {updateMutation.isPending ? "Saving..." : "Save Changes"}
+            <Save className="h-5 w-5 mr-3" />
+            {updateMutation.isPending ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Saving Changes...
+              </>
+            ) : (
+              "Save Changes"
+            )}
           </Button>
         </div>
       </form>
+      </div>
     </div>
   );
 }
