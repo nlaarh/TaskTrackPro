@@ -564,7 +564,7 @@ export class CorrectedDatabaseStorage implements IStorage {
   async getAllUsers(): Promise<User[]> {
     try {
       console.log('getAllUsers: Starting query...');
-      console.log('Database URL:', process.env.DATABASE_URL ? 'configured' : 'missing');
+      console.log('Using Railway database connection');
       
       // Use direct pool connection to bypass any Drizzle ORM issues  
       const testPool = new Pool({
