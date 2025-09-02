@@ -23,10 +23,10 @@
   --accent: hsl(0, 0%, 96%);
   --accent-foreground: hsl(0, 0%, 13%);
   
-  /* Beautiful gradient action button */
-  --action: linear-gradient(to right, #3b82f6, #10b981);
+  /* Clean professional action button */
+  --action: hsl(210, 79%, 51%);
   --action-foreground: hsl(0, 0%, 100%);
-  --action-hover: linear-gradient(to right, #2563eb, #059669);
+  --action-hover: hsl(210, 79%, 41%);
   
   /* Destructive actions remain red */
   --destructive: hsl(0, 84%, 60%);

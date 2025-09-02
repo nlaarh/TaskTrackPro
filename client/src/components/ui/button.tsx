@@ -12,8 +12,8 @@ const buttonVariants = cva(
         // Gmail-style default button (neutral gray)
         default: "bg-[hsl(0,0%,96%)] text-[hsl(0,0%,13%)] hover:bg-[hsl(0,0%,92%)] border border-[hsl(0,0%,87%)] shadow-sm hover:shadow-md",
         
-        // Beautiful blue-to-green gradient action button
-        action: "bg-gradient-to-r from-blue-500 to-green-500 text-white hover:from-blue-600 hover:to-green-600 shadow-md hover:shadow-lg transition-all duration-200",
+        // Clean professional action button (Apple/Gmail style)
+        action: "bg-[#1a73e8] text-white hover:bg-[#1557b0] shadow-sm hover:shadow-md transition-colors duration-200 font-medium",
         
         // Destructive remains red
         destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-sm hover:shadow-md",
