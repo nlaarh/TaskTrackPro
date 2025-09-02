@@ -307,12 +307,12 @@ export default function Contact() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
-              <p className="text-blue-800 mb-2">
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
+              <p className="text-gray-800 mb-2">
                 <Mail className="h-6 w-6 mx-auto mb-2" />
                 Ready to get in touch?
               </p>
-              <p className="text-blue-700">
+              <p className="text-gray-700">
                 Please email us at{' '}
                 <a 
                   href={`mailto:${websiteInfo.email}`}

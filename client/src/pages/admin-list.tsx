@@ -492,13 +492,13 @@ export default function AdminList() {
               )}
               <Button
                 onClick={() => setShowCreateUser(true)}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
+                variant="action"
               >
                 <FaUserPlus className="h-4 w-4 mr-2" />
                 Add User
               </Button>
               <Button
-                className="bg-green-600 hover:bg-green-700 text-white"
+                variant="action"
               >
                 <FaStore className="h-4 w-4 mr-2" />
                 Add Florist
@@ -1666,7 +1666,7 @@ export default function AdminList() {
                           type="button"
                           onClick={() => document.getElementById(`florist-image-${editFlorist.id}`)?.click()}
                           disabled={uploadingImage}
-                          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-sm"
+                          variant="action"
                         >
                           {uploadingImage ? (
                             <>
@@ -1807,6 +1807,7 @@ export default function AdminList() {
                       toast({ title: "Success", description: "Florist profile updated successfully!" });
                       setEditFlorist(null);
                     }}
+                    variant="action"
                     className="flex-1"
                     disabled={uploadingImage}
                   >

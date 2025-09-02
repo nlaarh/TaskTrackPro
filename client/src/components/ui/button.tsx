@@ -9,11 +9,11 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        // Gmail-style default button (neutral gray)
-        default: "bg-[hsl(0,0%,96%)] text-[hsl(0,0%,13%)] hover:bg-[hsl(0,0%,92%)] border border-[hsl(0,0%,87%)] shadow-sm hover:shadow-md",
+        // Clean secondary button (Google/Apple style)
+        default: "bg-white text-gray-700 hover:bg-gray-50 border border-gray-300 hover:border-gray-400 rounded-md px-4 py-2 text-sm font-medium transition-colors duration-200",
         
-        // Clean professional action button (Apple/Gmail style)
-        action: "bg-[#1a73e8] text-white hover:bg-[#1557b0] shadow-sm hover:shadow-md transition-colors duration-200 font-medium",
+        // Clean minimal button (Google/Apple style)
+        action: "bg-gray-900 text-white hover:bg-gray-800 border border-gray-900 hover:border-gray-800 rounded-md px-4 py-2 text-sm font-medium transition-colors duration-200",
         
         // Destructive remains red
         destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-sm hover:shadow-md",

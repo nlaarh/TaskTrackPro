@@ -407,7 +407,7 @@ export default function AdminWebsiteInfo() {
           <Button 
             type="submit" 
             disabled={updateMutation.isPending}
-            className="bg-blue-600 hover:bg-blue-700"
+            variant="action"
           >
             <Save className="h-4 w-4 mr-2" />
             {updateMutation.isPending ? "Saving..." : "Save Changes"}
