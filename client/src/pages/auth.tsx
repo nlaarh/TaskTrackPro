@@ -271,7 +271,7 @@ export default function Auth() {
           <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
             <CardHeader className="text-center space-y-4">
               <div className="flex justify-center">
-                <div className="bg-gradient-to-r from-gray-600 to-gray-700 p-3 rounded-full">
+                <div className="bg-gradient-to-r from-blue-500 to-green-500 p-3 rounded-full">
                   <Flower2 className="h-8 w-8 text-white" />
                 </div>
               </div>
@@ -789,7 +789,7 @@ export default function Auth() {
             </div>
           </div>
 
-          <div className="bg-gradient-to-r from-gray-600 to-gray-700 p-6 rounded-xl text-white">
+          <div className="bg-gradient-to-r from-blue-500 to-green-500 p-6 rounded-xl text-white">
             <Star className="h-8 w-8 mb-3" />
             <h3 className="font-semibold mb-2">Join Our Growing Community</h3>
             <p className="text-gray-100 text-sm">

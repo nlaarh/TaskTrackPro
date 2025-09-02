@@ -7,7 +7,7 @@ FloriHub is a mobile-friendly florist directory platform connecting customers wi
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
-Design preferences: Clean Apple-like white aesthetic, easy on the eyes, professional look with minimal colors (no pink, no dark backgrounds, no strong green), wedding/celebration focused imagery, sophisticated aesthetic.
+Design preferences: Clean, light aesthetic with beautiful blue-to-green gradient buttons for primary actions. Neutral gray styling for secondary actions. Professional look with sophisticated design, no dark backgrounds. Wedding/celebration focused imagery with elegant color schemes.
 Database preference: Use external PostgreSQL database (yamanote.proxy.rlwy.net:18615/flouristdb) - do not change without approval.
 Change approval required: Do not change design or database configuration without explicit user approval.
 
