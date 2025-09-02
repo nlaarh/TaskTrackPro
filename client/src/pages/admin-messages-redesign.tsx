@@ -286,7 +286,8 @@ export default function AdminMessagesRedesign() {
                     <p className="text-xs text-gray-500 mt-2">Please log in as admin to access messages</p>
                     <Button 
                       onClick={() => window.location.href = '/admin/login'} 
-                      className="mt-3 bg-blue-600 text-white hover:bg-blue-700"
+                      className="mt-3"
+                      variant="action"
                     >
                       Go to Admin Login
                     </Button>
@@ -304,8 +305,8 @@ export default function AdminMessagesRedesign() {
                       onClick={() => handleSelectMessage(message)}
                       className={cn(
                         "p-4 cursor-pointer hover:bg-gray-50 border-l-4 border-transparent",
-                        selectedMessage?.id === message.id && "bg-blue-50 border-l-blue-500",
-                        !message.is_read && "bg-blue-50/30 font-medium"
+                        selectedMessage?.id === message.id && "bg-gray-50 border-l-gray-500",
+                        !message.is_read && "bg-gray-50/30 font-medium"
                       )}
                     >
                       <div className="flex items-start justify-between mb-2">
@@ -326,7 +327,7 @@ export default function AdminMessagesRedesign() {
                         </div>
                         <div className="flex items-center gap-2">
                           {!message.is_read && (
-                            <div className="h-2 w-2 rounded-full bg-blue-500"></div>
+                            <div className="h-2 w-2 rounded-full bg-green-500"></div>
                           )}
                           <span className="text-xs text-gray-400">
                             {formatDate(message.created_at)}

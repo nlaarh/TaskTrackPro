@@ -264,14 +264,14 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-8 items-center">
         {/* Left Side - Form */}
         <div className="w-full max-w-md mx-auto">
           <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
             <CardHeader className="text-center space-y-4">
               <div className="flex justify-center">
-                <div className="bg-gradient-to-r from-blue-600 to-green-600 p-3 rounded-full">
+                <div className="bg-gradient-to-r from-gray-600 to-gray-700 p-3 rounded-full">
                   <Flower2 className="h-8 w-8 text-white" />
                 </div>
               </div>
@@ -363,7 +363,8 @@ export default function Auth() {
 
                   <Button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700"
+                    className="w-full"
+                    variant="action"
                     disabled={loginMutation.isPending}
                   >
                     {loginMutation.isPending ? "Signing In..." : "Sign In"}
@@ -381,7 +382,7 @@ export default function Auth() {
                         onClick={() => setUserRole("customer")}
                         className={`p-3 rounded-lg border-2 transition-colors ${
                           userRole === "customer"
-                            ? "border-blue-500 bg-blue-50 text-blue-700"
+                            ? "border-gray-500 bg-gray-50 text-gray-700"
                             : "border-gray-200 hover:border-gray-300"
                         }`}
                       >
@@ -393,7 +394,7 @@ export default function Auth() {
                         onClick={() => setUserRole("florist")}
                         className={`p-3 rounded-lg border-2 transition-colors ${
                           userRole === "florist"
-                            ? "border-green-500 bg-green-50 text-green-700"
+                            ? "border-gray-500 bg-gray-50 text-gray-700"
                             : "border-gray-200 hover:border-gray-300"
                         }`}
                       >
@@ -508,7 +509,8 @@ export default function Auth() {
 
                       <Button
                         type="submit"
-                        className="w-full bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700"
+                        className="w-full"
+                        variant="action"
                         disabled={customerRegisterMutation.isPending}
                       >
                         {customerRegisterMutation.isPending ? "Creating Account..." : "Create Customer Account"}
@@ -743,7 +745,8 @@ export default function Auth() {
 
                       <Button
                         type="submit"
-                        className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
+                        className="w-full"
+                        variant="action"
                         disabled={floristRegisterMutation.isPending}
                       >
                         {floristRegisterMutation.isPending ? "Creating Account..." : "Create Florist Account"}
@@ -771,7 +774,7 @@ export default function Auth() {
 
           <div className="grid grid-cols-2 gap-6">
             <div className="bg-white/60 backdrop-blur-sm p-6 rounded-xl border border-gray-200">
-              <User className="h-8 w-8 text-blue-600 mb-3" />
+              <User className="h-8 w-8 text-gray-600 mb-3" />
               <h3 className="font-semibold text-gray-900 mb-2">For Customers</h3>
               <p className="text-gray-600 text-sm">
                 Discover local florists, browse stunning arrangements, and find the perfect flowers for any occasion.
@@ -786,10 +789,10 @@ export default function Auth() {
             </div>
           </div>
 
-          <div className="bg-gradient-to-r from-blue-600 to-green-600 p-6 rounded-xl text-white">
+          <div className="bg-gradient-to-r from-gray-600 to-gray-700 p-6 rounded-xl text-white">
             <Star className="h-8 w-8 mb-3" />
             <h3 className="font-semibold mb-2">Join Our Growing Community</h3>
-            <p className="text-blue-100 text-sm">
+            <p className="text-gray-100 text-sm">
               Over 500+ professional florists and thousands of satisfied customers trust FloriHub 
               for their floral needs. Be part of something beautiful.
             </p>

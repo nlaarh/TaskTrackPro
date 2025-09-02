@@ -3,32 +3,43 @@
 @tailwind utilities;
 
 :root {
+  /* Gmail-inspired light theme */
   --background: hsl(0, 0%, 100%);
-  --foreground: hsl(0, 0%, 9%);
-  --muted: hsl(210, 40%, 98%);
+  --foreground: hsl(0, 0%, 13%);
+  --muted: hsl(0, 0%, 98%);
   --muted-foreground: hsl(0, 0%, 45%);
   --popover: hsl(0, 0%, 100%);
-  --popover-foreground: hsl(0, 0%, 9%);
+  --popover-foreground: hsl(0, 0%, 13%);
   --card: hsl(0, 0%, 100%);
-  --card-foreground: hsl(0, 0%, 9%);
-  --border: hsl(220, 13%, 91%);
-  --input: hsl(220, 13%, 91%);
-  --primary: hsl(220, 14%, 96%);
-  --primary-foreground: hsl(0, 0%, 9%);
-  --secondary: hsl(210, 40%, 98%);
-  --secondary-foreground: hsl(0, 0%, 9%);
-  --accent: hsl(210, 40%, 96%);
-  --accent-foreground: hsl(0, 0%, 9%);
+  --card-foreground: hsl(0, 0%, 13%);
+  --border: hsl(0, 0%, 91%);
+  --input: hsl(0, 0%, 91%);
+  
+  /* Gmail-style neutral buttons and actions */
+  --primary: hsl(0, 0%, 96%);
+  --primary-foreground: hsl(0, 0%, 13%);
+  --secondary: hsl(0, 0%, 98%);
+  --secondary-foreground: hsl(0, 0%, 13%);
+  --accent: hsl(0, 0%, 96%);
+  --accent-foreground: hsl(0, 0%, 13%);
+  
+  /* Gmail-style action button (subtle green/neutral) */
+  --action: hsl(120, 25%, 95%);
+  --action-foreground: hsl(120, 35%, 25%);
+  --action-hover: hsl(120, 30%, 92%);
+  
+  /* Destructive actions remain red */
   --destructive: hsl(0, 84%, 60%);
   --destructive-foreground: hsl(0, 0%, 98%);
-  --ring: hsl(0, 0%, 63%);
-  --radius: 0.75rem;
   
-  /* FloriHub clean colors */
-  --primary-light: hsl(220, 14%, 98%);
-  --primary-dark: hsl(0, 0%, 20%);
-  --accent-light: hsl(210, 40%, 98%);
-  --accent-medium: hsl(220, 13%, 91%);
+  --ring: hsl(0, 0%, 63%);
+  --radius: 0.5rem;
+  
+  /* FloriHub Gmail-inspired colors */
+  --gmail-neutral: hsl(0, 0%, 96%);
+  --gmail-neutral-dark: hsl(0, 0%, 13%);
+  --gmail-hover: hsl(0, 0%, 92%);
+  --gmail-border: hsl(0, 0%, 87%);
   --text-soft: hsl(0, 0%, 45%);
   --text-medium: hsl(0, 0%, 25%);
 }

@@ -69,7 +69,7 @@ export default function AdminDashboard() {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <div className="relative">
-                <Avatar className="h-16 w-16 bg-gradient-to-br from-blue-500 to-purple-600">
+                <Avatar className="h-16 w-16 bg-gradient-to-br from-gray-500 to-gray-600">
                   <AvatarFallback className="text-white text-xl font-bold">
                     <Shield className="h-8 w-8" />
                   </AvatarFallback>
@@ -92,18 +92,18 @@ export default function AdminDashboard() {
 
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="border-0 shadow-sm bg-gradient-to-br from-blue-50 to-blue-100/50">
+          <Card className="border-0 shadow-sm bg-gradient-to-br from-gray-50 to-gray-100/50">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-blue-600">Total Users</p>
-                  <p className="text-3xl font-bold text-blue-900">{usersLoading ? 'Loading...' : users.length}</p>
-                  <p className="text-xs text-blue-600/70 mt-1">
+                  <p className="text-sm font-medium text-gray-600">Total Users</p>
+                  <p className="text-3xl font-bold text-gray-900">{usersLoading ? 'Loading...' : users.length}</p>
+                  <p className="text-xs text-gray-600/70 mt-1">
                     <TrendingUp className="h-3 w-3 inline mr-1" />
                     +12% from last month
                   </p>
                 </div>
-                <Users className="h-8 w-8 text-blue-500" />
+                <Users className="h-8 w-8 text-gray-500" />
               </div>
             </CardContent>
           </Card>

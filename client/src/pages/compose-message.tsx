@@ -201,7 +201,7 @@ export default function ComposeMessage({ isOpen, onClose, florists, preSelectedF
                         className="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer border-b last:border-b-0"
                       >
                         <Avatar className="h-10 w-10">
-                          <AvatarFallback className="bg-blue-100 text-blue-700">
+                          <AvatarFallback className="bg-gray-100 text-gray-700">
                             {(florist.businessName || florist.name)?.charAt(0)?.toUpperCase() || 'F'}
                           </AvatarFallback>
                         </Avatar>
@@ -270,14 +270,14 @@ export default function ComposeMessage({ isOpen, onClose, florists, preSelectedF
             )}
 
             {selectedFlorist && (
-              <div className="p-3 bg-blue-50 border border-blue-200 rounded-md flex items-center justify-between">
+              <div className="p-3 bg-gray-50 border border-gray-200 rounded-md flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Avatar className="h-8 w-8">
-                    <AvatarFallback className="bg-blue-600 text-white text-sm">
+                    <AvatarFallback className="bg-gray-600 text-white text-sm">
                       {(selectedFlorist.businessName || selectedFlorist.name)?.charAt(0)?.toUpperCase() || 'F'}
                     </AvatarFallback>
                   </Avatar>
-                  <span className="text-sm font-medium text-blue-900">
+                  <span className="text-sm font-medium text-gray-900">
                     {selectedFlorist.businessName || `${selectedFlorist.name}'s Florist`}
                   </span>
                 </div>
@@ -290,7 +290,7 @@ export default function ComposeMessage({ isOpen, onClose, florists, preSelectedF
                     setSearchTerm("");
                     setShowResults(false);
                   }}
-                  className="text-blue-600 hover:text-blue-800 h-auto p-1"
+                  className="text-gray-600 hover:text-gray-800 h-auto p-1"
                 >
                   ✕
                 </Button>
@@ -346,7 +346,7 @@ export default function ComposeMessage({ isOpen, onClose, florists, preSelectedF
             <Button 
               type="submit" 
               disabled={sendMessageMutation.isPending}
-              className="bg-blue-600 hover:bg-blue-700"
+              variant="action"
             >
               {sendMessageMutation.isPending ? (
                 <>
