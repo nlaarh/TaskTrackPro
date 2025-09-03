@@ -13,7 +13,7 @@ import {
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Heart, Menu, Phone, User, LogOut, Store, Search, Shield, Users, ChevronDown, MessageSquare, Bell, Globe, BarChart3 } from "lucide-react";
+import { Heart, Menu, Phone, User, LogOut, Store, Search, Shield, Users, ChevronDown, MessageSquare, Bell, Globe, BarChart3, FileText, CheckSquare } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -71,6 +71,7 @@ export default function Navigation() {
   const publicNavItems = [
     { href: "/", label: "Home" },
     { href: "/search", label: "Search Members" },
+    { href: "/get-quote", label: "Get Event Quote" },
     { href: "/contact", label: "Contact" },
   ];
 
@@ -129,6 +130,20 @@ export default function Navigation() {
               <Link href="/search">Search Members</Link>
             </Button>
             
+            <Button 
+              asChild
+              variant="ghost" 
+              className={cn(
+                "text-gray-700 hover:text-gray-900 hover:bg-gray-50 font-medium px-4 py-2",
+                location.startsWith("/get-quote") && "text-gray-900 bg-gray-50"
+              )}
+            >
+              <Link href="/get-quote">
+                <FileText className="h-4 w-4 mr-2" />
+                Get Event Quote
+              </Link>
+            </Button>
+            
             <NavigationMenu>
               <NavigationMenuList>
                 <NavigationMenuItem>
@@ -154,21 +169,6 @@ export default function Navigation() {
               </NavigationMenuList>
             </NavigationMenu>
             
-            <Button 
-              asChild
-              variant="ghost" 
-              className="text-gray-700 hover:text-gray-900 hover:bg-gray-50 font-medium px-4 py-2"
-            >
-              <Link href="#community">Community</Link>
-            </Button>
-            
-            <Button 
-              asChild
-              variant="ghost" 
-              className="text-gray-700 hover:text-gray-900 hover:bg-gray-50 font-medium px-4 py-2"
-            >
-              <Link href="#">Blog</Link>
-            </Button>
             
             {/* Messages Link - Only for Admin/Florist */}
             {isAdminOrFlorist() && (
@@ -195,19 +195,6 @@ export default function Navigation() {
               </Button>
             )}
 
-            <Button 
-              asChild
-              variant="ghost" 
-              className={cn(
-                "text-gray-700 hover:text-gray-900 hover:bg-gray-50 font-medium px-4 py-2",
-                location === "/contact" && "text-gray-900 bg-gray-50"
-              )}
-            >
-              <Link href="/contact">
-                <Phone className="h-4 w-4 mr-2" />
-                Contact
-              </Link>
-            </Button>
           </div>
           
           {/* Auth Buttons */}
@@ -261,22 +248,6 @@ export default function Navigation() {
                   </Popover>
                 )}
 
-                <Button variant="ghost" size="sm" className="flex items-center gap-2 text-gray-700">
-                  <User className="h-4 w-4" />
-                  <span className="hidden sm:inline">
-                    Account
-                  </span>
-                </Button>
-                
-                <Button 
-                  onClick={() => window.location.href = "/api/logout"}
-                  variant="ghost" 
-                  size="sm"
-                  className="flex items-center gap-2 text-gray-700 hover:text-gray-900"
-                >
-                  <LogOut className="h-4 w-4" />
-                  <span className="hidden sm:inline">Logout</span>
-                </Button>
               </div>
             ) : (
               <Button 
@@ -293,16 +264,7 @@ export default function Navigation() {
             )}
             
             {/* Admin Dropdown - Only for admins */}
-            {(() => {
-              try {
-                const user = localStorage.getItem('customerUser');
-                if (!user) return null;
-                const userData = JSON.parse(user);
-                return userData.role === 'admin';
-              } catch {
-                return false;
-              }
-            })() && (
+            {user?.role === 'admin' && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button 
@@ -336,6 +298,13 @@ export default function Navigation() {
                       Website Info
                     </Link>
                   </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/quote-requests" className="cursor-pointer">
+                      <FileText className="h-4 w-4 mr-2" />
+                      Quote Requests
+                    </Link>
+                  </DropdownMenuItem>
+                  {/* Task Management removed */}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
                     <Link href="/admin-dashboard" className="cursor-pointer">
@@ -347,14 +316,72 @@ export default function Navigation() {
               </DropdownMenu>
             )}
             
+            {/* Account Dropdown - For authenticated users */}
+            {isAuthenticated && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="flex items-center gap-2 text-gray-700">
+                    <User className="h-4 w-4" />
+                    <span className="hidden sm:inline">Account</span>
+                    <ChevronDown className="h-3 w-3 ml-1" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href={user?.role === 'florist' ? '/florist-profile-setup' : '/customer-profile'} className="cursor-pointer">
+                      <User className="h-4 w-4 mr-2" />
+                      Edit Profile
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem 
+                    onClick={() => {
+                      // Clear all authentication tokens
+                      localStorage.removeItem('customerToken');
+                      localStorage.removeItem('customerUser');
+                      localStorage.removeItem('floristToken');
+                      localStorage.removeItem('florist_token');
+                      localStorage.removeItem('florist_data');
+                      
+                      // Redirect to login page
+                      window.location.href = '/auth';
+                    }}
+                    className="cursor-pointer"
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+            
+            {!isAuthenticated && (
+              <Button 
+                asChild 
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 ml-2"
+                size="sm"
+              >
+                <Link href="/auth?mode=register">
+                  <Users className="h-4 w-4 mr-2" />
+                  Join
+                </Link>
+              </Button>
+            )}
+            
+            {/* Contact Button - Always visible */}
             <Button 
-              asChild 
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 ml-2"
-              size="sm"
+              asChild
+              variant="ghost" 
+              className={cn(
+                "text-gray-700 hover:text-gray-900 hover:bg-gray-50 font-medium px-4 py-2",
+                location === "/contact" && "text-gray-900 bg-gray-50"
+              )}
             >
-              <Link href="/auth?mode=register">
-                <Users className="h-4 w-4 mr-2" />
-                Join
+              <Link href="/contact">
+                <Phone className="h-4 w-4 mr-2" />
+                Contact
               </Link>
             </Button>
             
@@ -436,17 +463,39 @@ export default function Navigation() {
                         </Button>
                       </>
                     ) : (
-                      <Button 
-                        onClick={() => {
-                          setMobileMenuOpen(false);
-                          window.location.href = "/api/logout";
-                        }}
-                        variant="outline" 
-                        className="w-full"
-                      >
-                        <LogOut className="h-4 w-4 mr-2" />
-                        Logout
-                      </Button>
+                      <>
+                        <Button 
+                          asChild
+                          variant="outline" 
+                          className="w-full"
+                        >
+                          <Link href={user?.role === 'florist' ? '/florist-profile-setup' : '/customer-profile'} onClick={() => setMobileMenuOpen(false)}>
+                            <User className="h-4 w-4 mr-2" />
+                            Edit Profile
+                          </Link>
+                        </Button>
+                        
+                        <Button 
+                          onClick={() => {
+                            // Clear all authentication tokens
+                            localStorage.removeItem('customerToken');
+                            localStorage.removeItem('customerUser');
+                            localStorage.removeItem('floristToken');
+                            localStorage.removeItem('florist_token');
+                            localStorage.removeItem('florist_data');
+                            
+                            setMobileMenuOpen(false);
+                            
+                            // Redirect to login page
+                            window.location.href = '/auth';
+                          }}
+                          variant="outline" 
+                          className="w-full"
+                        >
+                          <LogOut className="h-4 w-4 mr-2" />
+                          Logout
+                        </Button>
+                      </>
                     )}
                   </div>
                 </div>

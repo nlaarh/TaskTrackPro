@@ -165,6 +165,61 @@ export const savedFlorists = pgTable("saved_florists", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Quote requests for custom event pricing
+export const quoteRequests = pgTable("quote_requests", {
+  id: serial("id").primaryKey(),
+  // Event basics
+  eventType: varchar("event_type").notNull(),
+  eventDate: timestamp("event_date").notNull(),
+  eventTime: varchar("event_time"),
+  city: varchar("city").notNull(),
+  venue: varchar("venue"),
+  guestCount: integer("guest_count").notNull(),
+  
+  // Arrangements - stored as JSON array
+  arrangements: jsonb("arrangements").$type<Array<{type: string; count: number}>>().notNull(),
+  
+  // Style & theme
+  style: varchar("style").notNull(),
+  colorPalette: varchar("color_palette").notNull(),
+  preferredFlowers: text("preferred_flowers").array().default([]),
+  moodboardUrl: varchar("moodboard_url"),
+  moodboardFileUrl: varchar("moodboard_file_url"), // For uploaded files
+  
+  // Logistics
+  deliveryRequired: boolean("delivery_required").default(false),
+  setupRequired: boolean("setup_required").default(false),
+  teardownRequired: boolean("teardown_required").default(false),
+  pickupOption: boolean("pickup_option").default(false),
+  addOns: text("add_ons").array().default([]),
+  allergies: text("allergies"),
+  ecoFriendly: boolean("eco_friendly").default(false),
+  
+  // Budget
+  minBudget: integer("min_budget").notNull(),
+  maxBudget: integer("max_budget").notNull(),
+  
+  // Customer contact
+  customerName: varchar("customer_name").notNull(),
+  customerEmail: varchar("customer_email").notNull(),
+  customerPhone: varchar("customer_phone"),
+  
+  // Additional notes
+  additionalNotes: text("additional_notes"),
+  
+  // Admin fields
+  status: varchar("status").default("pending"), // pending, in-progress, completed, cancelled
+  adminNotes: text("admin_notes"),
+  quotedPrice: integer("quoted_price"), // In cents
+  quotedAt: timestamp("quoted_at"),
+  reviewedBy: varchar("reviewed_by"), // Admin user ID
+  assignedFloristId: integer("assigned_florist_id"), // Assigned florist ID
+  
+  // Timestamps
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Reference tables for admin-managed lists
 export const specialtiesReference = pgTable("specialties_reference", {
   id: serial("id").primaryKey(),
@@ -244,3 +299,20 @@ export const insertWebsiteInfoSchema = createInsertSchema(websiteInfo).omit({
 
 export type WebsiteInfo = typeof websiteInfo.$inferSelect;
 export type InsertWebsiteInfo = z.infer<typeof insertWebsiteInfoSchema>;
+
+// Quote request schemas
+export const insertQuoteRequestSchema = createInsertSchema(quoteRequests).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  status: true,
+  adminNotes: true,
+  quotedPrice: true,
+  quotedAt: true,
+  reviewedBy: true,
+  moodboardFileUrl: true,
+});
+
+export type QuoteRequest = typeof quoteRequests.$inferSelect;
+export type InsertQuoteRequest = z.infer<typeof insertQuoteRequestSchema>;
+

@@ -25,6 +25,10 @@ import AdminList from "@/pages/admin-list";
 import AdminMessagesRedesign from "@/pages/admin-messages-redesign";
 import AdminWebsiteInfo from "@/pages/admin-website-info";
 import Contact from "@/pages/contact";
+import CustomerProfile from "@/pages/customer-profile";
+import GetQuote from "@/pages/get-quote";
+import AdminQuoteRequests from "@/pages/admin-quote-requests";
+// Task management pages removed
 
 function Router() {
   return (
@@ -68,6 +72,8 @@ function Router() {
       <Route path="/admin-clean" component={() => <ProtectedRoute requireAdmin><AdminClean /></ProtectedRoute>} />
       <Route path="/admin-list" component={() => <ProtectedRoute requireAdmin><AdminList /></ProtectedRoute>} />
       <Route path="/admin/website-info" component={() => <ProtectedRoute requireAdmin><AdminWebsiteInfo /></ProtectedRoute>} />
+      <Route path="/admin/quote-requests" component={() => <ProtectedRoute requireAdmin><AdminQuoteRequests /></ProtectedRoute>} />
+      {/* Task management routes removed */}
       <Route path="/messages" component={() => <ProtectedRoute requireAdmin><AdminMessagesRedesign /></ProtectedRoute>} />
       
       {/* Public Florist Routes */}
@@ -78,9 +84,13 @@ function Router() {
       <Route path="/florist-dashboard" component={() => <ProtectedRoute requireFlorist><FloristDashboard /></ProtectedRoute>} />
       <Route path="/florist-profile-setup" component={() => <ProtectedRoute requireFlorist><FloristProfileSetup /></ProtectedRoute>} />
       
+      {/* Protected Customer Profile Route */}
+      <Route path="/customer-profile" component={() => <ProtectedRoute><CustomerProfile /></ProtectedRoute>} />
+      
       {/* Public Routes - Always Available */}
       <Route path="/" component={Landing} />
       <Route path="/search" component={SearchResults} />
+      <Route path="/get-quote" component={GetQuote} />
       <Route path="/contact" component={Contact} />
       <Route path="/florist/:id" component={FloristDetail} />
       <Route path="/register" component={FloristRegistration} />

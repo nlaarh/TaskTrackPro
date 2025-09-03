@@ -4,12 +4,9 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { correctedStorage } from "./storage-corrected";
 import { pool } from './db';
-import { setupAuth, isAuthenticated } from "./replitAuth";
-import { db } from "./db";
-import { sql } from "drizzle-orm";
-import { Pool } from 'pg';
-import { simpleStorage } from "./storage-simple";
+import { setupAuth } from "./replitAuth";
 import { ObjectStorageService } from "./objectStorage";
+// Task management system removed - focusing on quote request management only
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
@@ -133,6 +130,118 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
   app.get('/api/test', (req, res) => {
     res.json({ message: 'API is working', timestamp: new Date().toISOString() });
   });
+
+  // Database test endpoint
+  app.get('/api/test-db', async (req, res) => {
+    try {
+      const result = await pool.query('SELECT current_database(), current_timestamp');
+      res.json({ 
+        message: 'Database is working', 
+        database: result.rows[0].current_database,
+        timestamp: result.rows[0].current_timestamp
+      });
+    } catch (error) {
+      console.error('Database test error:', error);
+      res.status(500).json({ message: 'Database connection failed', error: error.message });
+    }
+  });
+
+  // Create missing tables endpoint
+  app.post('/api/create-tables', async (req, res) => {
+    try {
+      // Execute the SQL statements one by one
+      const tableQueries = [
+        `CREATE TABLE IF NOT EXISTS quote_requests (
+          id SERIAL PRIMARY KEY,
+          event_type VARCHAR NOT NULL,
+          event_date TIMESTAMP NOT NULL,
+          event_time VARCHAR,
+          city VARCHAR NOT NULL,
+          venue VARCHAR,
+          guest_count INTEGER NOT NULL,
+          arrangements JSONB NOT NULL,
+          style VARCHAR NOT NULL,
+          color_palette VARCHAR NOT NULL,
+          preferred_flowers TEXT[] DEFAULT '{}',
+          moodboard_url VARCHAR,
+          moodboard_file_url VARCHAR,
+          delivery_required BOOLEAN DEFAULT false,
+          setup_required BOOLEAN DEFAULT false,
+          teardown_required BOOLEAN DEFAULT false,
+          pickup_option BOOLEAN DEFAULT false,
+          add_ons TEXT[] DEFAULT '{}',
+          allergies TEXT,
+          eco_friendly BOOLEAN DEFAULT false,
+          min_budget INTEGER NOT NULL,
+          max_budget INTEGER NOT NULL,
+          customer_name VARCHAR NOT NULL,
+          customer_email VARCHAR NOT NULL,
+          customer_phone VARCHAR,
+          additional_notes TEXT,
+          status VARCHAR DEFAULT 'pending',
+          admin_notes TEXT,
+          quoted_price INTEGER,
+          quoted_at TIMESTAMP,
+          reviewed_by VARCHAR,
+          created_at TIMESTAMP DEFAULT NOW(),
+          updated_at TIMESTAMP DEFAULT NOW()
+        )`,
+        
+      ];
+
+      for (const query of tableQueries) {
+        await pool.query(query);
+      }
+      
+      res.json({ message: 'Tables created successfully' });
+    } catch (error) {
+      console.error('Table creation error:', error);
+      res.status(500).json({ message: 'Failed to create tables', error: error.message });
+    }
+  });
+
+  // Simple table creation endpoints
+  app.post('/api/create-quote-table', async (req, res) => {
+    try {
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS quote_requests (
+          id SERIAL PRIMARY KEY,
+          event_type VARCHAR NOT NULL,
+          event_date TIMESTAMP NOT NULL,
+          event_time VARCHAR,
+          city VARCHAR NOT NULL,
+          venue VARCHAR,
+          guest_count INTEGER NOT NULL,
+          arrangements JSONB NOT NULL,
+          style VARCHAR NOT NULL,
+          color_palette VARCHAR NOT NULL,
+          preferred_flowers TEXT[] DEFAULT '{}',
+          moodboard_url VARCHAR,
+          delivery_required BOOLEAN DEFAULT false,
+          setup_required BOOLEAN DEFAULT false,
+          teardown_required BOOLEAN DEFAULT false,
+          pickup_option BOOLEAN DEFAULT false,
+          add_ons TEXT[] DEFAULT '{}',
+          allergies TEXT,
+          eco_friendly BOOLEAN DEFAULT false,
+          min_budget INTEGER NOT NULL,
+          max_budget INTEGER NOT NULL,
+          customer_name VARCHAR NOT NULL,
+          customer_email VARCHAR NOT NULL,
+          customer_phone VARCHAR,
+          additional_notes TEXT,
+          status VARCHAR DEFAULT 'pending',
+          created_at TIMESTAMP DEFAULT NOW(),
+          updated_at TIMESTAMP DEFAULT NOW()
+        )
+      `);
+      res.json({ message: 'Quote requests table created successfully' });
+    } catch (error) {
+      console.error('Quote table creation error:', error);
+      res.status(500).json({ message: 'Failed to create quote table', error: error.message });
+    }
+  });
+
 
   // Customer Authentication endpoints
   
@@ -1464,6 +1573,169 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to get florists" });
     }
   });
+
+  // Quote request endpoints
+  app.post('/api/quote-requests', async (req, res) => {
+    try {
+      const {
+        eventType,
+        eventDate,
+        eventTime,
+        city,
+        venue,
+        guestCount,
+        arrangements,
+        style,
+        colorPalette,
+        preferredFlowers,
+        moodboardUrl,
+        deliveryRequired,
+        setupRequired,
+        teardownRequired,
+        pickupOption,
+        addOns,
+        allergies,
+        ecoFriendly,
+        minBudget,
+        maxBudget,
+        customerName,
+        customerEmail,
+        customerPhone,
+        additionalNotes
+      } = req.body;
+
+      // Basic validation
+      if (!eventType || !eventDate || !city || !guestCount || !arrangements?.length || 
+          !style || !colorPalette || !customerName || !customerEmail || !minBudget || !maxBudget) {
+        return res.status(400).json({ message: 'Missing required fields' });
+      }
+
+      // Insert quote request
+      const result = await pool.query(`
+        INSERT INTO quote_requests (
+          event_type, event_date, event_time, city, venue, guest_count, 
+          arrangements, style, color_palette, preferred_flowers, moodboard_url,
+          delivery_required, setup_required, teardown_required, pickup_option, 
+          add_ons, allergies, eco_friendly, min_budget, max_budget,
+          customer_name, customer_email, customer_phone, additional_notes
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24)
+        RETURNING id
+      `, [
+        eventType, new Date(eventDate), eventTime, city, venue, parseInt(guestCount),
+        JSON.stringify(arrangements), style, colorPalette, preferredFlowers || [], moodboardUrl,
+        deliveryRequired || false, setupRequired || false, teardownRequired || false, 
+        pickupOption || false, addOns || [], allergies, ecoFriendly || false,
+        parseInt(minBudget), parseInt(maxBudget), customerName, customerEmail, 
+        customerPhone, additionalNotes
+      ]);
+
+      const quoteRequestId = result.rows[0].id;
+      
+      // Quote request submitted successfully - no task management needed
+
+      res.status(201).json({ 
+        message: 'Quote request submitted successfully',
+        quoteRequestId
+      });
+    } catch (error) {
+      console.error('Error submitting quote request:', error);
+      res.status(500).json({ message: 'Failed to submit quote request' });
+    }
+  });
+
+  // Get quote requests (admin only)
+  app.get('/api/quote-requests', authenticateCustomer, checkAdminRole, async (req, res) => {
+    try {
+      const { status, limit = 50, offset = 0 } = req.query;
+      
+      let query = 'SELECT * FROM quote_requests';
+      const params: any[] = [];
+      
+      if (status) {
+        query += ' WHERE status = $1';
+        params.push(status);
+      }
+      
+      query += ' ORDER BY created_at DESC LIMIT $' + (params.length + 1) + ' OFFSET $' + (params.length + 2);
+      params.push(parseInt(limit as string), parseInt(offset as string));
+      
+      const result = await pool.query(query, params);
+      res.json(result.rows);
+    } catch (error) {
+      console.error('Error fetching quote requests:', error);
+      res.status(500).json({ message: 'Failed to fetch quote requests' });
+    }
+  });
+
+  // Get single quote request (admin only)
+  app.get('/api/quote-requests/:id', authenticateCustomer, checkAdminRole, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const result = await pool.query('SELECT * FROM quote_requests WHERE id = $1', [id]);
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ message: 'Quote request not found' });
+      }
+      
+      res.json(result.rows[0]);
+    } catch (error) {
+      console.error('Error fetching quote request:', error);
+      res.status(500).json({ message: 'Failed to fetch quote request' });
+    }
+  });
+
+  // Update quote request status and notes (admin only)
+  app.patch('/api/quote-requests/:id', authenticateCustomer, checkAdminRole, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const { status, adminNotes, quotedPrice } = req.body;
+      
+      const updateFields: string[] = [];
+      const params: any[] = [];
+      let paramIndex = 1;
+      
+      if (status !== undefined) {
+        updateFields.push(`status = $${paramIndex++}`);
+        params.push(status);
+      }
+      
+      if (adminNotes !== undefined) {
+        updateFields.push(`admin_notes = $${paramIndex++}`);
+        params.push(adminNotes);
+      }
+      
+      if (quotedPrice !== undefined) {
+        updateFields.push(`quoted_price = $${paramIndex++}`);
+        params.push(parseInt(quotedPrice));
+        updateFields.push(`quoted_at = NOW()`);
+      }
+      
+      updateFields.push(`reviewed_by = $${paramIndex++}`);
+      params.push(req.user.userId);
+      
+      updateFields.push(`updated_at = NOW()`);
+      
+      if (updateFields.length === 2) { // Only reviewed_by and updated_at
+        return res.status(400).json({ message: 'No fields to update' });
+      }
+      
+      params.push(id);
+      const query = `UPDATE quote_requests SET ${updateFields.join(', ')} WHERE id = $${paramIndex} RETURNING *`;
+      
+      const result = await pool.query(query, params);
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ message: 'Quote request not found' });
+      }
+      
+      res.json(result.rows[0]);
+    } catch (error) {
+      console.error('Error updating quote request:', error);
+      res.status(500).json({ message: 'Failed to update quote request' });
+    }
+  });
+
+  // Quote request management endpoints (task management system removed)
 
   // Serve uploaded images from object storage
   app.get('/objects/:objectPath(*)', async (req, res) => {
