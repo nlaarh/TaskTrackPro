@@ -262,8 +262,9 @@ export default function AdminQuoteRequests() {
     return ARRANGEMENT_TYPES.find(a => a.value === type)?.label || type;
   };
 
-  const getFlowerName = (slug: string) => {
-    return FLOWERS.find(f => f.slug === slug)?.name || slug;
+  const getFlowerName = (flowerValue: string) => {
+    const flower = FLOWERS.find(f => f.value === flowerValue);
+    return flower ? flower.label : flowerValue;
   };
 
   if (isLoading) {
@@ -411,7 +412,7 @@ export default function AdminQuoteRequests() {
                 {!isEditingDetails && (
                   <Button 
                     variant="outline"
-                    onClick={() => startEditingDetails(selectedQuote)}
+                    onClick={() => selectedQuote && startEditingDetails(selectedQuote)}
                   >
                     Edit All Fields
                   </Button>
@@ -983,7 +984,7 @@ export default function AdminQuoteRequests() {
                             <div className="space-y-2">
                               <Label>Assigned Florist</Label>
                               <Select 
-                                value={editForm.assigned_florist_id?.toString() || ''} 
+                                value={editForm.assigned_florist_id ? editForm.assigned_florist_id.toString() : ''} 
                                 onValueChange={(value) => setEditForm({...editForm, assigned_florist_id: parseInt(value) || null})}
                               >
                                 <SelectTrigger>

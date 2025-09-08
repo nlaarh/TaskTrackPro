@@ -1685,35 +1685,138 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update quote request status and notes (admin only)
+  // Update quote request - supports ALL fields (admin only)
   app.patch('/api/quote-requests/:id', authenticateCustomer, checkAdminRole, async (req: any, res) => {
     try {
       const { id } = req.params;
-      const { status, adminNotes, quotedPrice } = req.body;
+      const updates = req.body;
       
       const updateFields: string[] = [];
       const params: any[] = [];
       let paramIndex = 1;
       
-      if (status !== undefined) {
+      // Customer information
+      if (updates.customer_name !== undefined) {
+        updateFields.push(`customer_name = $${paramIndex++}`);
+        params.push(updates.customer_name);
+      }
+      if (updates.customer_email !== undefined) {
+        updateFields.push(`customer_email = $${paramIndex++}`);
+        params.push(updates.customer_email);
+      }
+      if (updates.customer_phone !== undefined) {
+        updateFields.push(`customer_phone = $${paramIndex++}`);
+        params.push(updates.customer_phone);
+      }
+      
+      // Event details
+      if (updates.event_type !== undefined) {
+        updateFields.push(`event_type = $${paramIndex++}`);
+        params.push(updates.event_type);
+      }
+      if (updates.event_date !== undefined) {
+        updateFields.push(`event_date = $${paramIndex++}`);
+        params.push(updates.event_date);
+      }
+      if (updates.event_time !== undefined) {
+        updateFields.push(`event_time = $${paramIndex++}`);
+        params.push(updates.event_time);
+      }
+      if (updates.city !== undefined) {
+        updateFields.push(`city = $${paramIndex++}`);
+        params.push(updates.city);
+      }
+      if (updates.venue !== undefined) {
+        updateFields.push(`venue = $${paramIndex++}`);
+        params.push(updates.venue);
+      }
+      if (updates.guest_count !== undefined) {
+        updateFields.push(`guest_count = $${paramIndex++}`);
+        params.push(updates.guest_count);
+      }
+      
+      // Style & theme
+      if (updates.style !== undefined) {
+        updateFields.push(`style = $${paramIndex++}`);
+        params.push(updates.style);
+      }
+      if (updates.color_palette !== undefined) {
+        updateFields.push(`color_palette = $${paramIndex++}`);
+        params.push(updates.color_palette);
+      }
+      if (updates.preferred_flowers !== undefined) {
+        updateFields.push(`preferred_flowers = $${paramIndex++}`);
+        params.push(JSON.stringify(updates.preferred_flowers));
+      }
+      if (updates.moodboard_url !== undefined) {
+        updateFields.push(`moodboard_url = $${paramIndex++}`);
+        params.push(updates.moodboard_url);
+      }
+      
+      // Budget
+      if (updates.min_budget !== undefined) {
+        updateFields.push(`min_budget = $${paramIndex++}`);
+        params.push(updates.min_budget);
+      }
+      if (updates.max_budget !== undefined) {
+        updateFields.push(`max_budget = $${paramIndex++}`);
+        params.push(updates.max_budget);
+      }
+      
+      // Services
+      if (updates.delivery_required !== undefined) {
+        updateFields.push(`delivery_required = $${paramIndex++}`);
+        params.push(updates.delivery_required);
+      }
+      if (updates.setup_required !== undefined) {
+        updateFields.push(`setup_required = $${paramIndex++}`);
+        params.push(updates.setup_required);
+      }
+      if (updates.teardown_required !== undefined) {
+        updateFields.push(`teardown_required = $${paramIndex++}`);
+        params.push(updates.teardown_required);
+      }
+      if (updates.pickup_option !== undefined) {
+        updateFields.push(`pickup_option = $${paramIndex++}`);
+        params.push(updates.pickup_option);
+      }
+      if (updates.eco_friendly !== undefined) {
+        updateFields.push(`eco_friendly = $${paramIndex++}`);
+        params.push(updates.eco_friendly);
+      }
+      
+      // Additional information
+      if (updates.additional_notes !== undefined) {
+        updateFields.push(`additional_notes = $${paramIndex++}`);
+        params.push(updates.additional_notes);
+      }
+      if (updates.allergies !== undefined) {
+        updateFields.push(`allergies = $${paramIndex++}`);
+        params.push(updates.allergies);
+      }
+      
+      // Admin fields  
+      if (updates.status !== undefined) {
         updateFields.push(`status = $${paramIndex++}`);
-        params.push(status);
+        params.push(updates.status);
       }
-      
-      if (adminNotes !== undefined) {
+      if (updates.admin_notes !== undefined) {
         updateFields.push(`admin_notes = $${paramIndex++}`);
-        params.push(adminNotes);
+        params.push(updates.admin_notes);
       }
-      
-      if (quotedPrice !== undefined) {
+      if (updates.quoted_price !== undefined) {
         updateFields.push(`quoted_price = $${paramIndex++}`);
-        params.push(parseInt(quotedPrice));
+        params.push(parseInt(updates.quoted_price));
         updateFields.push(`quoted_at = NOW()`);
       }
+      if (updates.assigned_florist_id !== undefined) {
+        updateFields.push(`assigned_florist_id = $${paramIndex++}`);
+        params.push(updates.assigned_florist_id);
+      }
       
+      // Always update reviewed_by and updated_at
       updateFields.push(`reviewed_by = $${paramIndex++}`);
       params.push(req.user.userId);
-      
       updateFields.push(`updated_at = NOW()`);
       
       if (updateFields.length === 2) { // Only reviewed_by and updated_at
@@ -1721,6 +1824,10 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
       }
       
       params.push(id);
+      
+      console.log('Updating quote request fields:', updateFields);
+      console.log('With parameters:', params);
+      
       const query = `UPDATE quote_requests SET ${updateFields.join(', ')} WHERE id = $${paramIndex} RETURNING *`;
       
       const result = await pool.query(query, params);
