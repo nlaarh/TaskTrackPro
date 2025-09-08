@@ -59,6 +59,11 @@ export default function AdminQuoteRequests() {
   const [quotedPrice, setQuotedPrice] = useState("");
   const [newStatus, setNewStatus] = useState("");
   const [assignedFloristId, setAssignedFloristId] = useState<number | null>(null);
+  
+  // Edit mode state
+  const [isEditingDetails, setIsEditingDetails] = useState(false);
+  const [editForm, setEditForm] = useState<Partial<QuoteRequest>>({});
+  
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -123,6 +128,46 @@ export default function AdminQuoteRequests() {
       });
     }
   });
+
+  // Edit mode functions
+  const startEditingDetails = (quote: QuoteRequest) => {
+    setEditForm({
+      event_type: quote.event_type,
+      event_date: quote.event_date,
+      event_time: quote.event_time,
+      city: quote.city,
+      venue: quote.venue,
+      guest_count: quote.guest_count,
+      style: quote.style,
+      color_palette: quote.color_palette,
+      min_budget: quote.min_budget,
+      max_budget: quote.max_budget,
+      additional_notes: quote.additional_notes,
+      allergies: quote.allergies,
+      delivery_required: quote.delivery_required,
+      setup_required: quote.setup_required,
+      teardown_required: quote.teardown_required,
+      pickup_option: quote.pickup_option,
+      eco_friendly: quote.eco_friendly,
+    });
+    setIsEditingDetails(true);
+  };
+
+  const cancelEditingDetails = () => {
+    setIsEditingDetails(false);
+    setEditForm({});
+  };
+
+  const saveEventDetails = () => {
+    if (!selectedQuote) return;
+    
+    updateQuoteMutation.mutate({
+      id: selectedQuote.id,
+      updates: editForm
+    });
+    setIsEditingDetails(false);
+    setEditForm({});
+  };
 
   const handleUpdateQuote = () => {
     if (!selectedQuote) return;
@@ -372,36 +417,124 @@ export default function AdminQuoteRequests() {
 
                     {/* Event Basic Info */}
                     <Card>
-                      <CardHeader>
+                      <CardHeader className="flex flex-row items-center justify-between">
                         <CardTitle className="text-lg">Event Details</CardTitle>
+                        {!isEditingDetails && (
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => startEditingDetails(selectedQuote)}
+                          >
+                            Edit
+                          </Button>
+                        )}
                       </CardHeader>
                       <CardContent className="space-y-3">
-                        <div>
-                          <Label className="text-sm text-gray-500">Event Type</Label>
-                          <div>{getEventTypeLabel(selectedQuote.event_type)}</div>
-                        </div>
-                        <div>
-                          <Label className="text-sm text-gray-500">Date & Time</Label>
-                          <div>
-                            {format(new Date(selectedQuote.event_date), 'PPPP')}
-                            {selectedQuote.event_time && (
-                              <span className="ml-2 text-gray-600">at {selectedQuote.event_time}</span>
-                            )}
-                          </div>
-                        </div>
-                        <div>
-                          <Label className="text-sm text-gray-500">Location</Label>
-                          <div>
-                            {selectedQuote.city}
-                            {selectedQuote.venue && (
-                              <span className="text-gray-600"> • {selectedQuote.venue}</span>
-                            )}
-                          </div>
-                        </div>
-                        <div>
-                          <Label className="text-sm text-gray-500">Guest Count</Label>
-                          <div>{selectedQuote.guest_count} guests</div>
-                        </div>
+                        {!isEditingDetails ? (
+                          <>
+                            <div>
+                              <Label className="text-sm text-gray-500">Event Type</Label>
+                              <div>{getEventTypeLabel(selectedQuote.event_type)}</div>
+                            </div>
+                            <div>
+                              <Label className="text-sm text-gray-500">Date & Time</Label>
+                              <div>
+                                {format(new Date(selectedQuote.event_date), 'PPPP')}
+                                {selectedQuote.event_time && (
+                                  <span className="ml-2 text-gray-600">at {selectedQuote.event_time}</span>
+                                )}
+                              </div>
+                            </div>
+                            <div>
+                              <Label className="text-sm text-gray-500">Location</Label>
+                              <div>
+                                {selectedQuote.city}
+                                {selectedQuote.venue && (
+                                  <span className="text-gray-600"> • {selectedQuote.venue}</span>
+                                )}
+                              </div>
+                            </div>
+                            <div>
+                              <Label className="text-sm text-gray-500">Guest Count</Label>
+                              <div>{selectedQuote.guest_count} guests</div>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="space-y-2">
+                              <Label>Event Type</Label>
+                              <Select 
+                                value={editForm.event_type} 
+                                onValueChange={(value) => setEditForm({...editForm, event_type: value})}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {EVENT_TYPES.map(type => (
+                                    <SelectItem key={type.value} value={type.value}>
+                                      {type.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-2">
+                              <div className="space-y-2">
+                                <Label>Event Date</Label>
+                                <Input 
+                                  type="date" 
+                                  value={editForm.event_date ? editForm.event_date.split('T')[0] : ''} 
+                                  onChange={(e) => setEditForm({...editForm, event_date: e.target.value})}
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label>Event Time</Label>
+                                <Input 
+                                  type="time" 
+                                  value={editForm.event_time || ''} 
+                                  onChange={(e) => setEditForm({...editForm, event_time: e.target.value})}
+                                />
+                              </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-2">
+                              <div className="space-y-2">
+                                <Label>City</Label>
+                                <Input 
+                                  value={editForm.city || ''} 
+                                  onChange={(e) => setEditForm({...editForm, city: e.target.value})}
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label>Venue (Optional)</Label>
+                                <Input 
+                                  value={editForm.venue || ''} 
+                                  onChange={(e) => setEditForm({...editForm, venue: e.target.value})}
+                                />
+                              </div>
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <Label>Guest Count</Label>
+                              <Input 
+                                type="number" 
+                                value={editForm.guest_count || ''} 
+                                onChange={(e) => setEditForm({...editForm, guest_count: parseInt(e.target.value) || 0})}
+                              />
+                            </div>
+                            
+                            <div className="flex gap-2 pt-4">
+                              <Button onClick={saveEventDetails} size="sm">
+                                Save Changes
+                              </Button>
+                              <Button variant="outline" onClick={cancelEditingDetails} size="sm">
+                                Cancel
+                              </Button>
+                            </div>
+                          </>
+                        )}
                       </CardContent>
                     </Card>
                   </div>
