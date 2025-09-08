@@ -439,20 +439,20 @@ export default function AdminQuoteRequests() {
 
             {selectedQuote && (
               <Tabs defaultValue="details" className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="details">Event Details</TabsTrigger>
-                  <TabsTrigger value="arrangements">Arrangements</TabsTrigger>
-                  <TabsTrigger value="admin">Admin Actions</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-3 bg-gray-100 p-1 rounded-lg">
+                  <TabsTrigger value="details" className="rounded-md font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">Event Details</TabsTrigger>
+                  <TabsTrigger value="arrangements" className="rounded-md font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">Arrangements</TabsTrigger>
+                  <TabsTrigger value="admin" className="rounded-md font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">Admin Actions</TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="details" className="space-y-6 mt-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <TabsContent value="details" className="space-y-8 mt-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {/* Customer Info */}
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-lg">Customer Information</CardTitle>
+                    <Card className="border-0 shadow-sm bg-white ring-1 ring-gray-200 hover:ring-gray-300 transition-all duration-200">
+                      <CardHeader className="pb-4">
+                        <CardTitle className="text-lg font-semibold text-gray-900">Customer Information</CardTitle>
                       </CardHeader>
-                      <CardContent className="space-y-3">
+                      <CardContent className="space-y-4">
                         {!isEditingDetails ? (
                           <>
                             <div className="flex items-center gap-2">
@@ -473,25 +473,28 @@ export default function AdminQuoteRequests() {
                         ) : (
                           <>
                             <div className="space-y-2">
-                              <Label>Customer Name</Label>
+                              <Label className="text-sm font-medium text-gray-700">Customer Name</Label>
                               <Input 
                                 value={editForm.customer_name || ''} 
                                 onChange={(e) => setEditForm({...editForm, customer_name: e.target.value})}
+                                className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg"
                               />
                             </div>
                             <div className="space-y-2">
-                              <Label>Email</Label>
+                              <Label className="text-sm font-medium text-gray-700">Email</Label>
                               <Input 
                                 type="email"
                                 value={editForm.customer_email || ''} 
                                 onChange={(e) => setEditForm({...editForm, customer_email: e.target.value})}
+                                className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg"
                               />
                             </div>
                             <div className="space-y-2">
-                              <Label>Phone (Optional)</Label>
+                              <Label className="text-sm font-medium text-gray-700">Phone (Optional)</Label>
                               <Input 
                                 value={editForm.customer_phone || ''} 
                                 onChange={(e) => setEditForm({...editForm, customer_phone: e.target.value})}
+                                className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg"
                               />
                             </div>
                           </>
@@ -500,11 +503,11 @@ export default function AdminQuoteRequests() {
                     </Card>
 
                     {/* Event Basic Info */}
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-lg">Event Details</CardTitle>
+                    <Card className="border-0 shadow-sm bg-white ring-1 ring-gray-200 hover:ring-gray-300 transition-all duration-200">
+                      <CardHeader className="pb-4">
+                        <CardTitle className="text-lg font-semibold text-gray-900">Event Details</CardTitle>
                       </CardHeader>
-                      <CardContent className="space-y-3">
+                      <CardContent className="space-y-4">
                         {!isEditingDetails ? (
                           <>
                             <div>
@@ -537,12 +540,12 @@ export default function AdminQuoteRequests() {
                         ) : (
                           <>
                             <div className="space-y-2">
-                              <Label>Event Type</Label>
+                              <Label className="text-sm font-medium text-gray-700">Event Type</Label>
                               <Select 
                                 value={editForm.event_type} 
                                 onValueChange={(value) => setEditForm({...editForm, event_type: value})}
                               >
-                                <SelectTrigger>
+                                <SelectTrigger className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg">
                                   <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
