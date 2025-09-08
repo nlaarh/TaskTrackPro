@@ -411,18 +411,25 @@ export default function AdminQuoteRequests() {
                 </div>
                 {!isEditingDetails && (
                   <Button 
-                    variant="outline"
                     onClick={() => selectedQuote && startEditingDetails(selectedQuote)}
+                    className="bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-medium px-6 py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 border-0"
                   >
                     Edit All Fields
                   </Button>
                 )}
                 {isEditingDetails && (
-                  <div className="flex gap-2">
-                    <Button onClick={saveEventDetails} size="sm">
+                  <div className="flex gap-3">
+                    <Button 
+                      onClick={saveEventDetails} 
+                      className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium px-6 py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 border-0"
+                    >
                       Save All Changes
                     </Button>
-                    <Button variant="outline" onClick={cancelEditingDetails} size="sm">
+                    <Button 
+                      variant="outline" 
+                      onClick={cancelEditingDetails} 
+                      className="border-gray-300 text-gray-700 hover:bg-gray-50 font-medium px-6 py-2 rounded-lg transition-all duration-200 hover:border-gray-400"
+                    >
                       Cancel
                     </Button>
                   </div>
@@ -1037,6 +1044,25 @@ export default function AdminQuoteRequests() {
                   </div>
                 </TabsContent>
               </Tabs>
+            )}
+            
+            {/* Save buttons at bottom of form */}
+            {isEditingDetails && (
+              <div className="flex justify-end gap-3 pt-6 border-t border-gray-200 mt-6">
+                <Button 
+                  variant="outline" 
+                  onClick={cancelEditingDetails} 
+                  className="border-gray-300 text-gray-700 hover:bg-gray-50 font-medium px-6 py-2.5 rounded-lg transition-all duration-200 hover:border-gray-400"
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={saveEventDetails} 
+                  className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium px-6 py-2.5 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 border-0"
+                >
+                  Save All Changes
+                </Button>
+              </div>
             )}
           </DialogContent>
         </Dialog>
