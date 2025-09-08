@@ -1197,6 +1197,7 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
       } = req.query;
 
       // Get all florists from Railway database using simple storage
+      const { simpleStorage } = await import('./storage-simple');
       const allFlorists = await simpleStorage.getAllFlorists();
       console.log(`Found ${allFlorists.length} total florists in database`);
 

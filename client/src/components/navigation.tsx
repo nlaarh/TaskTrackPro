@@ -48,6 +48,21 @@ export default function Navigation() {
     }
   };
 
+  // Check if user is admin specifically
+  const isAdmin = () => {
+    const token = localStorage.getItem('customerToken');
+    const userData = localStorage.getItem('customerUser');
+    
+    if (!token || !userData) return false;
+    
+    try {
+      const user = JSON.parse(userData);
+      return user.role === 'admin';
+    } catch {
+      return false;
+    }
+  };
+
   // Get unread message count
   const { data: unreadCount } = useQuery({
     queryKey: ['/api/messages/unread-count'],
@@ -264,7 +279,7 @@ export default function Navigation() {
             )}
             
             {/* Admin Dropdown - Only for admins */}
-            {user?.role === 'admin' && (
+            {isAdmin() && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button 
