@@ -152,6 +152,11 @@ export default function Auth() {
         console.log('🔐 LOGIN MUTATION: Token stored in localStorage');
       }
       
+      if (data.user) {
+        localStorage.setItem('customerUser', JSON.stringify(data.user));
+        console.log('🔐 LOGIN MUTATION: User data stored in localStorage');
+      }
+      
       toast({
         title: "Welcome back!",
         description: "You've been successfully logged in.",
@@ -196,6 +201,10 @@ export default function Auth() {
     onSuccess: (data) => {
       if (data.token) {
         localStorage.setItem('customerToken', data.token);
+      }
+      
+      if (data.user) {
+        localStorage.setItem('customerUser', JSON.stringify(data.user));
       }
       
       toast({
