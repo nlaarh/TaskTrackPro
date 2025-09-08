@@ -1746,7 +1746,11 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
       }
       if (updates.preferred_flowers !== undefined) {
         updateFields.push(`preferred_flowers = $${paramIndex++}`);
-        params.push(JSON.stringify(updates.preferred_flowers));
+        // Convert array to PostgreSQL array format: {item1,item2}
+        const pgArray = Array.isArray(updates.preferred_flowers) 
+          ? `{${updates.preferred_flowers.join(',')}}` 
+          : updates.preferred_flowers;
+        params.push(pgArray);
       }
       if (updates.moodboard_url !== undefined) {
         updateFields.push(`moodboard_url = $${paramIndex++}`);
@@ -1806,8 +1810,14 @@ export async function registerCorrectedRoutes(app: Express): Promise<Server> {
       }
       if (updates.quoted_price !== undefined) {
         updateFields.push(`quoted_price = $${paramIndex++}`);
-        params.push(parseInt(updates.quoted_price));
-        updateFields.push(`quoted_at = NOW()`);
+        // Ensure quoted_price is a valid number
+        const price = updates.quoted_price === null || updates.quoted_price === '' 
+          ? null 
+          : parseInt(updates.quoted_price);
+        params.push(price);
+        if (price !== null) {
+          updateFields.push(`quoted_at = NOW()`);
+        }
       }
       if (updates.assigned_florist_id !== undefined) {
         updateFields.push(`assigned_florist_id = $${paramIndex++}`);
